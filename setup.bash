@@ -78,8 +78,8 @@ cd $(dir $GCC)
 mkdir build
 cd build
 ../configure --prefix=$PREFIX --target=x86_64-elf --disable-werror \
-   #--disable-libssp --disable-libmudflap --with-newlib \
-   #--without-headers --enable-languages=c
+   --disable-libssp --disable-libmudflap --with-newlib \
+   --without-headers --enable-languages=c
 make all-gcc
 make install-gcc
 make all-target-libgcc
