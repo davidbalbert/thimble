@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 GMP=https://ftp.gnu.org/gnu/gmp/gmp-6.0.0a.tar.bz2
 MPFR=https://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2

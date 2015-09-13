@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function wd() {
   pushd $(dirname $BASH_SOURCE) >/dev/null
