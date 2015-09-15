@@ -19,6 +19,10 @@ mbr: boot.S bootmain.c boot.ld makeboot.rb
 	./makeboot.rb mbr
 
 
+.PHONY: clean
+clean:
+	rm -rf mbr *.o *.d
+
 .PHONY: qemu
 qemu: mbr
 	qemu-system-x86_64 -monitor stdio -cpu SandyBridge mbr
