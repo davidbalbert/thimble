@@ -1,1 +1,4 @@
 tools
+*.o
+*.d
+mbr

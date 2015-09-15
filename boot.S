@@ -29,7 +29,6 @@ start1:
                             # http://wiki.osdev.org/Memory_Map_(x86)). That's more than
                             # 11 KiB of usable space, which should be plenty.
 
-
     # Enable the A20 gate for > 1 MB memory access
     call    a20waitwrite
     mov     $0xd0, %al      # Tell the controller we want to read the Controller Output Port
@@ -114,7 +113,7 @@ map_entry:
 
     lgdt    gdtdesc         # Load the GDT
 
-    ljmp    $0x8, $start64   # Far jump into long mode! 0x8 sets CS to the selector of the code segment descriptor.
+    ljmp    $0x8, $start64   # Far jump into long mode! 0x8 is the selector of the selector of the code segment descriptor, which gets stored in CS.
 
 .code64
 start64:
