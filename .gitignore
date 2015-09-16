@@ -1,4 +1,7 @@
 tools
 *.o
 *.d
+*.img
 mbr
+kernel
+hello.txt
