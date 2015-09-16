@@ -30,5 +30,5 @@ clean:
 	rm -rf mbr kernel hello.txt *.img *.o *.d
 
 .PHONY: qemu
-qemu: mbr
+qemu: kernel.img
 	qemu-system-x86_64 -monitor stdio -cpu SandyBridge -drive file=kernel.img,format=raw
