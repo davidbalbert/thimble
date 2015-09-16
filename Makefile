@@ -11,12 +11,10 @@ LDFLAGS = -m elf_x86_64
 
 -include *.d
 
-mbr: boot.S bootmain.c boot.ld makeboot.rb
-	$(CC) $(CFLAGS) -c boot.S
-	$(CC) $(CFLAGS) -c bootmain.c
-	$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 -o mbr.o boot.o bootmain.o
-	$(OBJCOPY) -S -O binary -j .text mbr.o mbr
-	./makeboot.rb mbr
+mbr: boot1.S boot2.c boot.ld
+	$(CC) $(CFLAGS) -c boot1.S
+	$(CC) $(CFLAGS) -c boot2.c
+	$(LD) $(LDFLAGS) -N -T boot.ld -o mbr boot1.o boot2.o
 
 
 .PHONY: clean
