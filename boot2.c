@@ -13,12 +13,12 @@
 #define COMMAND 0x1F7
 #define STATUS 0x1F7 /* Same as COMMAND */
 
-void readlba(uchar *, ulong, ushort);
+void readlba(void *, ulong, ushort);
 
 void
 bootmain(void)
 {
-    readlba((uchar *)0x100000, 0, 1);
+    readlba(0x100000, 1, 1);
 
     for (;;)
         hlt();
@@ -28,12 +28,12 @@ bootmain(void)
 void
 waitdisk(void)
 {
-    while ((inb(STATUS) & 8) == 0)
+  while((inb(0x1F7) & 0xC0) != 0x40)
         ;
 }
 
 void
-readlba(uchar *addr, ulong start, ushort count)
+readlba(void *addr, ulong start, ushort count)
 {
     int i;
     ushort data;
@@ -60,8 +60,8 @@ readlba(uchar *addr, ulong start, ushort count)
 
     waitdisk();
 
-    for (i = 0; i < count * SECTSIZE; i += 2) {
+    for (i = 0; i < count * SECTSIZE / 2; i++) {
         data = inw(DATA);
-        *(addr + i*2) = data;
+        *((ushort *)addr + i) = data;
     }
 }
