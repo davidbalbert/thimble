@@ -30,38 +30,22 @@ start1:
                             # 11 KiB of usable space, which should be plenty.
 
     # Enable the A20 gate for > 1 MB memory access
-    call    a20waitwrite
-    mov     $0xd0, %al      # Tell the controller we want to read the Controller Output Port
-    out     %al, $0x64
+    # From xv6
+seta20.1:
+    inb     $0x64,%al               # Wait for not busy
+    testb   $0x2,%al
+    jnz     seta20.1
 
-    call    a20waitread
-    in      $0x60, %al      # Read the value of the COP
-    or      $2, %al         # Set the A20 bit
-    push    %ax
-    
-    call    a20waitwrite
-    mov     $0xd1, %al      # Now we want to write the output port
-    out     %al, $0x64
+    movb    $0xd1,%al               # 0xd1 -> port 0x64
+    outb    %al,$0x64
 
-    call    a20waitwrite
-    pop     %ax
-    out     %al, $0x60      # Write the new COP value
-    
-    jmp     a20done
+seta20.2:
+    inb     $0x64,%al               # Wait for not busy
+    testb   $0x2,%al
+    jnz     seta20.2
 
-a20waitwrite:
-    in      $0x64, %al      # Wait for PS2 controller to be ready by making sure bit 1
-    test    $2, %al         # of the status register is low.
-    jnz     a20waitwrite
-    ret
-
-a20waitread:
-    in      $0x64, %al
-    test    $1, %al         # status register bit 0 is high when we're allowed to read
-    jz      a20waitread
-    ret
-
-a20done:
+    movb    $0xdf,%al               # 0xdf -> port 0x60
+    outb    %al,$0x60
 
     # Enabeling Long Mode
 
