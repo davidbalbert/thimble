@@ -19,11 +19,11 @@ inb(ushort port)
     return data;
 }
 
-static inline ushort
-inw(ushort port)
+static inline void
+insw(ushort port, void *addr, uint count)
 {
-    ushort data;
-
-    asm volatile("in %1, %0" : "=a" (data) : "d" (port));
-    return data;
+    asm volatile("cld; rep insw" :
+                 "=D" (addr), "=c" (count) :
+                 "d" (port), "0" (addr), "1" (count) :
+                 "cc", "memory");
 }
