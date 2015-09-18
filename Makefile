@@ -9,8 +9,8 @@ OBJCOPY = $(TOOLCHAIN)-objcopy
 
 QEMU = qemu-system-x86_64
 
-CFLAGS = -O0 -MD -m64
-LDFLAGS = -m elf_x86_64
+CFLAGS = -O0 -MD -m64 -fno-builtin -Wall -Werror
+LDFLAGS = -m elf_x86_64 -static -nostdlib -N
 
 kernel.img: mbr kernel
 	dd bs=512 count=20 if=/dev/zero of=kernel.img

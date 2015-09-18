@@ -25,9 +25,6 @@ waitdisk(void)
 void
 readlba(void *addr, uint lba, uchar count)
 {
-    int i;
-    ushort data;
-
     waitdisk();
 
     outb(0x1F6, 0xE0 | (lba >> 24)); // primary drive + top 4 bytes of lba

@@ -2,3 +2,5 @@
 
 #define KERNBASE 0xFFFF800000000000     // First kernel virtual address
 #define KERNLINK (KERNBASE+EXTMEM)      // Kernel linked here
+
+#define USERTOP 0x00007FFFFFFFFFFF	// Last user virtual address
