@@ -5,8 +5,4 @@
 .globl start
 
 start:
-    call stage2main
-    
-error:
-    hlt
-    jmp error
+    jmp stage2main
