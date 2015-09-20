@@ -15,12 +15,8 @@ static ushort *vmem = (ushort *)P2V(0xB8000);
 static ushort pos = 0;
 
 static void
-setpos(ushort newpos)
+updatepos(void)
 {
-    pos = newpos;
-
-    // TODO: read base port from BIOS data area
-
     // cursor LOW port to vga INDEX register
     outb(0x3D4, 0x0F);
     outb(0x3D5, pos);
@@ -38,10 +34,11 @@ cclear(void)
         vmem[i] = SPACE;
     }
 
-    setpos(0);
+    pos = 0;
+    updatepos();
 }
 
-void
+static void
 cscroll(void)
 {
     int i;
@@ -52,14 +49,14 @@ cscroll(void)
     for (i = CSIZE - COLS; i < CSIZE; i++)
         vmem[i] = SPACE;
 
-    setpos(CSIZE - COLS);
+    pos = CSIZE - COLS;
 }
 
-void
-cputc(uchar c)
+static void
+cputc0(uchar c)
 {
     if (c == '\n') {
-        setpos(pos + 80 - pos%80);
+        pos += COLS - pos%COLS;
 
         if (pos >= CSIZE)
             cscroll();
@@ -70,8 +67,14 @@ cputc(uchar c)
     if (pos >= CSIZE)
         cscroll();
 
-    vmem[pos] = COLOR<<8 | c;
-    setpos(pos + 1);
+    vmem[pos++] = COLOR<<8 | c;
+}
+
+void
+cputc(uchar c)
+{
+    cputc0(c);
+    updatepos();
 }
 
 void
@@ -79,4 +82,6 @@ cputs(char *s)
 {
     for (; *s; s++)
         cputc(*s);
+
+    updatepos();
 }
