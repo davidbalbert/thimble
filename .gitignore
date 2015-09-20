@@ -2,6 +2,7 @@ tools
 *.o
 *.d
 *.img
-mbr
 kernel
-stage2size.h
+boot
+stage2
+
