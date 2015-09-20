@@ -27,3 +27,18 @@ insw(ushort port, void *addr, uint count)
                  "d" (port), "0" (addr), "1" (count) :
                  "cc", "memory");
 }
+
+static inline void
+stosb(void *dst, uchar c, ulong len)
+{
+    asm volatile("cld; rep stosb" :
+                 "=D" (dst), "=c" (len) :
+                 "0" (dst), "1" (len), "a" (c) :
+                 "cc", "memory");
+}
+
+static inline void
+ljmpstart()
+{
+    asm volatile("mv $0x100000, %eax; jmp %eax");
+}

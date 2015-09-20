@@ -9,28 +9,34 @@ OBJCOPY = $(TOOLCHAIN)-objcopy
 
 QEMU = qemu-system-x86_64
 
-CFLAGS = -O0 -MD -m64 -fno-builtin -Wall -Werror
+CFLAGS = -m64 -O0 -MD -fno-builtin -Wall -Werror
 LDFLAGS = -m elf_x86_64 -static -nostdlib -N
 
-kernel.img: mbr kernel
+kernel.img: boot stage2 kernel
 	dd bs=512 count=20 if=/dev/zero of=kernel.img
-	dd bs=512 if=mbr of=kernel.img conv=notrunc
-	dd bs=512 seek=1 if=kernel of=kernel.img conv=notrunc
+	dd bs=512 if=boot of=kernel.img conv=notrunc
+	dd bs=512 if=stage2 of=kernel.img conv=notrunc seek=1
+	dd bs=512 if=kernel of=kernel.img conv=notrunc seek=2 # Assuming stage2 fits in one sector ¯\_(ツ)_/¯
 
-kernel: $(OBJS) kernel.ld
-	$(LD) $(LDFLAGS) -T kernel.ld -o kernel $(OBJS)
+kernel: $(OBJS) start.S kernel.ld
+	$(CC) $(CFLAGS) -c start.S
+	$(LD) $(LDFLAGS) -T kernel.ld -o kernel start.o $(OBJS)
 
-mbr: boot1.S boot2.c boot.ld
-	$(CC) $(CFLAGS) -c boot1.S
-	$(CC) $(CFLAGS) -Os -c boot2.c
-	$(LD) $(LDFLAGS) -N -T boot.ld -o mbr boot1.o boot2.o
+boot: boot.S boot1.c boot.ld
+	$(CC) $(CFLAGS) -c boot.S
+	$(CC) $(CFLAGS) -Os -c boot1.c
+	$(LD) $(LDFLAGS) -N -T boot.ld -o boot boot.o boot1.o
 
+stage2: boot2.S stage2.c
+	$(CC) $(CFLAGS) -c boot2.S
+	$(CC) $(CFLAGS) -Os -c stage2.c
+	$(LD) $(LDFLAGS) -N -T stage2.ld -o stage2 boot2.o stage2.o
 
 -include *.d
 
 .PHONY: clean
 clean:
-	rm -rf mbr kernel *.img *.o *.d
+	rm -rf boot kernel *.img *.o *.d
 
 .PHONY: qemu
 qemu: kernel.img

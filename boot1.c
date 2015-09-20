@@ -1,19 +1,24 @@
 #include "types.h"
+#include "mem.h"
 #include "x86.h"
+#include "elf.h"
 
 #define SECTSIZE 512
 
-void readlba(void *, uint, uchar);
+void readsects(uchar *addr, uint lba, uchar count);
 
 void
 bootmain(void)
 {
-    readlba((void *)0x100000, 1, 1);
+    void *addr;
+    void (*stage2start)(void);
 
-    for (;;)
-        hlt();
+    addr = (void *)0x7E00;
+    readsects(addr, 1, 1);
+    
+    stage2start = (void(*)(void))addr;
+    stage2start();
 }
-
 
 void
 waitdisk(void)
@@ -23,7 +28,7 @@ waitdisk(void)
 }
 
 void
-readlba(void *addr, uint lba, uchar count)
+readsects(uchar *addr, uint lba, uchar count)
 {
     waitdisk();
 

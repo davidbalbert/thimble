@@ -47,7 +47,7 @@ seta20.2:
     movb    $0xdf,%al               # 0xdf -> port 0x60
     outb    %al,$0x60
 
-    # Enabeling Long Mode
+    # Enabeling long mode
 
     # Set up long mode page tables. We're going to identity map the first two
     # megabytes of memory.
@@ -97,10 +97,12 @@ map_entry:
 
     lgdt    gdtdesc         # Load the GDT
 
-    ljmp    $0x8, $start64   # Far jump into long mode! 0x8 is the selector of the selector of the code segment descriptor, which gets stored in CS.
+    ljmp    $0x8, $start32  # Far jump into protected mode! 0x8 is the selector
+                            # of the selector of the code segment descriptor, which
+                            # gets stored in CS.
 
-.code64
-start64:
+.code32
+start32:
     mov     $0x10, %ax      # 0x10 is the data segment descriptor selector.
     mov     %ax, %ds
     mov     %ax, %ss

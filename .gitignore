@@ -4,3 +4,4 @@ tools
 *.img
 mbr
 kernel
+stage2size.h

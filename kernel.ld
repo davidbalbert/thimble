@@ -1,4 +1,5 @@
 OUTPUT_FORMAT(elf64-x86-64)
+ENTRY(_start)
 
 SECTIONS
 {
@@ -9,6 +10,10 @@ SECTIONS
 	}
 
 	. = ALIGN(0x1000);
+
+	.rodata : {
+		*(.rodata)
+	}
 
 	.data : {
 		*(.data)
