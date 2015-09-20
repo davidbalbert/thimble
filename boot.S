@@ -1,4 +1,5 @@
 #include "asm.h"
+#include "mem.h"
 
 .code16
 .globl start
@@ -49,35 +50,55 @@ seta20.2:
 
     # Enabeling long mode
 
-    # Set up long mode page tables. We're going to identity map the first two
-    # megabytes of memory.
+    # Set up long mode page tables. We're going to identity map the first 2M of
+    # memory and also map KERNBASE to the first 2M. We'll use 2MB pages.
+    #
+    # 0x1000 - PML4
+    # 0x2000 - PDP for low addresses
+    # 0x3000 - PD for low addresses
+    # 0x4000 - PDP for high addresses
+    # 0x5000 - PD for high addresses
 
     mov     $0x1000, %edi
     mov     %edi, %cr3      # Store the address of PML4T in CR3
 
-    # Clear 0x1000 - 0x4FFF
+    # Clear 0x1000 - 0x5FFF
     xor     %eax, %eax
-    mov     $4096, %ecx
-    rep stosl               # Writes 4096 (ECX) 32-bit length 0's (EAX) starting at 0x1000 (EDI)
+    mov     $5120, %ecx
+    rep stosl               # Writes 5120 (ECX) 32-bit length 0's (EAX) starting at 0x1000 (EDI)
 
-    # Map the page tables
-    mov     %cr3, %edi
-    movl    $0x2003, (%edi) # Point PML4T[0] to a PDPT at 0x2000, marked as read/write and present (bits 2 and 1).
-    add     $0x1000, %edi
-    movl    $0x3003, (%edi) # Point PDPT[0] to a PDT at 0x3000, marked as read/write and present
-    add     $0x1000, %edi
-    movl    $0x4003, (%edi) # Point PDP[0] to a PT at 0x4000, marked as read/write and present
-    add     $0x1000, %edi
+    # First, identity map the first 2M. We mark each entry as present and
+    # writable. We set the size bit in the pgdir entry to use 2MB pages.
+    mov     $0x1000, %eax
+    mov     $0x2000, %edx
+    or      $(PTE_P|PTE_W), %edx
+    mov     %edx, (%eax)
 
-    # Identity map all 512 entries in PML4[0]->PDP[0]->PD[0]->PT. This is 2 MiB.
-    mov     $0x3, %ebx
-    mov     $512, %ecx
+    mov     $0x2000, %eax
+    mov     $0x3000, %edx
+    or      $(PTE_P|PTE_W), %edx
+    mov     %edx, (%eax)
 
-map_entry:
-    movl    %ebx, (%edi)    # Map the address of the current page (with r/w and present)
-    add     $0x1000, %ebx   # Calculate the address of the next page
-    add     $8, %edi        # Move to next PTE
-    loop    map_entry       # Jumps to map_entry and decrements ECX unless ECX == 1
+    mov     $0x3000, %eax
+    movw    $(0|PTE_P|PTE_W|PTE_PS), (%eax)
+
+    # Then map KERNBASE
+    mov     $0x1000, %eax
+    mov     $0x4000, %edx
+    or      $(PTE_P|PTE_W), %edx
+    mov     $(KERNBASE>>39 & 0x1FF), %ecx
+    mov     %edx, (%eax, %ecx, 8)
+
+    mov     $0x4000, %eax
+    mov     $0x5000, %edx
+    or      $(PTE_P|PTE_W), %edx
+    mov     $(KERNBASE>>30 & 0x1FF), %ecx
+    mov     %edx, (%eax, %ecx, 8)
+
+    mov     $0x5000, %eax
+    mov     $(0|PTE_P|PTE_W|PTE_PS), %edx
+    mov     $(KERNBASE>>21 & 0x1FF), %ecx
+    mov     %edx, (%eax, %ecx, 8)
 
     # Enable PAE
     mov     %cr4, %eax

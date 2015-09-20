@@ -18,9 +18,8 @@ kernel.img: boot stage2 kernel
 	dd bs=512 if=stage2 of=kernel.img conv=notrunc seek=1
 	dd bs=512 if=kernel of=kernel.img conv=notrunc seek=2 # Assuming stage2 fits in one sector ¯\_(ツ)_/¯
 
-kernel: $(OBJS) start.S kernel.ld
-	$(CC) $(CFLAGS) -c start.S
-	$(LD) $(LDFLAGS) -T kernel.ld -o kernel start.o $(OBJS)
+kernel: $(OBJS) kernel.ld
+	$(LD) $(LDFLAGS) -T kernel.ld -o kernel $(OBJS)
 
 boot: boot.S boot1.c boot.ld
 	$(CC) $(CFLAGS) -c boot.S
