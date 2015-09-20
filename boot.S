@@ -54,18 +54,16 @@ seta20.2:
     # memory and also map KERNBASE to the first 2M. We'll use 2MB pages.
     #
     # 0x1000 - PML4
-    # 0x2000 - PDP for low addresses
-    # 0x3000 - PD for low addresses
-    # 0x4000 - PDP for high addresses
-    # 0x5000 - PD for high addresses
+    # 0x2000 - PDP
+    # 0x3000 - PD
 
     mov     $0x1000, %edi
     mov     %edi, %cr3      # Store the address of PML4T in CR3
 
-    # Clear 0x1000 - 0x5FFF
+    # Clear 0x1000 - 0x3FFF
     xor     %eax, %eax
-    mov     $5120, %ecx
-    rep stosl               # Writes 5120 (ECX) 32-bit length 0's (EAX) starting at 0x1000 (EDI)
+    mov     $3072, %ecx
+    rep stosl               # Writes 3072 (ECX) 32-bit length 0's (EAX) starting at 0x1000 (EDI)
 
     # First, identity map the first 2M. We mark each entry as present and
     # writable. We set the size bit in the pgdir entry to use 2MB pages.
@@ -74,6 +72,11 @@ seta20.2:
     or      $(PTE_P|PTE_W), %edx
     mov     %edx, (%eax)
 
+    # Then map KERNBASE. We can point KERNBASE at the same PDP as the low
+    # memory because the low and high memory have the same lower 39 bits.
+    mov     $(KERNBASE>>39 & 0x1FF), %ecx
+    mov     %edx, (%eax, %ecx, 8)
+
     mov     $0x2000, %eax
     mov     $0x3000, %edx
     or      $(PTE_P|PTE_W), %edx
@@ -81,24 +84,6 @@ seta20.2:
 
     mov     $0x3000, %eax
     movw    $(0|PTE_P|PTE_W|PTE_PS), (%eax)
-
-    # Then map KERNBASE
-    mov     $0x1000, %eax
-    mov     $0x4000, %edx
-    or      $(PTE_P|PTE_W), %edx
-    mov     $(KERNBASE>>39 & 0x1FF), %ecx
-    mov     %edx, (%eax, %ecx, 8)
-
-    mov     $0x4000, %eax
-    mov     $0x5000, %edx
-    or      $(PTE_P|PTE_W), %edx
-    mov     $(KERNBASE>>30 & 0x1FF), %ecx
-    mov     %edx, (%eax, %ecx, 8)
-
-    mov     $0x5000, %eax
-    mov     $(0|PTE_P|PTE_W|PTE_PS), %edx
-    mov     $(KERNBASE>>21 & 0x1FF), %ecx
-    mov     %edx, (%eax, %ecx, 8)
 
     # Enable PAE
     mov     %cr4, %eax
