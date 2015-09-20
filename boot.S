@@ -69,7 +69,7 @@ seta20.2:
     movl    $0x4003, (%edi) # Point PDP[0] to a PT at 0x4000, marked as read/write and present
     add     $0x1000, %edi
 
-    # Identity map all 512 entries in PML4T[0]->PDPT[0]->PDT[0]->PT. This is 2 MiB.
+    # Identity map all 512 entries in PML4[0]->PDP[0]->PD[0]->PT. This is 2 MiB.
     mov     $0x3, %ebx
     mov     $512, %ecx
 
@@ -97,12 +97,12 @@ map_entry:
 
     lgdt    gdtdesc         # Load the GDT
 
-    ljmp    $0x8, $start32  # Far jump into protected mode! 0x8 is the selector
+    ljmp    $0x8, $start64  # Far jump into protected mode! 0x8 is the selector
                             # of the selector of the code segment descriptor, which
                             # gets stored in CS.
 
-.code32
-start32:
+.code64
+start64:
     mov     $0x10, %ax      # 0x10 is the data segment descriptor selector.
     mov     %ax, %ds
     mov     %ax, %ss
