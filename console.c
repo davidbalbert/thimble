@@ -1,7 +1,10 @@
 #include "types.h"
 
+#include "common.h"
 #include "mem.h"
 #include "x86.h"
+
+#include <stdarg.h>
 
 #define COLOR 0x07
 #define SPACE (COLOR << 8 | 0x20)
@@ -81,7 +84,107 @@ void
 cputs(char *s)
 {
     for (; *s; s++)
-        cputc(*s);
+        cputc0(*s);
 
+    updatepos();
+}
+
+void
+panic(char *s)
+{
+    cli();
+    cprintf("panic: %s", s);
+
+    for (;;)
+        hlt();
+}
+
+void
+printint(long n, uchar base, uchar sign)
+{
+    char *numbers = "0123456789abcdef";
+    char buf[24];
+    int i = 0;
+    ulong n2;
+
+    if (sign && (sign = n < 0))
+        n2 = -n;
+    else
+        n2 = n;
+
+    do {
+        buf[i++] = numbers[n2 % base];
+        n2 /= base;
+    } while (n2 != 0);
+
+    if (base == 16) {
+        buf[i++] = 'x';
+        buf[i++] = '0';
+    } else if (base == 8) {
+        buf[i++] = '0';
+    }
+
+    if (sign)
+        buf[i++] = '-';
+
+    for (i -= 1; i > -1; i--)
+        cputc0(buf[i]);
+}
+
+void
+cprintf(char *fmt, ...)
+{
+    va_list ap;
+    char c;
+    char *s;
+
+    if (fmt == 0)
+        panic("null fmt");
+
+    va_start(ap, fmt);
+
+    for (; (c = *fmt); fmt++) {
+        if (c != '%') {
+            cputc0(c);
+            continue;
+        }
+
+        c = *(++fmt);
+
+        if (c == 0)
+            break;
+
+        switch (c) {
+            case '%':
+                cputc0('%');
+                break;
+            case 's':
+                s = va_arg(ap, char *);
+                if (s == 0)
+                    s = "(null)";
+                for (; *s; s++)
+                    cputc0(*s);
+                break;
+            case 'd':
+                printint(va_arg(ap, int), 10, 1);
+                break;
+            case 'o':
+                printint(va_arg(ap, int), 8, 0);
+                break;
+            case 'l':
+                printint(va_arg(ap, long), 10, 1);
+                break;
+            case 'p':
+            case 'x':
+                printint(va_arg(ap, long), 16, 0);
+                break;
+            default:
+                cputc0('%');
+                cputc0(c);
+                break;
+        }
+    }
+
+    va_end(ap);
     updatepos();
 }

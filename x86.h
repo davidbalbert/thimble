@@ -5,6 +5,12 @@ hlt(void)
 }
 
 static inline void
+cli(void)
+{
+    asm volatile("cli");
+}
+
+static inline void
 outb(ushort port, uchar data)
 {
     asm volatile("outb %0, %1" : : "a" (data), "d" (port));
@@ -35,10 +41,4 @@ stosb(void *dst, uchar c, ulong len)
                  "=D" (dst), "=c" (len) :
                  "0" (dst), "1" (len), "a" (c) :
                  "cc", "memory");
-}
-
-static inline void
-ljmpstart()
-{
-    asm volatile("mv $0x100000, %eax; jmp %eax");
 }
