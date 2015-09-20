@@ -3,6 +3,6 @@ tools
 *.d
 *.img
 kernel
-boot
+stage1
 stage2
 
