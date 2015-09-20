@@ -1,5 +1,6 @@
 OBJS = \
        main.o\
+       console.o\
 
 TOOLCHAIN=x86_64-elf
 
@@ -9,7 +10,7 @@ OBJCOPY = $(TOOLCHAIN)-objcopy
 
 QEMU = qemu-system-x86_64
 
-CFLAGS = -m64 -O0 -MD -fno-builtin -Wall -Werror
+CFLAGS = -m64 -O0 -MD -fno-builtin -Wall -Werror -mcmodel=large
 LDFLAGS = -m elf_x86_64 -static -nostdlib -N
 
 kernel.img: stage1 stage2 kernel

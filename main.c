@@ -1,12 +1,16 @@
 #include "types.h"
 
+#include "console.h"
 #include "mem.h"
 #include "x86.h"
+
+void cscroll(void);
 
 int
 main(void)
 {
-    *((ushort *)0xB8000) = 0x5020;
+    cclear();
+    cputs("Hello, Thimble!");
 
     for (;;)
         hlt();
