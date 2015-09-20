@@ -8,6 +8,11 @@ GCC=https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2
 
 set -e
 
+if [ "$0" != "$BASH_SOURCE" ]; then
+  echo "setup.bash is not for sourcing. You probably meant to source env.bash." >&2
+  return
+fi
+
 function envfile() {
   pushd $(dirname $0) >/dev/null
   echo $(pwd)/env.bash
