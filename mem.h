@@ -15,3 +15,4 @@
 #define PTE_PS 0x80
 
 #define V2P(x) ((x) - KERNBASE)
+#define P2V(x) ((x) + KERNBASE)

@@ -1,5 +1,6 @@
 #include "types.h"
 
+#include "mem.h"
 #include "x86.h"
 
 #define COLOR 0x07
@@ -10,7 +11,7 @@
 
 #define CSIZE COLS*ROWS
 
-static ushort *vmem = (ushort *)0xB8000;
+static ushort *vmem = (ushort *)P2V(0xB8000);
 static ushort pos = 0;
 
 static void
