@@ -2,10 +2,6 @@
 
 #include "x86.h"
 
-static ushort pos = 0;
-
-static ushort *vmem = (ushort *)0xB8000;
-
 #define COLOR 0x07
 #define SPACE (COLOR << 8 | 0x20)
 
@@ -13,6 +9,9 @@ static ushort *vmem = (ushort *)0xB8000;
 #define ROWS 25
 
 #define CSIZE COLS*ROWS
+
+static ushort *vmem = (ushort *)0xB8000;
+static ushort pos = 0;
 
 static void
 setpos(ushort newpos)

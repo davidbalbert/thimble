@@ -4,8 +4,6 @@
 #include "mem.h"
 #include "x86.h"
 
-void cscroll(void);
-
 int
 main(void)
 {
