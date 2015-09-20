@@ -15,8 +15,10 @@ static ushort *vmem = (ushort *)0xB8000;
 #define CSIZE COLS*ROWS
 
 static void
-updatecursor()
+setpos(ushort newpos)
 {
+    pos = newpos;
+
     // TODO: read base port from BIOS data area
 
     // cursor LOW port to vga INDEX register
@@ -36,8 +38,7 @@ cclear(void)
         vmem[i] = SPACE;
     }
 
-    pos = 0;
-    updatecursor();
+    setpos(0);
 }
 
 void
@@ -51,28 +52,26 @@ cscroll(void)
     for (i = CSIZE - COLS; i < CSIZE; i++)
         vmem[i] = SPACE;
 
-    pos = CSIZE - COLS;
-    updatecursor();
+    setpos(CSIZE - COLS);
 }
 
 void
 cputc(uchar c)
 {
     if (c == '\n') {
-        pos += 80 - pos%80;
+        setpos(pos + 80 - pos%80);
 
         if (pos >= CSIZE)
             cscroll();
 
-        updatecursor();
         return;
     }
 
     if (pos >= CSIZE)
         cscroll();
 
-    vmem[pos++] = COLOR<<8 | c;
-    updatecursor();
+    vmem[pos] = COLOR<<8 | c;
+    setpos(pos + 1);
 }
 
 void
