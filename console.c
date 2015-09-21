@@ -6,8 +6,8 @@
 
 #include <stdarg.h>
 
-#define COLOR 0x07
-#define SPACE (COLOR << 8 | 0x20)
+#define COLOR 0x0700
+#define SPACE (COLOR | ' ')
 
 #define COLS 80
 #define ROWS 25
@@ -18,7 +18,7 @@ static ushort *vmem = (ushort *)P2V(0xB8000);
 static ushort pos = 0;
 
 static void
-updatepos(void)
+updatecursor(void)
 {
     // cursor LOW port to vga INDEX register
     outb(0x3D4, 0x0F);
@@ -38,7 +38,7 @@ cclear(void)
     }
 
     pos = 0;
-    updatepos();
+    updatecursor();
 }
 
 static void
@@ -70,14 +70,14 @@ cputc0(uchar c)
     if (pos >= CSIZE)
         cscroll();
 
-    vmem[pos++] = COLOR<<8 | c;
+    vmem[pos++] = COLOR | c;
 }
 
 void
 cputc(uchar c)
 {
     cputc0(c);
-    updatepos();
+    updatecursor();
 }
 
 void
@@ -86,7 +86,7 @@ cputs(char *s)
     for (; *s; s++)
         cputc0(*s);
 
-    updatepos();
+    updatecursor();
 }
 
 void
@@ -186,5 +186,5 @@ cprintf(char *fmt, ...)
     }
 
     va_end(ap);
-    updatepos();
+    updatecursor();
 }
