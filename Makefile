@@ -14,7 +14,7 @@ CFLAGS = -m64 -O0 -MD -fno-builtin -Wall -Werror -mcmodel=large
 LDFLAGS = -m elf_x86_64 -static -nostdlib -N
 
 kernel.img: stage1 stage2 kernel
-	dd bs=512 count=20 if=/dev/zero of=kernel.img
+	dd bs=512 count=200 if=/dev/zero of=kernel.img
 	dd bs=512 if=stage1 of=kernel.img conv=notrunc
 	dd bs=512 if=stage2 of=kernel.img conv=notrunc seek=1
 	dd bs=512 if=kernel of=kernel.img conv=notrunc seek=2 # Assuming stage2 fits in one sector ¯\_(ツ)_/¯
