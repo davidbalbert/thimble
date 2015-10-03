@@ -5,6 +5,7 @@ MPFR=https://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2
 MPC=https://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz
 BINUTILS=https://ftp.gnu.org/gnu/binutils/binutils-2.25.1.tar.bz2
 GCC=https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2
+GDB=https://ftp.gnu.org/gnu/gdb/gdb-7.10.tar.gz
 
 set -e
 
@@ -27,7 +28,7 @@ function get() {
   name=$(fname $1)
 
   echo Downloading ${name}...
-  curl -o $name $1
+  curl -# -o $name $1
 
   echo Extracting ${name}...
   tar xf $name
@@ -53,6 +54,7 @@ get $MPFR
 get $MPC
 get $BINUTILS
 get $GCC
+get $GDB
 git clone https://github.com/geofft/qemu.git -b 6.828-2.3.0
 
 cd $(dir $GMP)
@@ -90,6 +92,13 @@ make install-gcc
 make all-target-libgcc
 make install-target-libgcc
 cd ../../
+
+cd $(dir $GDB)
+patch -p1 <../contrib/gdb-7.10-g-packet-too-long.patch
+./configure --prefix=$PREFIX --enable-targets=all --program-prefix=x86_64-elf-
+make all
+make install
+cd ..
 
 cd qemu
 ./configure --disable-kvm --prefix=$PREFIX --target-list=x86_64-softmmu
