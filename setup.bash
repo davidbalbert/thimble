@@ -30,12 +30,9 @@ function get() {
   echo Downloading ${name}...
   curl -# -o $name $1
 
-  echo Extracting ${name}...
+  echo Extracting...
   tar xf $name
   rm $name
-
-  echo
-  echo
 }
 
 function fname() {
@@ -111,4 +108,5 @@ rm -rf $(dir $MPFR)
 rm -rf $(dir $MPC)
 rm -rf $(dir $BINUTILS)
 rm -rf $(dir $GCC)
+rm -rf $(dir $GDB)
 rm -rf qemu
