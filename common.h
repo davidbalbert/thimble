@@ -4,6 +4,10 @@ void cprintf(char *, ...);
 void cclear(void);
 void cputs(char *);
 
-// interrupt.c
+// trap.c
 
-void initidt(void);
+void trapinit(void);
+
+// pic.c
+
+void picinit(void);

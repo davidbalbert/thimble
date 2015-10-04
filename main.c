@@ -11,7 +11,8 @@ main(void)
     cclear();
     cprintf("Hello, Thimble!\n");
 
-    initidt();
+    trapinit();
+    picinit();
 
     cprintf("before\n");
     INT(50);

@@ -1,0 +1,4 @@
+void
+picinit(void)
+{
+}

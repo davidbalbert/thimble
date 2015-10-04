@@ -1,9 +1,10 @@
 OBJS = \
        main.o\
        console.o\
-       interrupt.o\
+       trap.o\
        ivec.o\
        alltraps.o\
+       pic.o\
 
 TOOLCHAIN=x86_64-elf
 

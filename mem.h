@@ -18,6 +18,7 @@
 #define P2V(x) ((x) + KERNBASE)
 
 #ifndef __ASSEMBLER__
+
 typedef struct {
     uint offlow:16;     // bottom 16 bits of segment offset
     uint cs:16;         // code segment selector
@@ -30,25 +31,11 @@ typedef struct {
     uint offmid:16;     // bits 16 - 31 of segment offset
     uint offhigh:32;    // bits 32 - 63 of segment offset
     uint reserved3:32;  // all 0s.
-} IntGate;
+} InterruptGate;
 
 typedef struct __attribute__((packed)) {
     ushort limit;
     ulong base;
 } IdtDesc;
-#endif
 
-#define INTGATE(gate, offset, sel)              \
-{                                               \
-    (gate).offlow = (offset) & 0xFFFF;          \
-    (gate).cs = (sel);                          \
-    (gate).ist = 0;                             \
-    (gate).reserved1 = 0;                       \
-    (gate).type = 0b1110;                       \
-    (gate).reserved2 = 0;                       \
-    (gate).dpl = 0;                             \
-    (gate).p = 1;                               \
-    (gate).offmid = ((offset) >> 16) & 0xFFFF;  \
-    (gate).offhigh = ((offset) >> 32);          \
-    (gate).reserved3 = 0;                       \
-}
+#endif
