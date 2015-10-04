@@ -8,7 +8,7 @@ puts ".globl alltraps"
   puts "vector#{i}:"
 
   unless i == 8 || (10..14).include?(i) || i == 17
-    puts "    pushq $0"
+    puts "    pushq $0       # Error code"
   end
 
   puts "    pushq $#{i}"
