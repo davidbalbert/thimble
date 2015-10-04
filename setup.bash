@@ -51,7 +51,7 @@ get $MPFR
 get $MPC
 get $BINUTILS
 get $GCC
-get $GDB
+#get $GDB
 git clone https://github.com/geofft/qemu.git -b 6.828-2.3.0
 
 cd $(dir $GMP)
@@ -90,12 +90,12 @@ make all-target-libgcc
 make install-target-libgcc
 cd ../../
 
-cd $(dir $GDB)
-patch -p1 <../contrib/gdb-7.10-g-packet-too-long.patch
-./configure --prefix=$PREFIX --enable-targets=all --program-prefix=x86_64-elf-
-make all
-make install
-cd ..
+#cd $(dir $GDB)
+#patch -p1 <../contrib/gdb-7.10-g-packet-too-long.patch
+#./configure --prefix=$PREFIX --enable-targets=all --program-prefix=x86_64-elf-
+#make all
+#make install
+#cd ..
 
 cd qemu
 ./configure --disable-kvm --prefix=$PREFIX --target-list=x86_64-softmmu
