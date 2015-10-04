@@ -33,9 +33,4 @@ typedef struct {
     uint reserved3:32;  // all 0s.
 } InterruptGate;
 
-typedef struct __attribute__((packed)) {
-    ushort limit;
-    ulong base;
-} IdtDesc;
-
 #endif

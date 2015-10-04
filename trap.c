@@ -1,6 +1,7 @@
 #include "types.h"
 
 #include "common.h"
+#include "irq.h"
 #include "mem.h"
 #include "x86.h"
 
@@ -74,5 +75,12 @@ trapinit(void)
 void
 trap(TrapFrame *tf)
 {
-    cprintf("trap: %u, error: %u, rax: %u\n", tf->trapno, tf->error, tf->rax);
+    switch(tf->trapno) {
+        case T_IRQ0 + IRQ_KBD:
+            handlekbd();
+            break;
+        default:
+            cprintf("trap: %u, error: %u\n", tf->trapno, tf->error);
+            break;
+    }
 }

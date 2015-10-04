@@ -5,6 +5,7 @@ OBJS = \
        ivec.o\
        alltraps.o\
        pic.o\
+       kbd.o\
 
 TOOLCHAIN=x86_64-elf
 
