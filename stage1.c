@@ -1,5 +1,6 @@
 #include "types.h"
 
+#include "mem.h"
 #include "x86.h"
 
 #include "bootide.h"

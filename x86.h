@@ -42,3 +42,15 @@ stosb(void *dst, uchar c, ulong len)
                  "0" (dst), "1" (len), "a" (c) :
                  "cc", "memory");
 }
+
+static inline void
+lidt(IDTDesc *idtr)
+{
+    asm volatile("lidt (%0)" : : "r" (idtr));
+}
+
+static inline void
+genint(uchar v)
+{
+    asm volatile("int $32");
+}
