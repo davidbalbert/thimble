@@ -7,8 +7,33 @@
 #define NIDT 256
 
 typedef struct {
+    ulong rax;
+    ulong rbx;
+    ulong rcx;
+    ulong rdx;
+    ulong rbp;
+    ulong rsi;
+    ulong rdi;
+    ulong r8;
+    ulong r9;
+    ulong r10;
+    ulong r11;
+    ulong r12;
+    ulong r13;
+    ulong r14;
+    ulong r15;
+
     ulong trapno;
     ulong error;
+
+    /* Pushed by hardware */
+    ulong rip;
+    ulong cs;
+    ulong eflags;
+
+    /* Pushed by hardware on privilege level change */
+    ulong rsp;
+    ulong ss;
 } TrapFrame;
 
 static InterruptGate idt[NIDT] __attribute__((aligned(8)));
@@ -49,5 +74,5 @@ trapinit(void)
 void
 trap(TrapFrame *tf)
 {
-    cprintf("trap: %u, error: %u\n", tf->trapno, tf->error);
+    cprintf("trap: %u, error: %u, rax: %u\n", tf->trapno, tf->error, tf->rax);
 }
