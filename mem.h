@@ -3,7 +3,7 @@
 #define KERNBASE 0xFFFF800000000000     // First kernel virtual address
 #define KERNLINK (KERNBASE+EXTMEM)      // Kernel linked here
 
-#define USERTOP 0x00007FFFFFFFFFFF	// Last user virtual address
+#define USERTOP 0x00007FFFFFFFFFFF      // Last user virtual address
 
 
 #define PGSIZE 0x1000
@@ -30,10 +30,25 @@ typedef struct {
     uint offmid:16;     // bits 16 - 31 of segment offset
     uint offhigh:32;    // bits 32 - 63 of segment offset
     uint reserved3:32;  // all 0s.
-} IDTEntry;
+} IntGate;
 
 typedef struct __attribute__((packed)) {
     ushort limit;
     ulong base;
-} IDTDesc;
+} IdtDesc;
 #endif
+
+#define INTGATE(gate, offset, sel)              \
+{                                               \
+    (gate).offlow = (offset) & 0xFFFF;          \
+    (gate).cs = (sel);                          \
+    (gate).ist = 0;                             \
+    (gate).reserved1 = 0;                       \
+    (gate).type = 0b1110;                       \
+    (gate).reserved2 = 0;                       \
+    (gate).dpl = 0;                             \
+    (gate).p = 1;                               \
+    (gate).offmid = ((offset) >> 16) & 0xFFFF;  \
+    (gate).offhigh = ((offset) >> 32);          \
+    (gate).reserved3 = 0;                       \
+}

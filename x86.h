@@ -44,7 +44,7 @@ stosb(void *dst, uchar c, ulong len)
 }
 
 static inline void
-lidt(IDTDesc *idtr)
+lidt(IdtDesc *idtr)
 {
     asm volatile("lidt (%0)" : : "r" (idtr));
 }

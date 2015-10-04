@@ -12,7 +12,12 @@ main(void)
     cprintf("Hello, Thimble!\n");
 
     initidt();
+
+    cprintf("before\n");
     INT(50);
+    cprintf("middle\n");
+    INT(32);
+    cprintf("after\n");
 
     for (;;)
         hlt();

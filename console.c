@@ -174,6 +174,9 @@ cprintf(char *fmt, ...)
             case 'l':
                 printint(va_arg(ap, long), 10, 1);
                 break;
+            case 'u':
+                printint(va_arg(ap, long), 10, 0);
+                break;
             case 'p':
             case 'x':
                 printint(va_arg(ap, long), 16, 0);
