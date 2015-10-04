@@ -49,8 +49,4 @@ lidt(IDTDesc *idtr)
     asm volatile("lidt (%0)" : : "r" (idtr));
 }
 
-static inline void
-genint(uchar v)
-{
-    asm volatile("int $32");
-}
+#define INT(v) asm volatile("int %0" : : "N" (v) : "cc", "memory")

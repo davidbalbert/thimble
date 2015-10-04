@@ -12,7 +12,7 @@ main(void)
     cprintf("Hello, Thimble!\n");
 
     initidt();
-    genint(32);
+    INT(50);
 
     for (;;)
         hlt();
