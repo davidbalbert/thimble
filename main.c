@@ -12,8 +12,8 @@ main(void)
 
     trapinit();
     picinit();
+    kbdinit();
 
-    picenable(IRQ_KBD);
     sti();
 
     for (;;)
