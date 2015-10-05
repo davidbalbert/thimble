@@ -10,7 +10,20 @@ Thimble should work on Linux or OS X, though I've only tested it on OS X.
 - libsdl (for QEMU)
 - Ruby (any version should do)
 
-Running setup.bash will install a cross compiler in the tools directory.
-Sourcing env.bash will put the cross compiler on your path. Running
-`deactivate` in your shell restores things to normal (it's like a Python
-virtual environment).
+## Building and running
+
+```
+$ bash setup.bash   # Downloads and builds cross compiler toolchain. Only run this once.
+
+$ source env.bash
+(thimble) $ make qemu
+
+# When you're done working on thimble, `deactivate` will restore your path.
+It's kind of like a python virtual env:
+(thimble) $ deactivate
+$
+```
+
+# License
+
+Thimble is copyright 2015 David Albert and is available under the terms of the GNU GPLv3 or later. See COPYING for more info.
