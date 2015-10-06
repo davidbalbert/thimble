@@ -158,6 +158,8 @@ cprintf(char *fmt, ...)
             case '%':
                 cputc0('%');
                 break;
+            case 'c':
+                cputc0((char)va_arg(ap, int));
             case 's':
                 s = va_arg(ap, char *);
                 if (s == 0)

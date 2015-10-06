@@ -3,6 +3,7 @@ void panic(char *s);
 void cprintf(char *fmt, ...);
 void cclear(void);
 void cputs(char *s);
+void cputc(uchar c);
 
 // kbd.c
 void kbdinit(void);
