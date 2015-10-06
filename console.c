@@ -55,6 +55,8 @@ cscroll(void)
     pos = CSIZE - COLS;
 }
 
+static void cputs0(char *s);
+
 static void
 cputc0(uchar c)
 {
@@ -64,6 +66,13 @@ cputc0(uchar c)
         if (pos >= CSIZE)
             cscroll();
 
+        return;
+    } else if (c == '\t') {
+        cputs0("        ");
+        return;
+    } else if (c == '\b') {
+        if (pos % COLS != 0)
+            vmem[--pos] = SPACE;
         return;
     }
 
@@ -80,12 +89,17 @@ cputc(uchar c)
     updatecursor();
 }
 
-void
-cputs(char *s)
+static void
+cputs0(char *s)
 {
     for (; *s; s++)
         cputc0(*s);
+}
 
+void
+cputs(char *s)
+{
+    cputs0(s);
     updatecursor();
 }
 

@@ -8,12 +8,23 @@
 
 #define RELEASE  0x80 // If the high bit is set, it's a key release
 
-#define CTRL        1
-#define ALT         2
-#define META        4
-#define SHIFT       8
-#define CAPSLOCK    16
-#define E0MOD       32
+#define LCTRL       (1<<0)
+#define RCTRL       (1<<1)
+#define LALT        (1<<2)
+#define RALT        (1<<3)
+#define LMETA       (1<<4)
+#define RMETA       (1<<5)
+#define LSHIFT      (1<<6)
+#define RSHIFT      (1<<7)
+#define CAPSLOCK    (1<<8)
+#define SCROLLLOCK  (1<<9)
+#define NUMLOCK     (1<<10)
+#define E0MOD       (1<<11)
+
+#define CTRL    (LCTRL | RCTRL)
+#define ALT     (LALT | RALT)
+#define SHIFT   (LSHIFT | RSHIFT)
+#define META    (LMETA | RMETA)
 
 void
 kbdinit(void)
@@ -25,29 +36,53 @@ static uint skip = 0;
 static uint mods = 0; // bitmap for modifier keys
 
 #define ESC 0
-#define BCK 0
-#define TAB 0
-#define LALT 0
-#define RALT 0
-#define LCTL 0
-#define RCTL 0
-#define LSHF 0
-#define RSHF 0
 #define CPSLK 0
 #define F 0 // F
 #define NLK 0 // Number lock
 #define SLK 0 // Scroll lock
 
 static uchar charmap[256] = {
-    0  , ESC, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', BCK,
-    TAB, 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',
-    LCTL, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',
-    LSHF, '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', RSHF, '*',
-    LALT, ' ', CPSLK, F, F, F, F, F, F, F, F, F, F, NLK, SLK, '7', '8', '9',
+    0  , ESC, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',
+    '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',
+    0, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',
+    0, '\\', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', 0, '*',
+    0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '7', '8', '9',
     '4', '5', '6', '1', '2', '3', '0', '.',
-    [0x57] = F, // F11
-    [0x58] = F, // F12
 };
+
+static uchar shiftmap[256] = {
+    0  , ESC, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b',
+    '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n',
+    0, 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~',
+    0, '|', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?', 0, '*',
+    0, ' ', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '7', '8', '9',
+    '4', '5', '6', '1', '2', '3', '0', '.',
+};
+
+/*
+static uchar e2map[256] = {
+};
+*/
+
+/*
+static uint togglemap[256] = {
+    [0x3A] CAPSLOCK,
+    [0x45] NUMLOCK,
+    [0x45] SCROLLLOCK,
+};
+*/
+
+static uint modmap[256] = {
+    [0x1D] LCTRL,
+    [0x2A] LSHIFT,
+    [0x36] RSHIFT,
+    [0x38] LALT,
+};
+
+static uint e0modmap[256] = {
+    [0x1D] RCTRL,
+};
+
 
 void
 handlekbd(void)
@@ -58,25 +93,36 @@ handlekbd(void)
     if (skip > 0) {
         skip--;
         cprintf("%x ", byte);
+        return;
     } else if (byte == 0xE1) {
-        cprintf("0xe1 ");
-        skip = 5;       // Skip pause button: [0xE1, 0x1D, 0x45, 0xE1, 0x9D, 0xC5]
+        // Skip pause button: [0xE1, 0x1D, 0x45, 0xE1, 0x9D, 0xC5]
+        skip = 5;
+        return;
     } else if (byte == 0xE0) {
         mods |= E0MOD;
+        return;
     } else if (mods & E0MOD && (byte == 0x2A || byte == 0xB7)) {
-        cprintf("printscreen ");
-        skip = 2;       // Skip print screen: [0xE0, 0x2A, 0xE0, 0x37] or [0xE0, 0xB7, 0xE0, 0xAA]
+        // Skip print screen: [0xE0, 0x2A, 0xE0, 0x37] or [0xE0, 0xB7, 0xE0, 0xAA]
+        skip = 2;
         mods &= ~E0MOD;
+        return;
     } else if (byte & RELEASE) {
-        // Skip all key releases
+        byte &= ~RELEASE;
+
+        mods ^= (mods & E0MOD ? e0modmap[byte] : modmap[byte]);
         mods &= ~E0MOD;
-    } else if (mods & E0MOD) {
-        mods &= ~E0MOD;
-        //othermap[byte];
-    } else {
+        return;
+    }
+
+    mods |= (mods & E0MOD ? e0modmap[byte] : modmap[byte]);
+
+    if (mods & SHIFT)
+        c = shiftmap[byte];
+    else if (mods & E0MOD)
+        c = 0; // e0map[byte];
+    else
         c = charmap[byte];
 
-        if (c != 0)
-            cputc(c);
-    }
+    if (c)
+        cputc(c);
 }
