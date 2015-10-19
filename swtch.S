@@ -9,8 +9,8 @@
 # The order of pushes and pops depend on the layout of Registers.
 #
 # The general shape of this function is as follows
-#   - Save the registers for the current process on its stack (which is the current one).
-#   - Save the address of the Registers into `from`. This doubles as our stack pointer.
+#   - Save the registers for the current process on its stack (this is the current stack).
+#   - Save the address of our newly built Registers into `from`. `*from` doubles as our stack pointer.
 #   - Switch to the new process's stack (the stack pointer is the same as `to`).
 #   - Restore the new process's registers from its stack.
 #
