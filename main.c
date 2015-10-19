@@ -50,7 +50,5 @@ main(void)
     start(task1);
     start(task2);
 
-    sti();
-
     scheduler();
 }

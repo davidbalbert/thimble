@@ -105,6 +105,8 @@ scheduler(void)
 {
     Proc *p;
 
+    sti();
+
     for (;;) {
         lock(&ptable.lock);
         for (p = ptable.procs; p < &ptable.procs[NPROCS]; p++) {
