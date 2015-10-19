@@ -30,15 +30,19 @@ kernel.img: stage1 stage2 kernel
 kernel: $(OBJS) kernel.ld
 	$(LD) $(LDFLAGS) -T kernel.ld -o kernel $(OBJS)
 
-stage1: boot1.S stage1.c stage1.ld
+
+
+stage1: boot1.S stage1.c bootide.c stage1.ld
 	$(CC) $(CFLAGS) -c boot1.S
 	$(CC) $(CFLAGS) -Os -c stage1.c
-	$(LD) $(LDFLAGS) -N -T stage1.ld -o stage1 boot1.o stage1.o
+	$(CC) $(CFLAGS) -Os -c bootide.c
+	$(LD) $(LDFLAGS) -N -T stage1.ld -o stage1 boot1.o stage1.o bootide.o
 
-stage2: boot2.S stage2.c stage2.ld
+stage2: boot2.S stage2.c bootide.c stage2.ld
 	$(CC) $(CFLAGS) -c boot2.S
 	$(CC) $(CFLAGS) -Os -c stage2.c
-	$(LD) $(LDFLAGS) -N -T stage2.ld -o stage2 boot2.o stage2.o
+	$(CC) $(CFLAGS) -Os -c bootide.c
+	$(LD) $(LDFLAGS) -N -T stage2.ld -o stage2 boot2.o stage2.o bootide.o
 
 ivec.S: ivec.rb
 	ruby ivec.rb > ivec.S
