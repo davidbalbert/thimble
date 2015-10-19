@@ -1,6 +1,6 @@
 # void swtch(Registers **from, Registers *to)
-#   rdi - from
-#   rsi - to
+#   %rdi - from
+#   %rsi - to
 #
 # Registers are stored on the top of the stack. From is a double
 # pointer so that we can store the address of the top of the stack
