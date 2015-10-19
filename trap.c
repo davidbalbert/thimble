@@ -7,7 +7,7 @@
 
 #define NIDT 256
 
-typedef struct {
+struct TrapFrame {
     ulong rax;
     ulong rbx;
     ulong rcx;
@@ -35,7 +35,8 @@ typedef struct {
     /* Pushed by hardware on privilege level change */
     ulong rsp;
     ulong ss;
-} TrapFrame;
+};
+typedef struct TrapFrame TrapFrame;
 
 static InterruptGate idt[NIDT] __attribute__((aligned(8)));
 static IdtDesc idtr;

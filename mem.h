@@ -19,7 +19,7 @@
 
 #ifndef __ASSEMBLER__
 
-typedef struct {
+struct InterruptGate {
     uint offlow:16;     // bottom 16 bits of segment offset
     uint cs:16;         // code segment selector
     uint ist:3;         // interrupt stack table
@@ -31,6 +31,7 @@ typedef struct {
     uint offmid:16;     // bits 16 - 31 of segment offset
     uint offhigh:32;    // bits 32 - 63 of segment offset
     uint reserved3:32;  // all 0s.
-} InterruptGate;
+};
+typedef struct InterruptGate InterruptGate;
 
 #endif

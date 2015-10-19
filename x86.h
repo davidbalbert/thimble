@@ -49,6 +49,30 @@ stosb(void *dst, uchar c, ulong len)
                  "cc", "memory");
 }
 
+static inline ulong
+readrflags(void)
+{
+    ulong rflags;
+    asm volatile("pushfq; pop %0" : "=r" (rflags));
+    return rflags;
+}
+
+static inline uint
+xchg(uint *addr, uint val)
+{
+    uint ret;
+
+    // xv6 has "cc" in the clobbers list, but the Intel
+    // programmers manual says that xchg doesn't modify any flags.
+    // I think it's fine to leave "cc" out, but I'm putting this
+    // note here just in case.
+    asm volatile("xchg %0, %1" :
+                 "+m" (*addr), "=r" (ret) :
+                 "1" (val));
+
+    return ret;
+}
+
 typedef struct __attribute__((packed)) {
     ushort limit;
     ulong base;

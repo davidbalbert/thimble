@@ -107,7 +107,7 @@ void
 panic(char *s)
 {
     cli();
-    cprintf("panic: %s", s);
+    cprintf("panic: %s\n", s);
 
     for (;;)
         hlt();
