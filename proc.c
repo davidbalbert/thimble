@@ -15,7 +15,20 @@ static struct {
 } ptable;
 
 #define STACKSIZE PGSIZE
-static uchar stacks[NPROCS][STACKSIZE] __attribute__((aligned(16)));
+// TODO: if the first dimension is NPROCS and the second dimension
+// >= 980 (should be STACKSIZE), we get a triple fault at boot
+// before the screen gets cleared. I'm not sure if this is before
+// or after the bootloader transfers control to the kernel. I
+// think it's a triple fault because trapinit has not run yet, so
+// the interrupt vectors are not yet set up.
+//
+// If interrupt vectors were set up, I think we'd be getting a
+// page fault (4096 * 1024 is 4 MiB, more than the 2 MiB that the
+// boot loader maps in. Additionally, the boot loader loads the
+// kernel at P2V(0x100000) leaving only 1 MiB available for the
+// kernel. I should probably just work on a memory allocator and
+// not hard code these.
+static uchar stacks[2][STACKSIZE] __attribute__((aligned(16)));
 
 
 #define MAXCPU 8
@@ -116,5 +129,6 @@ schedinit(void)
     initlock(&ptable.lock);
 
     cpu = &cpus[0];
+    cpu->id = 0;
     cpu->ncli = 0;
 }

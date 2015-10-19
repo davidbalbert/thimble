@@ -3,7 +3,7 @@ typedef struct Registers Registers;
 
 
 // console.c
-void panic(char *s);
+void panic(char *s) __attribute__((noreturn));
 void cprintf(char *fmt, ...);
 void cclear(void);
 void cputs(char *s);
@@ -26,7 +26,7 @@ void picenable(uchar irq);
 
 // proc.c
 void schedinit(void);
-void scheduler(void);
+void scheduler(void) __attribute__((noreturn));
 void start(void (*f)(void));
 void yield(void);
 

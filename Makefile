@@ -6,9 +6,9 @@ OBJS = \
        alltraps.o\
        pic.o\
        kbd.o\
+       swtch.o\
        lock.o\
        proc.o\
-       swtch.o\
 
 TOOLCHAIN=x86_64-elf
 

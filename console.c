@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "mem.h"
+#include "proc.h"
 #include "x86.h"
 
 #include <stdarg.h>
@@ -107,7 +108,7 @@ void
 panic(char *s)
 {
     cli();
-    cprintf("panic: %s\n", s);
+    cprintf("cpu%d: panic: %s\n", cpu->id, s);
 
     for (;;)
         hlt();

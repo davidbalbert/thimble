@@ -6,6 +6,7 @@ typedef enum {
 
 struct Cpu {
     Registers *scheduler;       // swtch to this to call the scheduler
+    int id;                     // cpu id number
     int ncli;                   // number of times pushcli has been called.
     int intena;                 // whether interrupts were enabled before pushcli
 };
