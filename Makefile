@@ -51,7 +51,7 @@ ivec.S: ivec.rb
 
 .PHONY: clean
 clean:
-	rm -rf stage1 stage2 kernel *.img *.o *.d
+	rm -rf stage1 stage2 kernel ivec.S *.img *.o *.d
 
 
 QEMUOPTS = -monitor stdio -drive file=kernel.img,format=raw -m 512
