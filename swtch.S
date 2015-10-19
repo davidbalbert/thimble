@@ -2,9 +2,10 @@
 #   %rdi - from
 #   %rsi - to
 #
-# Registers are stored on the top of the stack. From is a double
-# pointer so that we can store the address of the top of the stack
-# once we have pushed everything.
+# Registers are stored on the top of the stack. Swtch builds Registers for
+# `from` on its stack, switches stacks, and then consumes `to`. `From` is a
+# double pointer so that we can store the address of the new Registers struct
+# we created.
 #
 # The order of pushes and pops depend on the layout of Registers.
 #
