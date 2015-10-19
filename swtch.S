@@ -6,7 +6,7 @@
 # pointer so that we can store the address of the top of the stack
 # once we have pushed everything.
 #
-# The structure of swtch mirrors that of Registers.
+# The order of pushes and pops depend on the layout of Registers.
 #
 # The general shape of this function is as follows
 #   - Save the registers for the current process on its stack (which is the current one).
