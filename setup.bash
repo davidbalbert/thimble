@@ -7,6 +7,8 @@ BINUTILS=https://ftp.gnu.org/gnu/binutils/binutils-2.25.1.tar.bz2
 GCC=https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2
 GDB=https://ftp.gnu.org/gnu/gdb/gdb-7.10.tar.gz
 
+export MAKEFLAGS=-j4
+
 set -e
 
 if [ "$0" != "$BASH_SOURCE" ]; then
@@ -46,13 +48,15 @@ function dir() {
 
 mkdir -p $PREFIX
 
-get $GMP
-get $MPFR
-get $MPC
-get $BINUTILS
-get $GCC
-#get $GDB
-git clone https://github.com/geofft/qemu.git -b 6.828-2.3.0
+if [ -z "$NODOWNLOAD" ]; then
+  get $GMP
+  get $MPFR
+  get $MPC
+  get $BINUTILS
+  get $GCC
+  #get $GDB
+  git clone https://github.com/geofft/qemu.git -b 6.828-2.3.0
+fi
 
 cd $(dir $GMP)
 ./configure --prefix=$PREFIX
@@ -61,13 +65,13 @@ make install
 cd ..
 
 cd $(dir $MPFR)
-./configure --prefix=$PREFIX
+./configure --prefix=$PREFIX --with-gmp=$PREFIX
 make
 make install
 cd ..
 
 cd $(dir $MPC)
-./configure --prefix=$PREFIX
+./configure --prefix=$PREFIX --with-gmp=$PREFIX
 make
 make install
 cd ..
@@ -83,7 +87,7 @@ mkdir build
 cd build
 ../configure --prefix=$PREFIX --target=x86_64-elf --disable-werror \
    --disable-libssp --disable-libmudflap --with-newlib \
-   --without-headers --enable-languages=c
+   --without-headers --enable-languages=c --with-gmp=$PREFIX
 make all-gcc
 make install-gcc
 make all-target-libgcc
@@ -103,10 +107,12 @@ make
 make install
 cd ..
 
-rm -rf $(dir $GMP)
-rm -rf $(dir $MPFR)
-rm -rf $(dir $MPC)
-rm -rf $(dir $BINUTILS)
-rm -rf $(dir $GCC)
-rm -rf $(dir $GDB)
-rm -rf qemu
+if [ -z "$NORM" ]; then
+  rm -rf $(dir $GMP)
+  rm -rf $(dir $MPFR)
+  rm -rf $(dir $MPC)
+  rm -rf $(dir $BINUTILS)
+  rm -rf $(dir $GCC)
+  rm -rf $(dir $GDB)
+  rm -rf qemu
+fi
