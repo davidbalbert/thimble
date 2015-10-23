@@ -46,49 +46,49 @@ function dir() {
 
 mkdir -p $PREFIX
 
-#get $GMP
-#get $MPFR
-#get $MPC
-#get $BINUTILS
-#get $GCC
+get $GMP
+get $MPFR
+get $MPC
+get $BINUTILS
+get $GCC
 #get $GDB
 git clone https://github.com/geofft/qemu.git -b 6.828-2.3.0
 
-#cd $(dir $GMP)
-#./configure --prefix=$PREFIX
-#make
-#make install
-#cd ..
+cd $(dir $GMP)
+./configure --prefix=$PREFIX
+make
+make install
+cd ..
 
-#cd $(dir $MPFR)
-#./configure --prefix=$PREFIX
-#make
-#make install
-#cd ..
+cd $(dir $MPFR)
+./configure --prefix=$PREFIX
+make
+make install
+cd ..
 
-#cd $(dir $MPC)
-#./configure --prefix=$PREFIX
-#make
-#make install
-#cd ..
+cd $(dir $MPC)
+./configure --prefix=$PREFIX
+make
+make install
+cd ..
 
-#cd $(dir $BINUTILS)
-#./configure --prefix=$PREFIX --target=x86_64-elf --disable-werror
-#make
-#make install
-#cd ..
+cd $(dir $BINUTILS)
+./configure --prefix=$PREFIX --target=x86_64-elf --disable-werror
+make
+make install
+cd ..
 
-#cd $(dir $GCC)
-#mkdir build
-#cd build
-#../configure --prefix=$PREFIX --target=x86_64-elf --disable-werror \
-   #--disable-libssp --disable-libmudflap --with-newlib \
-   #--without-headers --enable-languages=c
-#make all-gcc
-#make install-gcc
-#make all-target-libgcc
-#make install-target-libgcc
-#cd ../../
+cd $(dir $GCC)
+mkdir build
+cd build
+../configure --prefix=$PREFIX --target=x86_64-elf --disable-werror \
+   --disable-libssp --disable-libmudflap --with-newlib \
+   --without-headers --enable-languages=c
+make all-gcc
+make install-gcc
+make all-target-libgcc
+make install-target-libgcc
+cd ../../
 
 #cd $(dir $GDB)
 #patch -p1 <../contrib/gdb-7.10-g-packet-too-long.patch
@@ -97,12 +97,16 @@ git clone https://github.com/geofft/qemu.git -b 6.828-2.3.0
 #make install
 #cd ..
 
-cd qemu
-./configure --disable-kvm --disable-gtk --enable-cocoa --prefix=$PREFIX --target-list=x86_64-softmmu
-make
+if [ "$(uname)" == "Darwin" ]; then
+  QEMU_CONFIG_OPTS="--disable-gtk"
+else
+  QEMU_CONFIG_OPTS=""
+fi
 
-# I've had trouble with running qemu's make install in parallel
-unset MAKEFLAGS
+cd qemu
+./configure --disable-kvm --prefix=$PREFIX --target-list=x86_64-softmmu $QEMU_CONFIG_OPTS
+make
+unset MAKEFLAGS # I've had trouble with running qemu's make install in parallel
 make install
 cd ..
 
