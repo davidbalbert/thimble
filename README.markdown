@@ -1,4 +1,4 @@
-# Thimble - A small OS (maybe)
+# Thimble - A small OS that doesn't do much
 
 ## Requirements
 
