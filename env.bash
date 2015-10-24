@@ -19,7 +19,7 @@ eval prev_libpath=$`libpath`
 prev_manpath=$MANPATH
 prev_ps1=$PS1
 
-export PREFIX=$(wd)/tools
+export PREFIX=$(wd)/toolchain
 export PATH=$PREFIX/bin:$PATH
 export MANPATH=$PREFIX/share/man:$MANPATH
 eval export `libpath`=$PREFIX/lib:$`libpath`

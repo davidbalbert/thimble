@@ -7,13 +7,12 @@ Thimble should work on Linux or OS X, though I've only tested it on OS X.
 - Bash
 - A C compiler
 - Make
-- libsdl (for QEMU)
 - Ruby (any version should do)
 
 ## Building and running
 
 ```
-$ bash setup.bash   # Downloads and builds cross compiler toolchain. Only run this once.
+$ bash mktoolchain.bash   # Downloads and builds compiler and assembler. Only run this once.
 
 $ source env.bash
 (thimble) $ make qemu
