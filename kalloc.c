@@ -10,7 +10,7 @@ struct FreeList {
 typedef struct FreeList FreeList;
 
 static struct {
-    SpinLock *lock;
+    SpinLock lock;
     FreeList *freelist;
     int uselock;
 } kmem;
@@ -48,7 +48,7 @@ kalloc(void)
     FreeList *page;
 
     if (kmem.uselock)
-        lock(kmem.lock);
+        lock(&kmem.lock);
 
     if (!kmem.freelist)
         return 0;
@@ -57,7 +57,7 @@ kalloc(void)
     kmem.freelist = page->next;
 
     if (kmem.uselock)
-        unlock(kmem.lock);
+        unlock(&kmem.lock);
 
     return (void *)page;
 }
@@ -75,14 +75,14 @@ kfree(void *a)
     memset(p, 1, PGSIZE);
 
     if (kmem.uselock)
-        lock(kmem.lock);
+        lock(&kmem.lock);
 
     page = (FreeList *)p;
     page->next = kmem.freelist;
     kmem.freelist = page;
 
     if (kmem.uselock)
-        unlock(kmem.lock);
+        unlock(&kmem.lock);
 }
 
 static void
@@ -100,7 +100,7 @@ freerange(void *start, void *end)
 void
 initmem1(void *start, void *end)
 {
-    initlock(kmem.lock);
+    initlock(&kmem.lock);
     kmem.freelist = 0;
 
     // interrupts aren't set up yet, so we can't call lock/unlock
