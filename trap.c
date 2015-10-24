@@ -38,6 +38,22 @@ struct TrapFrame {
 };
 typedef struct TrapFrame TrapFrame;
 
+struct InterruptGate {
+    uint offlow:16;     // bottom 16 bits of segment offset
+    uint cs:16;         // code segment selector
+    uint ist:3;         // interrupt stack table
+    uint reserved1:5;   // all 0s.
+    uint type:4;
+    uint reserved2:1;   // 0
+    uint dpl:2;         // descriptor privelege level
+    uint p:1;           // present
+    uint offmid:16;     // bits 16 - 31 of segment offset
+    uint offhigh:32;    // bits 32 - 63 of segment offset
+    uint reserved3:32;  // all 0s.
+};
+typedef struct InterruptGate InterruptGate;
+
+
 static InterruptGate idt[NIDT] __attribute__((aligned(8)));
 static IdtDesc idtr;
 

@@ -9,6 +9,16 @@ void cclear(void);
 void cputs(char *s);
 void cputc(uchar c);
 
+// kalloc.c
+void initmem1(void *start, void *end);
+void *kalloc(void);
+void kfree(void *a);
+void *p2v(ulong paddr);
+ulong v2p(void *vaddr);
+
+// klibc.c
+void *memset(void *p, int c, size_t len);
+
 // kbd.c
 void kbdinit(void);
 void handlekbd(void);

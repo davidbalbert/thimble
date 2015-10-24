@@ -9,6 +9,8 @@ OBJS = \
        swtch.o\
        lock.o\
        proc.o\
+       kalloc.o\
+       klibc.o\
 
 TOOLCHAIN=x86_64-elf
 

@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "irq.h"
+#include "mem.h"
 #include "x86.h"
 
 void
@@ -42,11 +43,12 @@ main(void)
     cclear();
     cprintf("Hello, Thimble!\n");
 
+    initmem1(end, p2v(2 * 1024 * 1024));
+    schedinit();
     trapinit();
     picinit();
     kbdinit();
 
-    schedinit();
     start(task1);
     start(task2);
 

@@ -3,12 +3,11 @@
 #define KERNBASE 0xFFFF800000000000     // First kernel virtual address
 #define KERNLINK (KERNBASE+EXTMEM)      // Kernel linked here
 
-#define USERTOP 0x00007FFFFFFFFFFF      // Last user virtual address
+#define USERTOP 0x0000800000000000      // Top of user address space.
+#define PHYSTOP 0x20000000              // Top of physical memory (512 MiB). TODO: autodetect this.
 
 
 #define PGSIZE 0x1000
-
-#define NPDENTRIES 512
 
 #define PTE_P 0x1
 #define PTE_W 0x2
@@ -17,21 +16,9 @@
 #define V2P(x) ((x) - KERNBASE)
 #define P2V(x) ((x) + KERNBASE)
 
+
 #ifndef __ASSEMBLER__
 
-struct InterruptGate {
-    uint offlow:16;     // bottom 16 bits of segment offset
-    uint cs:16;         // code segment selector
-    uint ist:3;         // interrupt stack table
-    uint reserved1:5;   // all 0s.
-    uint type:4;
-    uint reserved2:1;   // 0
-    uint dpl:2;         // descriptor privelege level
-    uint p:1;           // present
-    uint offmid:16;     // bits 16 - 31 of segment offset
-    uint offhigh:32;    // bits 32 - 63 of segment offset
-    uint reserved3:32;  // all 0s.
-};
-typedef struct InterruptGate InterruptGate;
+extern char end[]; // End of kernel, provided by linker
 
 #endif
