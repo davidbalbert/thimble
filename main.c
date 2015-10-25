@@ -21,7 +21,6 @@ task1(void)
     for(;;) {
         cprintf("task1: %d\n", i++);
         wastetime();
-        yield();
     }
 }
 
@@ -33,7 +32,6 @@ task2(void)
     for(;;) {
         cprintf("task2: %d\n", i++);
         wastetime();
-        yield();
     }
 }
 
@@ -47,10 +45,11 @@ main(void)
     schedinit();
     trapinit();
     picinit();
+    timerinit();
     kbdinit();
 
-    start(task1);
-    start(task2);
+    //start(task1);
+    //start(task2);
 
     scheduler();
 }

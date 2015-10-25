@@ -43,5 +43,8 @@ void yield(void);
 // switch.S
 void swtch(Registers **from, Registers *to);
 
+// timer.c
+void timerinit(void);
+
 // trap.c
 void trapinit(void);

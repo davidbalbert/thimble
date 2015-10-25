@@ -26,12 +26,6 @@
 #define SHIFT   (LSHIFT | RSHIFT)
 #define META    (LMETA | RMETA)
 
-void
-kbdinit(void)
-{
-    picenable(IRQ_KBD);
-}
-
 static uint skip = 0;
 static uint mods = 0; // bitmap for modifier keys
 
@@ -125,4 +119,11 @@ handlekbd(void)
 
     if (c)
         cputc(c);
+}
+
+
+void
+kbdinit(void)
+{
+    picenable(IRQ_KBD);
 }

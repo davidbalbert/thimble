@@ -59,6 +59,8 @@ static IdtDesc idtr;
 
 extern ulong vectors[];
 
+ulong ticks;
+
 static void
 mkgate(InterruptGate *gate, ulong offset, ushort selector)
 {
@@ -93,6 +95,11 @@ void
 trap(TrapFrame *tf)
 {
     switch(tf->trapno) {
+        case T_IRQ0 + IRQ_TIMER:
+            ticks++;
+            if (ticks % 100 == 0)
+                cprintf("tick: %l\n", ticks);
+            break;
         case T_IRQ0 + IRQ_KBD:
             handlekbd();
             break;
