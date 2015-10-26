@@ -25,6 +25,13 @@ static void
 procbegin(void)
 {
     unlock(&ptable.lock);
+
+    // In "user space," interrupts are always on. There are also no
+    // kernel locks held, so enabling interrupts should not be a
+    // problem here. This will eventually change to something else
+    // when we actually have user space programs.
+    sti();
+
     // returns to the process entry point. See mkproc's first arg.
 }
 
@@ -54,7 +61,7 @@ mkproc(void (*f)(void))
     sp -= sizeof(Registers);
 
     p->regs = (Registers *)sp;
-    // TODO?: memset p->regs
+    memzero(p->regs, sizeof(Registers));
 
     // Our first call to swtch will return to procbegin
     p->regs->rip = (ulong)procbegin;

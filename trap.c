@@ -96,9 +96,7 @@ trap(TrapFrame *tf)
 {
     switch(tf->trapno) {
         case T_IRQ0 + IRQ_TIMER:
-            ticks++;
-            if (ticks % 100 == 0)
-                cprintf("tick: %l\n", ticks);
+            handletimer();
             break;
         case T_IRQ0 + IRQ_KBD:
             handlekbd();

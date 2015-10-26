@@ -10,3 +10,9 @@ memset(void *p, int c, size_t len)
 
     return p;
 }
+
+void *
+memzero(void *p, size_t len)
+{
+    return memset(p, 0, len);
+}

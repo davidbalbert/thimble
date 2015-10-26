@@ -1,6 +1,7 @@
 #include "types.h"
 
 #include "common.h"
+#include "cpu.h"
 #include "irq.h"
 #include "mem.h"
 #include "x86.h"
@@ -48,8 +49,8 @@ main(void)
     timerinit();
     kbdinit();
 
-    //start(task1);
-    //start(task2);
+    start(task1);
+    start(task2);
 
     scheduler();
 }

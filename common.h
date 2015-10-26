@@ -18,6 +18,7 @@ ulong v2p(void *vaddr);
 
 // klibc.c
 void *memset(void *p, int c, size_t len);
+void *memzero(void *p, size_t len);
 
 // kbd.c
 void kbdinit(void);
@@ -45,6 +46,7 @@ void swtch(Registers **from, Registers *to);
 
 // timer.c
 void timerinit(void);
+void handletimer(void);
 
 // trap.c
 void trapinit(void);

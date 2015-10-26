@@ -2,6 +2,7 @@
 
 #include "common.h"
 #include "irq.h"
+#include "proc.h"
 #include "x86.h"
 
 #define TIMER_FREQ 1193182
@@ -19,10 +20,18 @@
 #define TIMER_FREQDIV (2 << 1)     // repeating timer
 
 void
+handletimer(void)
+{
+    if (proc && proc->state == RUNNING)
+        yield();
+}
+
+
+void
 timerinit(void)
 {
     outb(TIMER_CMD, TIMER_SEL0 | TIMER_LOHI | TIMER_FREQDIV);
-    outb(TIMER_CHAN0, TIMER_RELOAD(100) & 0xFF);
-    outb(TIMER_CHAN0, TIMER_RELOAD(100) >> 8);
+    outb(TIMER_CHAN0, TIMER_RELOAD(50) & 0xFF);
+    outb(TIMER_CHAN0, TIMER_RELOAD(50) >> 8);
     picenable(IRQ_TIMER);
 }
