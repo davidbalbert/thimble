@@ -98,8 +98,7 @@ trapinit(void)
     int i;
 
     for (i = 0; i < NIDT; i++) {
-        // 0x8 refers to the code segment in the boot GDT. This may have to change later.
-        mkgate(&idt[i], vectors[i], 0x8);
+        mkgate(&idt[i], vectors[i], SEG_KCODE << 3);
     }
 
     lidt(idt, sizeof(idt));
