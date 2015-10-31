@@ -12,6 +12,7 @@ OBJS = \
        kalloc.o\
        klibc.o\
        timer.o\
+       vm.o\
 
 TOOLCHAIN=x86_64-elf
 

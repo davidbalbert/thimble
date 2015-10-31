@@ -76,12 +76,32 @@ xchg(uint *addr, uint val)
 typedef struct __attribute__((packed)) {
     ushort limit;
     ulong base;
-} IdtDesc;
+} TableDescription;
+
+struct InterruptGate;
+typedef struct InterruptGate InterruptGate;
 
 static inline void
-lidt(IdtDesc *idtr)
+lidt(InterruptGate *g, uint size)
 {
-    asm volatile("lidt (%0)" : : "r" (idtr));
+    TableDescription idtr;
+    idtr.limit = size - 1;
+    idtr.base = (ulong)g;
+
+    asm volatile("lidt (%0)" : : "r" (&idtr));
+}
+
+struct SegmentDescriptor;
+typedef struct SegmentDescriptor SegmentDescriptor;
+
+static inline void
+lgdt(SegmentDescriptor *d, uint size)
+{
+    TableDescription gdtr;
+    gdtr.limit = size - 1;
+    gdtr.base = (ulong)d;
+
+    asm volatile("lgdt (%0)" : : "r" (&gdtr));
 }
 
 #define INT(v) asm volatile("int %0" : : "N" (v) : "cc", "memory")

@@ -55,7 +55,6 @@ typedef struct InterruptGate InterruptGate;
 
 
 static InterruptGate idt[NIDT] __attribute__((aligned(8)));
-static IdtDesc idtr;
 
 extern ulong vectors[];
 
@@ -78,20 +77,6 @@ mkgate(InterruptGate *gate, ulong offset, ushort selector)
 }
 
 void
-trapinit(void)
-{
-    int i;
-
-    for (i = 0; i < NIDT; i++) {
-        // 0x8 refers to the code segment in the boot GDT. This may have to change later.
-        mkgate(&idt[i], vectors[i], 0x8);
-    }
-
-    idtr = (IdtDesc){sizeof(idt) - 1, (ulong)&idt};
-    lidt(&idtr);
-}
-
-void
 trap(TrapFrame *tf)
 {
     switch(tf->trapno) {
@@ -105,4 +90,17 @@ trap(TrapFrame *tf)
             cprintf("trap: %u, error: %u\n", tf->trapno, tf->error);
             break;
     }
+}
+
+void
+trapinit(void)
+{
+    int i;
+
+    for (i = 0; i < NIDT; i++) {
+        // 0x8 refers to the code segment in the boot GDT. This may have to change later.
+        mkgate(&idt[i], vectors[i], 0x8);
+    }
+
+    lidt(idt, sizeof(idt));
 }

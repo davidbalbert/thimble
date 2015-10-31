@@ -50,3 +50,6 @@ void handletimer(void);
 
 // trap.c
 void trapinit(void);
+
+// vm.c
+void seginit(void);

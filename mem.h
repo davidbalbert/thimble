@@ -16,6 +16,10 @@
 #define V2P(x) ((x) - KERNBASE)
 #define P2V(x) ((x) + KERNBASE)
 
+#define SEG_KCODE 1
+#define SEG_KDATA 2
+#define SEG_UCODE 3
+#define SEG_UDATA 4
 
 #ifndef __ASSEMBLER__
 

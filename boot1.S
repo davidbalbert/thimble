@@ -129,7 +129,7 @@ done:
 .balign 8
 gdt:
     GDT_ENTRY(0, 0, 0, 0)
-    GDT_ENTRY(0, 0, 0b10011010, 0b1010)     # Code segment
+    GDT_ENTRY(0, 0, 0b10011010, 0b0010)     # Code segment
     GDT_ENTRY(0, 0, 0b10010010, 0)          # Data segment
     # We need a TSS segment here, but I don't know what that is yet.
 

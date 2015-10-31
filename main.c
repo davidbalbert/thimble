@@ -44,6 +44,7 @@ main(void)
 
     initmem1(end, p2v(2 * 1024 * 1024));
     schedinit();
+    seginit();
     trapinit();
     picinit();
     timerinit();
