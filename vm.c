@@ -20,10 +20,10 @@ codedesc(SegmentDescriptor *d, uchar dpl)
     d->type = 0b1010;   // Code, R+X
     d->s = 1;           // application (code or data) segment
     d->dpl = dpl;
-    d->p = 1;
-    d->avl = 0;
+    d->p = 1;           // Always present
+    d->avl = 0;         // For use by system
     d->l = 1;           // 64 bit code segment
-    d->db = 0;          // Should always be zero in 64 bit mode
+    d->db = 0;          // Should always be zero for 64 bit code segments
     d->g = 0;
     d->base24_31 = 0;
 }
@@ -37,9 +37,9 @@ datadesc(SegmentDescriptor *d, uchar dpl)
     d->type = 0b0010;   // Data, R+W
     d->s = 1;           // application (code or data) segment
     d->dpl = dpl;
-    d->p = 1;
-    d->avl = 0;
-    d->l = 0;
+    d->p = 1;           // Always present
+    d->avl = 0;         // For use by system
+    d->l = 0;           // Always 0 for data segments
     d->db = 0;
     d->g = 0;
     d->base24_31 = 0;
