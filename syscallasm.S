@@ -18,7 +18,7 @@ syscall0:
 
     mov     %rsp, %rdx  # temp user stack pointer
     mov     %rax, %rsp  # switch to the kernel stack
-    push    %rdx        # save the user stack pointer
+    push    %rdx        # save the user stack pointer on kernel stack
 
     call    syscall
 
