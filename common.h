@@ -1,6 +1,6 @@
 typedef struct SpinLock SpinLock;
 typedef struct Registers Registers;
-
+typedef struct Proc Proc;
 
 // console.c
 void panic(char *s) __attribute__((noreturn));
@@ -53,3 +53,4 @@ void trapinit(void);
 
 // vm.c
 void seginit(void);
+void switchuvm(Proc *p);

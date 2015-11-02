@@ -104,4 +104,10 @@ lgdt(SegmentDescriptor *d, uint size)
     asm volatile("lgdt (%0)" : : "r" (&gdtr));
 }
 
+static inline void
+ltr(ushort sel)
+{
+    asm volatile("ltr %0" : : "r" (sel));
+}
+
 #define INT(v) asm volatile("int %0" : : "N" (v) : "cc", "memory")

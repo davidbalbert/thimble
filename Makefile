@@ -23,6 +23,7 @@ OBJCOPY = $(TOOLCHAIN)-objcopy
 QEMU = qemu-system-x86_64
 
 CFLAGS = -m64 -O0 -MD -fno-builtin -Wall -Werror -mcmodel=large -gdwarf-2
+ASFLAGS = -m64 -gdwarf-2 -Wa,-divide
 LDFLAGS = -m elf_x86_64 -static -nostdlib -N
 
 kernel.img: stage1 stage2 kernel

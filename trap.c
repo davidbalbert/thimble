@@ -29,12 +29,12 @@ struct TrapFrame {
 
     /* Pushed by hardware */
     ulong rip;
-    ulong cs;
-    ulong eflags;
-
-    /* Pushed by hardware on privilege level change */
+    ushort cs;
+    uchar padding1[6];
+    ulong rflags;
     ulong rsp;
-    ulong ss;
+    ushort ss;
+    uchar padding2[6];
 };
 typedef struct TrapFrame TrapFrame;
 

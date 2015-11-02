@@ -48,7 +48,11 @@ mkproc(void (*f)(void))
 
     p->kstack = kalloc();
     if (p->kstack == 0)
-        panic("mkproc - kalloc");
+        panic("mkproc - kstack");
+
+    p->ustack = kalloc();
+    if (p->ustack == 0)
+        panic("mkproc - ustack");
 
     p->state = READY;
 
@@ -110,6 +114,7 @@ scheduler(void)
             p->state = RUNNING;
             proc = p;
 
+            switchuvm(proc);
             swtch(&cpu->scheduler, p->regs);
 
             proc = 0;
