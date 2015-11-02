@@ -8,6 +8,7 @@
 
 
 #define PGSIZE 0x1000
+#define KSTACKSIZE PGSIZE
 
 #define PTE_P 0x1
 #define PTE_W 0x2

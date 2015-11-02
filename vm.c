@@ -70,7 +70,7 @@ switchuvm(Proc *p)
 
     d = (TaskStateDescriptor *)&cpu->gdt[SEG_TSS];
     tsdesc(d, &cpu->ts, sizeof(cpu->ts));
-    cpu->ts.rsp0 = (ulong)p->kstack + PGSIZE;
+    cpu->ts.rsp0 = (ulong)p->kstack + KSTACKSIZE;
 
     ltr(SEG_TSS << 3);
 }

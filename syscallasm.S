@@ -9,16 +9,23 @@
 
 .globl syscall0
 syscall0:
-    # TODO: switch to kernel stack
-    push    %r11    # userspace flags
-    push    %rcx    # return address
+    push    %r11        # userspace flags
+    push    %rcx        # return address
 
-    call syscall
+    mov     %rax, %rdi  # save syscall num as first arg to syscall
 
-    pop     %rcx    # restore return address
-    pop     %r11    # restore flags
-    # TODO: switch back to user stack
-    sysret
+    call    kstacktop   # top of kstack -> rax
+
+    mov     %rsp, %rdx  # temp user stack pointer
+    mov     %rax, %rsp  # switch to the kernel stack
+    push    %rdx        # save the user stack pointer
+
+    call    syscall
+
+    pop     %rsp        # switch back to the user stack
+    pop     %rcx        # restore return address
+    pop     %r11        # restore flags
+    sysretq
 
 .globl sysinit
 sysinit:

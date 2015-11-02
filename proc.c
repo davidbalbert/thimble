@@ -56,7 +56,7 @@ mkproc(void (*f)(void))
 
     p->state = READY;
 
-    sp = p->kstack + PGSIZE;
+    sp = p->kstack + KSTACKSIZE;
     sp -= 8;
 
     // Procbegin returns to f, our entry point
