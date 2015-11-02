@@ -44,6 +44,9 @@ void yield(void);
 // switch.S
 void swtch(Registers **from, Registers *to);
 
+// syscallasm.S
+void sysinit(void);
+
 // timer.c
 void timerinit(void);
 void handletimer(void);

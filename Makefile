@@ -13,6 +13,8 @@ OBJS = \
        klibc.o\
        timer.o\
        vm.o\
+       syscall.o\
+       syscallasm.o\
 
 TOOLCHAIN=x86_64-elf
 

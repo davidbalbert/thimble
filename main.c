@@ -14,12 +14,15 @@ wastetime(void)
         ;
 }
 
+void hello(void);
+
 void
 task1(void)
 {
     int i = 0;
 
     for(;;) {
+        //hello();
         cprintf("task1: %d\n", i++);
         wastetime();
     }
@@ -46,6 +49,7 @@ main(void)
     schedinit();
     seginit();
     trapinit();
+    sysinit();
     picinit();
     timerinit();
     kbdinit();
