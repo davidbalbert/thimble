@@ -60,3 +60,8 @@ sysinit:
     wrmsr
 
     ret
+
+.globl hello
+    mov     $1, %rax
+    syscall
+    ret

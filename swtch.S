@@ -44,8 +44,3 @@ swtch:
     pop     %r15
 
     ret
-
-.globl hello
-    mov     $1, %rax
-    syscall
-    ret
