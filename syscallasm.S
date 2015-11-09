@@ -12,7 +12,7 @@ syscall0:
     push    %r11        # userspace flags
     push    %rcx        # return address
 
-    mov     %rax, %rdi  # save syscall num as first arg to syscall
+    mov     %rax, %r12  # temporarily save syscall num
 
     call    kstacktop   # top of kstack -> rax
 
@@ -20,11 +20,19 @@ syscall0:
     mov     %rax, %rsp  # switch to the kernel stack
     push    %rdx        # save the user stack pointer on kernel stack
 
+    mov     %r12, %rdi  # syscall num as first arg to syscall
     call    syscall
 
     pop     %rsp        # switch back to the user stack
     pop     %rcx        # restore return address
     pop     %r11        # restore flags
+
+    sysretq
+
+.global forkret
+forkret:
+    #pop     %rcx       # This has different behavior. why?
+    mov     (%rsp), %rcx   # Our entry point is stored above us on the stack (see mkproc)
     sysretq
 
 .globl sysinit
@@ -47,21 +55,21 @@ sysinit:
     shr     $32, %rdx
     wrmsr
 
-    # Put segment selectors in STAR. Bytes 6 and 7 (top two bytes
-    # of edx) is SEG_UCODE for sysret. Bytes 4 and 5 are SEG_KCODE
-    # for syscall. Syscall and sysret assume that the data segments
-    # for the stack segment selector come directly after the code
-    # segments.
+    # Put segment selectors in STAR. Bytes 6 and 7 (top two bytes of edx) is
+    # SEG_UCODE32 for sysret. Bytes 4 and 5 are SEG_KCODE for syscall. Syscall
+    # and sysret assume that the data segments for the stack segment selector
+    # come directly after the code segments.
     mov     $STAR, %ecx
     rdmsr
     xor     %edx, %edx
-    mov     $(SEG_UCODE << (16 + 3)), %edx  # 16 to shift two bytes, 3 to make the selector
+    mov     $((SEG_UCODE32 << 3 | USER_DPL) << 16), %edx
     or      $(SEG_KCODE << 3), %edx
     wrmsr
 
     ret
 
 .globl hello
+hello:
     mov     $1, %rax
     syscall
     ret

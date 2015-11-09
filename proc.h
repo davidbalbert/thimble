@@ -72,7 +72,11 @@ struct Registers {
 };
 typedef struct Registers Registers;
 
-#define NDESC 7 // 1 Null descriptor, 4 segment descriptors, and 1 128-bit TSS descriptor
+// 1 null descriptor
+// 2 kernel segments
+// 3 user segments (includes one unused compatibility mode code segment descriptor)
+// 1 128-bit TSS descriptor
+#define NDESC 8
 
 struct Cpu {
     Registers *scheduler;           // swtch to this to call the scheduler

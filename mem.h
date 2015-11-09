@@ -10,18 +10,22 @@
 #define PGSIZE 0x1000
 #define KSTACKSIZE PGSIZE
 
-#define PTE_P 0x1
-#define PTE_W 0x2
-#define PTE_PS 0x80
+#define PTE_P 0x1       // present
+#define PTE_W 0x2       // writable
+#define PTE_U 0x4       // user accessible
+#define PTE_PS 0x80     // page size (4 MB)
 
 #define V2P(x) ((x) - KERNBASE)
 #define P2V(x) ((x) + KERNBASE)
 
-#define SEG_KCODE 1
-#define SEG_KDATA 2
-#define SEG_UCODE 3
-#define SEG_UDATA 4
-#define SEG_TSS	  5
+#define USER_DPL     3
+
+#define SEG_KCODE    1
+#define SEG_KDATA    2
+#define SEG_UCODE32  3   // unused, but required by sysret
+#define SEG_UDATA    4
+#define SEG_UCODE    5
+#define SEG_TSS      6
 
 #ifndef __ASSEMBLER__
 

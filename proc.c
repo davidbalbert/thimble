@@ -32,8 +32,10 @@ procbegin(void)
     // when we actually have user space programs.
     sti();
 
-    // returns to the process entry point. See mkproc's first arg.
+    // returns to forkret, which sysrets to the process entry point
 }
+
+void forkret(void);
 
 static void
 mkproc(void (*f)(void))
@@ -57,10 +59,14 @@ mkproc(void (*f)(void))
     p->state = READY;
 
     sp = p->kstack + KSTACKSIZE;
-    sp -= 8;
 
-    // Procbegin returns to f, our entry point
+    // forkret expects our entry point to be at the top of the stack
+    sp -= 8;
     *(ulong *)sp = (ulong)f;
+
+    // Procbegin returns to forkret
+    sp -= 8;
+    *(ulong *)sp = (ulong)forkret;
 
     sp -= sizeof(Registers);
 

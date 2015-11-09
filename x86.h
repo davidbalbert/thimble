@@ -57,6 +57,15 @@ readrflags(void)
     return rflags;
 }
 
+static inline ulong
+readcr2(void)
+{
+    ulong cr2;
+    asm volatile("mov %%cr2, %0" : "=a" (cr2));
+    return cr2;
+}
+
+
 static inline uint
 xchg(uint *addr, uint val)
 {

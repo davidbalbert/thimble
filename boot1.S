@@ -69,7 +69,7 @@ seta20.2:
     # writable. We set the size bit in the pgdir entry to use 2MB pages.
     mov     $0x1000, %eax
     mov     $0x2000, %edx
-    or      $(PTE_P|PTE_W), %edx
+    or      $(PTE_P|PTE_W|PTE_U), %edx
     mov     %edx, (%eax)
 
     # Then map KERNBASE. We can point KERNBASE at the same PDP as the low
@@ -79,15 +79,16 @@ seta20.2:
 
     mov     $0x2000, %eax
     mov     $0x3000, %edx
-    or      $(PTE_P|PTE_W), %edx
+    or      $(PTE_P|PTE_W|PTE_U), %edx
     mov     %edx, (%eax)
 
     mov     $0x3000, %eax
-    movw    $(0|PTE_P|PTE_W|PTE_PS), (%eax)
+    movw    $(0|PTE_P|PTE_W|PTE_U|PTE_PS), (%eax)
 
-    # Enable PAE
+    # Enable PAE and PSE
     mov     %cr4, %eax
-    or      $(1 << 5), %eax
+    or      $(1 << 4), %eax # Page Size Extension
+    or      $(1 << 5), %eax # Physical Address Extension
     mov     %eax, %cr4
 
     # Enable Long Mode in the EFER Machine Specific Register

@@ -87,7 +87,9 @@ trap(TrapFrame *tf)
             handlekbd();
             break;
         default:
-            cprintf("trap: %u, error: %u\n", tf->trapno, tf->error);
+            cprintf("trap: %u, error: %u, cr2: %x, rip: %x\n", tf->trapno, tf->error, readcr2(), tf->rip);
+            for (;;)
+                hlt();
             break;
     }
 }

@@ -80,8 +80,8 @@ seginit(void)
 {
     codedesc(&cpu->gdt[SEG_KCODE], 0);
     datadesc(&cpu->gdt[SEG_KDATA], 0);
-    codedesc(&cpu->gdt[SEG_UCODE], 3);
     datadesc(&cpu->gdt[SEG_UDATA], 3);
+    codedesc(&cpu->gdt[SEG_UCODE], 3);
 
     lgdt(cpu->gdt, sizeof(cpu->gdt));
 }
