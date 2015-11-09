@@ -31,8 +31,8 @@ syscall0:
 
 .global forkret
 forkret:
-    #pop     %rcx       # This has different behavior. why?
-    mov     (%rsp), %rcx   # Our entry point is stored above us on the stack (see mkproc)
+    pop     %rcx       # This has different behavior. why?
+    #mov     (%rsp), %rcx   # Our entry point is stored above us on the stack (see mkproc)
     sysretq
 
 .globl sysinit
