@@ -23,16 +23,12 @@ syscall0:
     mov     %r12, %rdi  # syscall num as first arg to syscall
     call    syscall
 
+.globl sysret
+sysret:
     pop     %rsp        # switch back to the user stack
     pop     %rcx        # restore return address
     pop     %r11        # restore flags
 
-    sysretq
-
-.global forkret
-forkret:
-    pop     %rcx       # This has different behavior. why?
-    #mov     (%rsp), %rcx   # Our entry point is stored above us on the stack (see mkproc)
     sysretq
 
 .globl sysinit
@@ -71,5 +67,11 @@ sysinit:
 .globl hello
 hello:
     mov     $1, %rax
+    syscall
+    ret
+
+.globl goodbye
+goodbye:
+    mov     $2, %rax
     syscall
     ret

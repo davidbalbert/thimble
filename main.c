@@ -19,22 +19,19 @@ void hello(void);
 void
 task1(void)
 {
-    //int i = 0;
-
     for(;;) {
         hello();
-        //cprintf("task1: %d\n", i++);
         wastetime();
     }
 }
 
+void goodbye(void);
+
 void
 task2(void)
 {
-    int i = 0;
-
     for(;;) {
-        cprintf("task2: %d\n", i++);
+        goodbye();
         wastetime();
     }
 }
@@ -55,7 +52,7 @@ main(void)
     kbdinit();
 
     start(task1);
-    //start(task2);
+    start(task2);
 
     scheduler();
 }

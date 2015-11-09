@@ -19,6 +19,8 @@ kstacktop(void)
 int
 syscall(int num)
 {
-    cprintf("syscall(%d)\n", num);
+    static int i = 0;
+
+    cprintf("syscall(%d): %d\n", num, i++);
     return 0;
 }

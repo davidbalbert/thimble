@@ -1,6 +1,7 @@
 #include "types.h"
 
 #include "common.h"
+#include "cpu.h"
 #include "lock.h"
 #include "mem.h"
 #include "proc.h"
@@ -26,22 +27,17 @@ procbegin(void)
 {
     unlock(&ptable.lock);
 
-    // In "user space," interrupts are always on. There are also no
-    // kernel locks held, so enabling interrupts should not be a
-    // problem here. This will eventually change to something else
-    // when we actually have user space programs.
-    sti();
-
-    // returns to forkret, which sysrets to the process entry point
+    // returns to sysret, which sysrets to the process entry point
 }
 
-void forkret(void);
+void sysret(void);
 
 static void
 mkproc(void (*f)(void))
 {
     Proc *p;
-    uchar *sp;
+    uchar *ksp;
+    uchar *usp;
 
     if (ptable.n >= NPROCS)
         panic("mkproc - nprocs");
@@ -58,19 +54,28 @@ mkproc(void (*f)(void))
 
     p->state = READY;
 
-    sp = p->kstack + KSTACKSIZE;
+    ksp = p->kstack + KSTACKSIZE;
+    usp = p->ustack + USTACKSIZE;
 
-    // forkret expects our entry point to be at the top of the stack
-    sp -= 8;
-    *(ulong *)sp = (ulong)f;
+    // rflags
+    usp -= 8;
+    *(ulong *)usp = FL_IF;
 
-    // Procbegin returns to forkret
-    sp -= 8;
-    *(ulong *)sp = (ulong)forkret;
+    // entry point
+    usp -= 8;
+    *(ulong *)usp = (ulong)f;
 
-    sp -= sizeof(Registers);
+    // user stack
+    ksp -= 8;
+    *(ulong *)ksp = (ulong)usp;
 
-    p->regs = (Registers *)sp;
+    // Procbegin returns to sysret
+    ksp -= 8;
+    *(ulong *)ksp = (ulong)sysret;
+
+    ksp -= sizeof(Registers);
+
+    p->regs = (Registers *)ksp;
     memzero(p->regs, sizeof(Registers));
 
     // Our first call to swtch will return to procbegin
