@@ -8,8 +8,9 @@
 
 void readbytes(uchar *addr, ulong count, ulong offset);
 
+// koffset is the first byte of the kernel on disk
 void
-stage2main(void)
+stage2main(ulong koffset)
 {
     ElfHeader *elf;
     ElfProgHeader *ph, *eph;
@@ -17,7 +18,7 @@ stage2main(void)
     uchar *pa;
 
     elf = (ElfHeader *)0x10000;
-    readbytes((uchar *)elf, PGSIZE, 0);
+    readbytes((uchar *)elf, PGSIZE, koffset);
 
     if (elf->magic != ELF_MAGIC) {
         for (;;)
@@ -29,7 +30,7 @@ stage2main(void)
 
     for (; ph < eph; ph++) {
         pa = (uchar *)ph->paddr;
-        readbytes(pa, ph->filesz, ph->offset);
+        readbytes(pa, ph->filesz, koffset + ph->offset);
         if (ph->memsz > ph->filesz)
             stosb(pa + ph->filesz, 0, ph->memsz - ph->filesz);
     }
@@ -38,6 +39,9 @@ stage2main(void)
     entry();
 }
 
+// addr - destination
+// count - bytes to read
+// offset - start byte (offset from start of disk)
 void
 readbytes(uchar *addr, ulong count, ulong offset)
 {
@@ -47,7 +51,7 @@ readbytes(uchar *addr, ulong count, ulong offset)
     eaddr = addr + count;
 
     addr -= offset % SECTSIZE;
-    lba = offset/SECTSIZE + 2; // kernel starts at sector 2. This assumes stage 2 is one sector wide
+    lba = offset/SECTSIZE;
 
     for (; addr < eaddr; addr += SECTSIZE, lba++)
         readsects(addr, lba, 1);

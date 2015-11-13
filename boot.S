@@ -1,6 +1,10 @@
 #include "asm.h"
 #include "mem.h"
 
+#include "stage2size.h"
+
+#define STAGE2 0x7E00
+
 .code16
 .globl start
 
@@ -47,6 +51,15 @@ seta20.2:
 
     movb    $0xdf,%al               # 0xdf -> port 0x60
     outb    %al,$0x60
+
+
+    # Load stage 2 from disk
+    xor     %ax, %ax
+    mov     $0x42, %ah      # Subroutine identifier for LBA disk reads?
+    mov     $0x80, %dl      # C drive
+    mov     $dap, %si       # Address of DAP
+    int     $0x13           # Call the BIOS
+
 
     # Enabeling long mode
 
@@ -117,12 +130,25 @@ start64:
     mov     %ax, %fs
     mov     %ax, %gs
 
-    call    bootmain        # Into C
 
-    # bootmain should never return, but just in case...
+    mov     $((STAGE2SIZE + 1) * 512), %rdi   # Stage 2 needs to know where to start loading the kernel from.
+    call    STAGE2
+
+    # stage2 should never return, but just in case...
 done:
     hlt
     jmp     done
+
+# Disk Address Packet (DAP)
+.balign 4
+dap:
+    .byte   16             # DAP size
+    .byte   0              # Always zero
+    .word   STAGE2SIZE     # Number of sectors to read
+    .word   STAGE2         # Destination offset
+    .word   0              # Destination real mode segment
+    .long   1              # Starting LBA
+    .long   0              # Upper 16 bits of 48-bit LBA
 
 # The GDT should be alligned on an 8-byte boundary. See section 3.5.1, of
 # volume 3A of the Intel 64 and IA-32 Architectures Software Developer's
@@ -136,4 +162,4 @@ gdt:
 
 gdtdesc:
     .word   (gdtdesc - gdt - 1)     # sizeof(gdt) - 1
-    .long   gdt
+    .quad   gdt

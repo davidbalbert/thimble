@@ -3,6 +3,8 @@ toolchain
 *.d
 *.img
 kernel
-stage1
+boot
 stage2
 ivec.S
+stage2size.txt
+stage2size.h

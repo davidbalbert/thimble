@@ -25,30 +25,30 @@ OBJCOPY = $(TOOLCHAIN)-objcopy
 QEMU = qemu-system-x86_64
 
 CFLAGS = -m64 -O0 -MD -fno-builtin -Wall -Werror -mcmodel=large -gdwarf-2
-ASFLAGS = -m64 -gdwarf-2 -Wa,-divide
+ASFLAGS = -m64 -MD -gdwarf-2 -Wa,-divide
 LDFLAGS = -m elf_x86_64 -static -nostdlib -N
 
-kernel.img: stage1 stage2 kernel
+kernel.img: boot stage2 kernel stage2size.txt
 	dd bs=512 count=16384 if=/dev/zero of=kernel.img
-	dd bs=512 if=stage1 of=kernel.img conv=notrunc
+	dd bs=512 if=boot of=kernel.img conv=notrunc
 	dd bs=512 if=stage2 of=kernel.img conv=notrunc seek=1
-	dd bs=512 if=kernel of=kernel.img conv=notrunc seek=2 # Assuming stage2 fits in one sector ¯\_(ツ)_/¯
+	dd bs=512 if=kernel of=kernel.img conv=notrunc seek=$(shell expr $(shell cat stage2size.txt) + 1)
 
 kernel: $(OBJS) kernel.ld
 	$(LD) $(LDFLAGS) -T kernel.ld -o kernel $(OBJS)
 
+boot.o: stage2size.h
 
+boot: boot.o boot.ld
+	$(LD) $(LDFLAGS) -N -T boot.ld -o boot boot.o
 
-stage1: boot1.S stage1.c bootide.c stage1.ld
-	$(CC) $(CFLAGS) -c boot1.S
-	$(CC) $(CFLAGS) -Os -c stage1.c
-	$(CC) $(CFLAGS) -Os -c bootide.c
-	$(LD) $(LDFLAGS) -N -T stage1.ld -o stage1 boot1.o stage1.o bootide.o
+stage2size.txt: stage2
+	wc -c stage2 | awk '{ print int(($$1 + 511) / 512) }' > stage2size.txt
 
-stage2: boot2.S stage2.c bootide.c stage2.ld
-	$(CC) $(CFLAGS) -c boot2.S
-	$(CC) $(CFLAGS) -Os -c stage2.c
-	$(CC) $(CFLAGS) -Os -c bootide.c
+stage2size.h: stage2size.txt
+	echo '#define STAGE2SIZE' $(shell cat stage2size.txt) > stage2size.h
+
+stage2: boot2.o stage2.o bootide.o stage2.ld
 	$(LD) $(LDFLAGS) -N -T stage2.ld -o stage2 boot2.o stage2.o bootide.o
 
 ivec.S: ivec.rb
@@ -58,7 +58,7 @@ ivec.S: ivec.rb
 
 .PHONY: clean
 clean:
-	rm -rf stage1 stage2 kernel ivec.S *.img *.o *.d
+	rm -rf boot stage2 kernel ivec.S stage2size.* *.img *.o *.d
 
 
 QEMUOPTS = -monitor stdio -drive file=kernel.img,format=raw -m 512

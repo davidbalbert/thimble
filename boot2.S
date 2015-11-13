@@ -2,7 +2,6 @@
 # that there is known code at the beginning of stage2.
 
 .code64
-.globl start
 
 start:
     jmp stage2main
