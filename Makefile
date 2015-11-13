@@ -48,8 +48,14 @@ stage2size.txt: stage2
 stage2size.h: stage2size.txt
 	echo '#define STAGE2SIZE' $(shell cat stage2size.txt) > stage2size.h
 
-stage2: boot2.o stage2.o bootide.o stage2.ld
-	$(LD) $(LDFLAGS) -N -T stage2.ld -o stage2 boot2.o stage2.o bootide.o
+
+STAGE2OBJS = \
+	     stage2asm.o\
+	     stage2.o\
+	     bootide.o\
+
+stage2: $(STAGE2OBJS) stage2.ld
+	$(LD) $(LDFLAGS) -N -T stage2.ld -o stage2 $(STAGE2OBJS)
 
 ivec.S: ivec.rb
 	ruby ivec.rb > ivec.S
