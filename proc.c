@@ -83,6 +83,16 @@ mkproc(void (*f)(void))
 }
 
 void
+panic(char *s)
+{
+    cli();
+    cprintf("cpu%d: panic: %s\n", cpu->id, s);
+
+    for (;;)
+        hlt();
+}
+
+void
 start(void (*f)(void))
 {
     lock(&ptable.lock);

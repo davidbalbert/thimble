@@ -9,6 +9,21 @@ SECTIONS
 		*(.text);
 	}
 
+	.rodata :
+	{
+		*(.rodata);
+	}
+
+	.bss :
+	{
+		*(.bss);
+	}
+
+	.data :
+	{
+		*(.data);
+	}
+
 	/DISCARD/ :
 	{
 		*(.*);

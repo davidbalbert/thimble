@@ -1,8 +1,13 @@
+// Simple console driver. Can be used by the kernel and the stage 2 bootloader.
+// No external dependencies besides a void panic(char *) function.
+//
+// N.b. The cursor position is not shared between the bootloader and kernel.
+// Printing from the kernel will write over anything printed from the
+// bootloader.
+
 #include "types.h"
 
-#include "common.h"
 #include "mem.h"
-#include "proc.h"
 #include "x86.h"
 
 #include <stdarg.h>
@@ -105,16 +110,6 @@ cputs(char *s)
 }
 
 void
-panic(char *s)
-{
-    cli();
-    cprintf("cpu%d: panic: %s\n", cpu->id, s);
-
-    for (;;)
-        hlt();
-}
-
-void
 printint(long n, uchar base, uchar sign)
 {
     char *numbers = "0123456789abcdef";
@@ -145,6 +140,8 @@ printint(long n, uchar base, uchar sign)
     for (i -= 1; i > -1; i--)
         cputc0(buf[i]);
 }
+
+void panic(char *s);
 
 void
 cprintf(char *fmt, ...)

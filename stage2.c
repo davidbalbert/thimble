@@ -6,6 +6,17 @@
 
 #include "bootide.h"
 
+// required by the console driver
+void
+panic(char *s)
+{
+    for (;;)
+        hlt();
+}
+
+void cclear(void);
+void cprintf(char *s, ...);
+
 void readbytes(uchar *addr, ulong count, ulong offset);
 
 // koffset is the first byte of the kernel on disk

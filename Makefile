@@ -53,6 +53,7 @@ STAGE2OBJS = \
 	     stage2asm.o\
 	     stage2.o\
 	     bootide.o\
+	     console.o\
 
 stage2: $(STAGE2OBJS) stage2.ld
 	$(LD) $(LDFLAGS) -N -T stage2.ld -o stage2 $(STAGE2OBJS)
