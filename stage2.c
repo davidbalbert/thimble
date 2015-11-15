@@ -8,7 +8,7 @@
 
 #define SECTSIZE 512
 
-static int hasahci = 0; // Set if we find an ahci controller
+static int has_ahci = 0; // Set if we find an ahci controller
 
 // required by the console driver
 void
@@ -29,7 +29,7 @@ stage2main(ulong koffset)
     void (*entry)(void);
     uchar *pa;
 
-    hasahci = ahcidetect();
+    has_ahci = ahcidetect();
 
     elf = (ElfHeader *)0x10000;
     readbytes((uchar *)elf, PGSIZE, koffset);
@@ -68,7 +68,7 @@ readbytes(uchar *addr, ulong count, ulong offset)
     lba = offset/SECTSIZE;
 
     for (; addr < eaddr; addr += SECTSIZE, lba++) {
-        if (hasahci) {
+        if (has_ahci) {
             ahciread(addr, lba, 1);
         } else {
             ideread(addr, lba, 1);
