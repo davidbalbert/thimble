@@ -1,6 +1,7 @@
 // PCI driver. Used by stage2 bootloader.
 #include "types.h"
 
+#include "pci.h"
 #include "x86.h"
 
 #define PCI_ADDR 0xCF8
@@ -41,8 +42,8 @@ static char *classes[] = {
     [0xFF] "Device does not fit defined class"
 };
 
-static char *
-classname(uchar code)
+char *
+pciclass(uchar code)
 {
     return classes[code] ? classes[code] : "Reserved";
 }
@@ -87,44 +88,61 @@ ismultifunc(ushort vendorid)
 
 void cprintf(char *, ...);
 
-static void
-checkdevice(uchar bus, uchar dev)
+static int
+checkdevice(uchar bus, uchar dev, int (*f)(PciFunction *))
 {
     ushort vendorid;
-    uchar class;
-    int func;
+    PciFunction func;
+    int i;
 
     vendorid = pcireadw(bus, dev, 0, PCI_VENDORID);
 
     if (vendorid == 0xFFFF)
-        return;
+        return 1;
 
-    class = pcireadb(bus, dev, 0, PCI_CLASS);
+    func.vendorid = vendorid;
+    func.bus = bus;
+    func.dev = dev;
+    func.func = 0;
+    func.class = pcireadb(bus, dev, 0, PCI_CLASS);
+    func.subclass = pcireadb(bus, dev, 0, PCI_SUBCLASS);
 
-    cprintf("pci%d.%d.0: %s\n", bus, dev, classname(class));
+    if (f(&func) == 0)
+        return 0;
 
     if (ismultifunc(vendorid)) {
-        for (func = 1; func < PCI_NFUNC; func++)  {
-            vendorid = pcireadw(bus, dev, func, PCI_VENDORID);
+        for (i = 1; i < PCI_NFUNC; i++)  {
+            vendorid = pcireadw(bus, dev, i, PCI_VENDORID);
 
             if (vendorid == 0xFFFF)
                 continue;
 
-            class = pcireadb(bus, dev, func, PCI_CLASS);
+            func.vendorid = vendorid;
+            func.func = i;
+            func.class = pcireadb(bus, dev, i, PCI_CLASS);
+            func.subclass = pcireadb(bus, dev, i, PCI_SUBCLASS);
 
-            cprintf("pci%d.%d.%d: %s\n", bus, dev, func, classname(class));
+            if (f(&func) == 0)
+                return 0;
         }
     }
+
+    return 1;
 }
 
+// Enumerates all present PCI functions, calling f with each one.
+// If f returns 0, stop enumerating. Otherwise, continue.
 void
-pcienumerate(void)
+pcieach(int (*f)(PciFunction *))
 {
-    int bus, dev;
+    int bus, dev, ret;
 
     for (bus = 0; bus < PCI_NBUS; bus++) {
         for (dev = 0; dev < PCI_NDEV; dev++) {
-            checkdevice(bus, dev);
+            ret = checkdevice(bus, dev, f);
+
+            if (ret == 0)
+                return;
         }
     }
 }

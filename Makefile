@@ -79,7 +79,7 @@ Q35_QEMUOPTS = -monitor stdio \
 
 .PHONY: qemu
 qemu: kernel.img
-	$(QEMU) $(QEMUOPTS)
+	$(QEMU) $(Q35_QEMUOPTS)
 
 .PHONY: qemu-gdb
 qemu-gdb: kernel.img

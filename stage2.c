@@ -1,10 +1,12 @@
 #include "types.h"
 
+#include "bootdefs.h"
 #include "elf.h"
 #include "mem.h"
+#include "pci.h"
 #include "x86.h"
 
-#include "bootide.h"
+#define SECTSIZE 512
 
 // required by the console driver
 void
@@ -14,12 +16,21 @@ panic(char *s)
         hlt();
 }
 
-void cclear(void);
-void cprintf(char *s, ...);
+static int
+findahci(PciFunction *f)
+{
+    if (f->class == PCI_C_STORAGE && f->subclass == PCI_SC_AHCI) {
+        cprintf("found AHCI Controller: pci%d.%d.%d\n",
+                f->bus,
+                f->dev,
+                f->func);
+        return 0;
+    } else {
+        return 1;
+    }
+}
 
 void readbytes(uchar *addr, ulong count, ulong offset);
-
-void pcienumerate(void);
 
 // koffset is the first byte of the kernel on disk
 void
@@ -31,7 +42,7 @@ stage2main(ulong koffset)
     uchar *pa;
 
     cclear();
-    pcienumerate();
+    pcieach(findahci);
 
     for (;;)
         hlt();
