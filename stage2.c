@@ -19,6 +19,8 @@ void cprintf(char *s, ...);
 
 void readbytes(uchar *addr, ulong count, ulong offset);
 
+void pcienumerate(void);
+
 // koffset is the first byte of the kernel on disk
 void
 stage2main(ulong koffset)
@@ -27,6 +29,13 @@ stage2main(ulong koffset)
     ElfProgHeader *ph, *eph;
     void (*entry)(void);
     uchar *pa;
+
+    cclear();
+    pcienumerate();
+
+    for (;;)
+        hlt();
+
 
     elf = (ElfHeader *)0x10000;
     readbytes((uchar *)elf, PGSIZE, koffset);

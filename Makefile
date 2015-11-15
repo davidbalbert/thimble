@@ -54,6 +54,7 @@ STAGE2OBJS = \
 	     stage2.o\
 	     bootide.o\
 	     console.o\
+	     pci.o\
 
 stage2: $(STAGE2OBJS) stage2.ld
 	$(LD) $(LDFLAGS) -N -T stage2.ld -o stage2 $(STAGE2OBJS)
