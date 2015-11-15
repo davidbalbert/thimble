@@ -1,7 +1,7 @@
 #include "types.h"
 
 #include "cpu.h"
-#include "common.h"
+#include "defs.h"
 #include "lock.h"
 #include "proc.h"
 #include "x86.h"

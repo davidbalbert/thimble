@@ -1,6 +1,6 @@
 #include "types.h"
 
-#include "common.h"
+#include "defs.h"
 #include "mem.h"
 #include "proc.h"
 

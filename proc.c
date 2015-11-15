@@ -1,6 +1,6 @@
 #include "types.h"
 
-#include "common.h"
+#include "defs.h"
 #include "cpu.h"
 #include "lock.h"
 #include "mem.h"

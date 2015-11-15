@@ -1,6 +1,6 @@
 #include "types.h"
 
-#include "common.h"
+#include "defs.h"
 #include "irq.h"
 #include "x86.h"
 
