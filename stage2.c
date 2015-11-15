@@ -8,26 +8,14 @@
 
 #define SECTSIZE 512
 
+static int hasahci = 0; // Set if we find an ahci controller
+
 // required by the console driver
 void
 panic(char *s)
 {
     for (;;)
         hlt();
-}
-
-static int
-findahci(PciFunction *f)
-{
-    if (f->class == PCI_C_STORAGE && f->subclass == PCI_SC_AHCI) {
-        cprintf("found AHCI Controller: pci%d.%d.%d\n",
-                f->bus,
-                f->dev,
-                f->func);
-        return 0;
-    } else {
-        return 1;
-    }
 }
 
 void readbytes(uchar *addr, ulong count, ulong offset);
@@ -41,12 +29,7 @@ stage2main(ulong koffset)
     void (*entry)(void);
     uchar *pa;
 
-    cclear();
-    pcieach(findahci);
-
-    for (;;)
-        hlt();
-
+    hasahci = ahcidetect();
 
     elf = (ElfHeader *)0x10000;
     readbytes((uchar *)elf, PGSIZE, koffset);
@@ -84,7 +67,11 @@ readbytes(uchar *addr, ulong count, ulong offset)
     addr -= offset % SECTSIZE;
     lba = offset/SECTSIZE;
 
-    for (; addr < eaddr; addr += SECTSIZE, lba++)
-        readsects(addr, lba, 1);
-
+    for (; addr < eaddr; addr += SECTSIZE, lba++) {
+        if (hasahci) {
+            ahciread(addr, lba, 1);
+        } else {
+            ideread(addr, lba, 1);
+        }
+    }
 }

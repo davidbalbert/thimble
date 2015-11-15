@@ -1,5 +1,9 @@
+// ahci.c
+int  ahcidetect(void);
+void ahciread(uchar *addr, uint lba, uchar count);
+
 // bootide.c
-void readsects(uchar *addr, uint lba, uchar count);
+void ideread(uchar *addr, uint lba, uchar count);
 
 // console.h
 void cprintf(char *fmt, ...);

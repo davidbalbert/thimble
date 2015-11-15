@@ -3,7 +3,7 @@
 #include "bootide.h"
 #include "x86.h"
 
-void
+static void
 waitdisk(void)
 {
     while((inb(0x1F7) & 0xC0) != 0x40)
@@ -11,7 +11,7 @@ waitdisk(void)
 }
 
 void
-readsects(uchar *addr, uint lba, uchar count)
+ideread(uchar *addr, uint lba, uchar count)
 {
     waitdisk();
 

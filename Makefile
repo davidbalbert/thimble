@@ -55,6 +55,7 @@ STAGE2OBJS = \
 	     bootide.o\
 	     console.o\
 	     pci.o\
+	     ahci.o\
 
 stage2: $(STAGE2OBJS) stage2.ld
 	$(LD) $(LDFLAGS) -N -T stage2.ld -o stage2 $(STAGE2OBJS)
@@ -79,7 +80,7 @@ Q35_QEMUOPTS = -monitor stdio \
 
 .PHONY: qemu
 qemu: kernel.img
-	$(QEMU) $(Q35_QEMUOPTS)
+	$(QEMU) $(QEMUOPTS)
 
 .PHONY: qemu-gdb
 qemu-gdb: kernel.img
