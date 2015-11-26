@@ -13,10 +13,12 @@
 #define PCI_DEVICEID 0x2
 #define PCI_SUBCLASS 0xA
 #define PCI_CLASS    0xB
+#define PCI_BAR0 0x10
 
 #define PCI_NBUS  256
 #define PCI_NDEV  32
 #define PCI_NFUNC 8
+
 
 #define PCI_MULTIFUNC (1 << 7)
 
@@ -48,7 +50,7 @@ pciclass(uchar code)
     return classes[code] ? classes[code] : "Reserved";
 }
 
-uint
+static uint
 pcireadl(uchar bus, uchar dev, uchar func, uchar offset)
 {
     ulong addr;
@@ -59,7 +61,7 @@ pcireadl(uchar bus, uchar dev, uchar func, uchar offset)
     return inl(PCI_DATA);
 }
 
-ushort
+static ushort
 pcireadw(uchar bus, uchar dev, uchar func, uchar offset)
 {
     uint data;
@@ -69,7 +71,7 @@ pcireadw(uchar bus, uchar dev, uchar func, uchar offset)
     return offset % 4 == 0 ? data : data >> 16;
 }
 
-uchar
+static uchar
 pcireadb(uchar bus, uchar dev, uchar func, uchar offset)
 {
     uint data;
@@ -85,8 +87,6 @@ ismultifunc(ushort vendorid)
 {
     return vendorid & PCI_MULTIFUNC;
 }
-
-void cprintf(char *, ...);
 
 static int
 checkdevice(uchar bus, uchar dev, int (*f)(PciFunction *))
@@ -145,4 +145,11 @@ pcieach(int (*f)(PciFunction *))
                 return;
         }
     }
+}
+
+// Returns base address register bar for function f.
+uint
+pcibar(PciFunction *f, uchar bar)
+{
+    return pcireadl(f->bus, f->dev, f->func, PCI_BAR0 + 4*bar);
 }

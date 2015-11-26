@@ -29,6 +29,8 @@ stage2main(ulong koffset)
     void (*entry)(void);
     uchar *pa;
 
+    cclear();
+
     has_ahci = ahcidetect();
 
     elf = (ElfHeader *)0x10000;

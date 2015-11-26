@@ -5,9 +5,7 @@
 #include "x86.h"
 
 static struct {
-    uchar bus;
-    uchar dev;
-    uchar func;
+    PciFunction pci;
 } hba; // Host bus adapter
 
 static int ahcifound = 0;
@@ -17,10 +15,7 @@ findahci(PciFunction *f)
 {
     if (f->class == PCI_C_STORAGE && f->subclass == PCI_SC_AHCI) {
         ahcifound = 1;
-
-        hba.bus = f->bus;
-        hba.dev = f->dev;
-        hba.func = f->func;
+        hba.pci = *f;
 
         return 0;
     } else {
@@ -31,7 +26,6 @@ findahci(PciFunction *f)
 void
 ahciread(uchar *addr, uint lba, uchar count)
 {
-    cclear();
     cprintf("AHCI not implemented yet");
     for (;;)
         hlt();
@@ -40,7 +34,15 @@ ahciread(uchar *addr, uint lba, uchar count)
 int
 ahcidetect(void)
 {
+    uint *hbabase;
+
     pcieach(findahci);
+
+    if (ahcifound) {
+        hbabase = (uint *)(ulong)pcibar(&hba.pci, 5);
+        cprintf("bar5: %p\n", hbabase);
+        cprintf("*bar5: %p\n", *hbabase);
+    }
 
     return ahcifound;
 }

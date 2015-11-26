@@ -11,10 +11,10 @@
 #define KSTACKSIZE PGSIZE
 #define USTACKSIZE PGSIZE
 
-#define PTE_P 0x1       // present
-#define PTE_W 0x2       // writable
-#define PTE_U 0x4       // user accessible
-#define PTE_PS 0x80     // page size (4 MB)
+#define PTE_P  0x1      // present
+#define PTE_W  0x2      // writable
+#define PTE_U  0x4      // user accessible
+#define PTE_PS 0x80     // large page size
 
 #define V2P(x) ((x) - KERNBASE)
 #define P2V(x) ((x) + KERNBASE)

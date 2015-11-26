@@ -13,6 +13,8 @@ void cputc(uchar c);
 
 // pci.c
 typedef struct PciFunction PciFunction;
+typedef int (*pciiter)(PciFunction *f);
 
 char *pciclass(uchar code);
-void pcieach(int (*f)(PciFunction *));
+void pcieach(pciiter f);
+uint pcibar(PciFunction *f, uchar bar);

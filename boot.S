@@ -63,23 +63,28 @@ seta20.2:
 
     # Enabeling long mode
 
-    # Set up long mode page tables. We're going to identity map the first 2M of
-    # memory and also map KERNBASE to the first 2M. We'll use 2MB pages.
+    # Set up long mode page tables. We're going to identity map the first 4 GB
+    # of memory and also map KERNBASE to the first 4 GB. We'll use 1 GB pages.
+    # We're mapping in so much memory because the bootloader needs to access
+    # the AHCI controller which is a memory mapped PCI device that lives
+    # between the 3rd and 4th GB of physical memory.
     #
     # 0x1000 - PML4
     # 0x2000 - PDP
-    # 0x3000 - PD
 
     mov     $0x1000, %edi
-    mov     %edi, %cr3      # Store the address of PML4T in CR3
+    mov     %edi, %cr3      # Store the address of PML4 in CR3
 
-    # Clear 0x1000 - 0x3FFF
+    # Clear 0x1000 - 0x2FFF
     xor     %eax, %eax
-    mov     $3072, %ecx
-    rep stosl               # Writes 3072 (ECX) 32-bit length 0's (EAX) starting at 0x1000 (EDI)
+    mov     $(0x2000 / 4), %ecx
+    rep stosl               # Zeroes (EAX) out 0x2000 (ECX) bytes in 4 byte increments starting at 0x1000 (EDI)
 
-    # First, identity map the first 2M. We mark each entry as present and
-    # writable. We set the size bit in the pgdir entry to use 2MB pages.
+    # First, identity map the first 4 GB. We mark each entry as present,
+    # writable, and user accessible.
+    #
+    # TODO: once our kernel has its own per process page tables, get rid of PTE_U.
+
     mov     $0x1000, %eax
     mov     $0x2000, %edx
     or      $(PTE_P|PTE_W|PTE_U), %edx
@@ -90,17 +95,28 @@ seta20.2:
     mov     $(KERNBASE>>39 & 0x1FF), %ecx
     mov     %edx, (%eax, %ecx, 8)
 
+    # Now map in the first GB
     mov     $0x2000, %eax
-    mov     $0x3000, %edx
-    or      $(PTE_P|PTE_W|PTE_U), %edx
+    mov     $(PTE_P|PTE_W|PTE_U|PTE_PS), %edx
     mov     %edx, (%eax)
 
-    mov     $0x3000, %eax
-    movw    $(0|PTE_P|PTE_W|PTE_U|PTE_PS), (%eax)
+    # Second GB
+    add     $8, %eax
+    add     $0x40000000, %edx
+    mov     %edx, (%eax)
+
+    # Third GB
+    add     $8, %eax
+    add     $0x40000000, %edx
+    mov     %edx, (%eax)
+
+    # Fourth GB
+    add     $8, %eax
+    add     $0x40000000, %edx
+    mov     %edx, (%eax)
 
     # Enable PAE and PSE
     mov     %cr4, %eax
-    or      $(1 << 4), %eax # Page Size Extension
     or      $(1 << 5), %eax # Physical Address Extension
     mov     %eax, %cr4
 
@@ -129,7 +145,6 @@ start64:
     mov     %ax, %es
     mov     %ax, %fs
     mov     %ax, %gs
-
 
     mov     $((STAGE2SIZE + 1) * 512), %rdi   # Stage 2 needs to know where to start loading the kernel from.
     call    STAGE2
