@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
-GMP=https://ftp.gnu.org/gnu/gmp/gmp-6.0.0a.tar.bz2
+GMP=https://ftp.gnu.org/gnu/gmp/gmp-6.1.0.tar.bz2
 MPFR=https://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2
 MPC=https://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz
 BINUTILS=https://ftp.gnu.org/gnu/binutils/binutils-2.25.1.tar.bz2
-GCC=https://ftp.gnu.org/gnu/gcc/gcc-5.2.0/gcc-5.2.0.tar.bz2
-GDB=https://ftp.gnu.org/gnu/gdb/gdb-7.10.tar.gz
+GCC=https://ftp.gnu.org/gnu/gcc/gcc-5.3.0/gcc-5.3.0.tar.bz2
 
 export MAKEFLAGS=-j4
 
@@ -42,8 +41,7 @@ function fname() {
 }
 
 function dir() {
-  # last sed is a hack for gmp-6.0.0a, whose directory is gmp-6.0.0
-  echo $(fname $1) | sed 's/\.tar\.bz2$//' | sed 's/\.tar\.gz$//' | sed 's/a$//'
+  echo $(fname $1) | sed 's/\.tar\.bz2$//' | sed 's/\.tar\.gz$//'
 }
 
 mkdir -p $PREFIX
@@ -54,7 +52,6 @@ if [ -z "$NODOWNLOAD" ]; then
   get $MPC
   get $BINUTILS
   get $GCC
-  #get $GDB
   git clone https://github.com/geofft/qemu.git -b 6.828-2.3.0
 fi
 
@@ -94,13 +91,6 @@ make all-target-libgcc
 make install-target-libgcc
 cd ../../
 
-#cd $(dir $GDB)
-#patch -p1 <../contrib/gdb-7.10-g-packet-too-long.patch
-#./configure --prefix=$PREFIX --enable-targets=all --program-prefix=x86_64-elf-
-#make all
-#make install
-#cd ..
-
 if [ "$(uname)" == "Darwin" ]; then
   QEMU_CONFIG_OPTS="--disable-gtk"
 else
@@ -120,6 +110,5 @@ if [ -z "$NORM" ]; then
   rm -rf $(dir $MPC)
   rm -rf $(dir $BINUTILS)
   rm -rf $(dir $GCC)
-  rm -rf $(dir $GDB)
   rm -rf qemu
 fi
