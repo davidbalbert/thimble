@@ -1,7 +1,8 @@
 #include "types.h"
 
-#include "bootide.h"
 #include "x86.h"
+
+#define SECTSIZE 512
 
 static void
 waitdisk(void)
