@@ -98,7 +98,6 @@ else
 fi
 
 cd qemu
-patch -p1 <../qemu-2.4.0-remove-qerror_report.patch
 ./configure --disable-kvm --prefix=$PREFIX --target-list=x86_64-softmmu $QEMU_CONFIG_OPTS
 make
 unset MAKEFLAGS # I've had trouble with running qemu's make install in parallel
