@@ -31,7 +31,6 @@ unlock(SpinLock *l)
 void
 pushcli(void)
 {
-    // TODO: save interrupt enabled on first push
     ulong rflags = readrflags();
 
     cli();

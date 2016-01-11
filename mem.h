@@ -28,6 +28,10 @@
 #define SEG_UCODE    5
 #define SEG_TSS      6
 
+#define KB 1024l
+#define MB (1024l*1024)
+#define GB (1024l*1024*1024)
+
 #ifndef __ASSEMBLER__
 
 extern char end[]; // End of kernel, provided by linker

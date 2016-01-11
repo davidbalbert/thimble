@@ -14,6 +14,7 @@ static int has_ahci = 0; // Set if we find an ahci controller
 void
 panic(char *s)
 {
+    cprintf("%s\n", s);
     for (;;)
         hlt();
 }

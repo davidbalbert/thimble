@@ -5,7 +5,7 @@ void ahciread(uchar *addr, uint lba, uchar count);
 // bootide.c
 void ideread(uchar *addr, uint lba, uchar count);
 
-// console.h
+// console.c
 void cprintf(char *fmt, ...);
 void cclear(void);
 void cputs(char *s);
@@ -18,3 +18,6 @@ typedef int (*pciiter)(PciFunction *f);
 char *pciclass(uchar code);
 void pcieach(pciiter f);
 uint pcibar(PciFunction *f, uchar bar);
+
+// stage2.c
+void panic(char *s) __attribute__((noreturn));

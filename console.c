@@ -18,7 +18,9 @@
 #define COLS 80
 #define ROWS 25
 
-#define CSIZE COLS*ROWS
+#define CSIZE (COLS*ROWS)
+
+// TODO: we should have a console lock
 
 static ushort *vmem = (ushort *)P2V(0xB8000);
 static ushort pos = 0;
@@ -141,7 +143,7 @@ printint(long n, uchar base, uchar sign)
         cputc0(buf[i]);
 }
 
-void panic(char *s);
+void panic(char *s) __attribute__((noreturn));
 
 void
 cprintf(char *fmt, ...)
