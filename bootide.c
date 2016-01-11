@@ -25,5 +25,5 @@ ideread(uchar *addr, uint lba, uchar sectcount)
 
     waitdisk();
 
-    insw(0x1F0, addr, count * SECTSIZE/2);
+    insw(0x1F0, addr, sectcount * SECTSIZE/2);
 }
