@@ -9,10 +9,26 @@
 
 #include "types.h"
 
+#include "ata.h"
 #include "bootdefs.h"
 #include "mem.h"
 #include "pci.h"
 #include "x86.h"
+
+// capabilities
+#define CAP_S64A (1 << 31) // 64-bit addressing
+#define CAP_SNCQ (1 << 30) // native command queuing
+#define CAP_SAM  (1 << 18) // ahci only
+#define CAP_SPM  (1 << 17) // port multiplier support
+
+// port command
+#define PORT_CMD_ST  (1 << 0)   // start processing the command list
+#define PORT_CMD_FRE (1 << 4)   // fis receive enable
+#define PORT_CMD_FR  (1 << 14)  // fis receive running
+#define PORT_CMD_CR  (1 << 15)  // command list running
+
+// interrupt status
+#define PORT_IS_TFES (1 << 30) // interrupt due to task file error bit set
 
 struct Port {
     uint clb;       // command list base address, 1K-byte aligned
@@ -84,6 +100,8 @@ struct CommandHeader {
 typedef struct CommandHeader CommandHeader;
 
 
+#define PRDSIZE (4*MB) // max byte count in a PRDT entry
+
 struct PhysicalRegionDescriptor
 {
     uint dba;       // Data base address
@@ -106,10 +124,38 @@ struct CommandTable
     uchar acmd[16];    // ATAPI command, 12 or 16 bytes
     uchar rsv[48];
 
+    // WARING! ahciread relies on sizeof(CommandTable). If we ever
+    // dynamically allocate Command Tables, we must change ahciread!
     PhysicalRegionDescriptor prdt[NPRD];   // can contain 0 to 65535 entries
 };
 
 typedef struct CommandTable CommandTable;
+
+
+#define FIS_TYPE_REG_H2D 0x27
+
+struct FisRegisterH2D {
+    uchar type;
+    uint  rsv0:7;
+    uint  c:1;      // 1 - command register update, 0 = device controle update
+    uchar command;  // command register
+    uchar feat;     // feature register 7:0
+    uchar lba0;     // lba 7:0
+    uchar lba1;     // lba 15:8
+    uchar lba2;     // lba 23:16
+    uchar device;   // device register
+    uchar lba3;     // lba 31:24
+    uchar lba4;     // lba 39:32
+    uchar lba5;     // lba 47:40
+    uchar featexp;  // feature register 15:8
+    uchar count;    // sector count 7:0
+    uchar countexp; // sector count 15:8
+    uchar rsv1;
+    uchar control;  // control register
+    uint  rsv2;
+};
+
+typedef struct FisRegisterH2D FisRegisterH2D;
 
 
 struct ReceivedFisStorage {
@@ -147,7 +193,7 @@ static struct {
 #define NCMD 32
 
 static CommandHeader cmdlist[NCMD] __attribute__((aligned(1*KB)));
-//static CommandTable cmdtbl __attribute__((aligned(128)));
+static CommandTable cmdtbl __attribute__((aligned(128)));
 static ReceivedFisStorage fisstorage __attribute__((aligned(256)));
 
 static int ahcifound = 0;
@@ -165,12 +211,32 @@ findahci(PciFunction *f)
     }
 }
 
-/*
+static void
+checkalign(void *a, int alignment, char *msg)
+{
+    uintptr aa = (uintptr)a;
+
+    if (aa & (alignment-1))
+        panic(msg);
+}
+
+
 static int
 findslot(Port *port)
 {
-    // MAKE THIS ACTUALLY WORK!
-    return 0;
+    uint slots;
+    int i;
+
+    slots = port->sact | port->ci;
+
+    for (i = 0; i < NCMD; i++) {
+        if ((slots & 1) == 0)
+            return i;
+        slots >>= 1;
+    }
+
+    panic("ahci findslot");
+    return -1;
 }
 
 static CommandHeader *
@@ -178,29 +244,104 @@ getcmdlist(Port *port)
 {
     return (CommandHeader*)(((ulong)port->clbu << 32) + port->clb);
 }
-*/
+
+static void
+mkprd(PhysicalRegionDescriptor *prd, uintptr addr, uint bytes)
+{
+    if (bytes > 4*MB)
+        panic("mkprd");
+
+    prd->dba = (uint)addr;
+    if (hba.dma64)
+        prd->dbau = (uint)(addr >> 32);
+
+    prd->dbc = bytes - 1; // zero indexed
+    prd->i = 1;
+}
 
 void
-ahciread(uchar *addr, uint lba, uchar sectcount)
+ahciread(uchar *addr, ulong lba, ushort sectcount)
 {
-    //int slot;
+    int slot, i;
+    ushort sectleft;
     Port *port;
-    //CommandHeader *cmdhdr;
+    CommandHeader *cmdhdr;
+    uintptr addri;
 
-    cprintf("whatever\n");
-    panic("ahciread: ahci not implemented yet");
+    addri = (uintptr)addr;
+
+    if (lba > ATA_MAXLBA48)
+        panic("ahciread - maxlba");
+
+    checkalign(addr, 2, "ahciread - addr align");
+
+    if (!hba.dma64 && addri >= 4*GB)
+        panic("ahciread - 64 bit start");
+    if (!hba.dma64 && addri + sectcount*ATA_SECTSIZE >= 4*GB)
+        panic("ahciread - 64 bit end");
 
     port = &hba.base->ports[0];
     port->is = 0xFFFFFFFF;      // clear interrupt flags
 
-    //slot = findslot(port);
-    //cmdhdr = getcmdlist(port);
+    slot = findslot(port);
+    cmdhdr = &getcmdlist(port)[slot];
 
+    cmdhdr->cfl = sizeof(FisRegisterH2D)/sizeof(uint);
+    cmdhdr->w = 0; // read
+    cmdhdr->prdtl = (sectcount*ATA_SECTSIZE + PRDSIZE - 1) / PRDSIZE; // round up to the nearest 4MB
 
+    if (cmdhdr->prdtl > NPRD)
+        panic("ahciread - prdtl");
 
-    // Set up the dma read command in the command list???
-    // ...
-    // port->cmd |= PORT_CMD_ST;
+    // WARING! ahciread relies on sizeof(CommandTable). If we ever
+    // dynamically allocate Command Tables, we must change ahciread!
+    memzero(&cmdtbl, sizeof(CommandTable));
+
+    sectleft = sectcount;
+    for (i = 0; i < cmdhdr->prdtl - 1; i++) {
+        mkprd(&cmdtbl.prdt[i], addri, 4*MB);
+        addri += 4*MB;
+        sectleft -= 4*MB/ATA_SECTSIZE;
+    }
+    mkprd(&cmdtbl.prdt[i], addri, sectleft * ATA_SECTSIZE);
+
+    FisRegisterH2D *cmdfis = (FisRegisterH2D *)(&cmdtbl.cfis);
+
+    cmdfis->type = FIS_TYPE_REG_H2D;
+    cmdfis->c = 1;
+    cmdfis->command = ATA_CMD_READ_DMA_EXT;
+
+    cmdfis->lba0 = (uchar)lba;
+    cmdfis->lba1 = (uchar)(lba >> 8);
+    cmdfis->lba2 = (uchar)(lba >> 16);
+    cmdfis->device = ATA_LBA_MODE;
+
+    cmdfis->lba3 = (uchar)(lba >> 24);
+    cmdfis->lba4 = (uchar)(lba >> 32);
+    cmdfis->lba5 = (uchar)(lba >> 40);
+
+    cmdfis->count = (uchar)(sectcount);
+    cmdfis->countexp = (uchar)(sectcount >> 8);
+
+    while (port->tfd & (ATA_ST_BSY | ATA_ST_DRQ))
+        ;
+
+    port->ci = 1<<slot; // issue the command!
+
+    // wait for the command to finish
+    for (;;) {
+        // break on complete
+        if ((port->ci & (1<<slot)) == 0)
+            break;
+
+        // error bit set in ata status register
+        if (port->is & PORT_IS_TFES)
+            panic("ahciread - error 1");
+    }
+
+    // check again. no idea if this is necessary, but it's in an osdev example (of dubious quality)
+    if (port->is & PORT_IS_TFES)
+        panic("ahciread - error 2");
 }
 
 
@@ -210,6 +351,7 @@ abar(PciFunction *f)
     return (HbaMemory *)(ulong)(pcibar(f, 5) & 0xFFFFFFF0);
 }
 
+/*
 static char *
 version(uint vs) {
     switch (vs) {
@@ -253,6 +395,7 @@ yn(char *feature, int present)
 
     cprintf("ahci: %s? %s\n", feature, res);
 }
+*/
 
 static int
 popcount(ulong x)
@@ -262,25 +405,6 @@ popcount(ulong x)
         x &= x - 1; // clear least significant non-zero bit
     }
     return count;
-}
-
-#define CAP_S64A (1 << 31) // 64-bit addressing
-#define CAP_SNCQ (1 << 30) // native command queuing
-#define CAP_SAM  (1 << 18) // ahci only
-#define CAP_SPM  (1 << 17) // port multiplier support
-
-#define PORT_CMD_ST  (1 << 0)   // start processing the command list
-#define PORT_CMD_FRE (1 << 4)   // fis receive enable
-#define PORT_CMD_FR  (1 << 14)  // fis receive running
-#define PORT_CMD_CR  (1 << 15)  // command list running
-
-static void
-checkalign(void *a, int alignment, char *msg)
-{
-    uintptr aa = (uintptr)a;
-
-    if (aa & (alignment-1))
-        panic(msg);
 }
 
 
@@ -298,11 +422,10 @@ static void
 portstop(Port *port)
 {
     port->cmd &= ~PORT_CMD_ST;
+    port->cmd &= ~PORT_CMD_FRE;
 
     while (port->cmd & (PORT_CMD_FR | PORT_CMD_CR))
         ;
-
-    port->cmd &= ~PORT_CMD_FRE;
 }
 
 static void
@@ -343,7 +466,6 @@ int
 ahcidetect(void)
 {
     HbaMemory *base;
-    Port *port;
 
     pcieach(findahci);
 
@@ -352,26 +474,6 @@ ahcidetect(void)
         hba.nports = popcount(base->pi);
         hba.nslots = ((base->cap >> 8) & 0x1F) + 1;
         hba.dma64  = base->cap & CAP_S64A;
-
-        cprintf("ahci: found controller at pci%d.%d.%d: ", hba.pci.bus, hba.pci.dev, hba.pci.func);
-        cprintf("version %s, %s, %d ports\n", version(base->vs), speed(base->cap), hba.nports);
-        cprintf("ahci: %d command slots\n", hba.nslots);
-
-        yn("64-bit addressing", base->cap & CAP_S64A);
-        yn("native command queuing", base->cap & CAP_SNCQ);
-        yn("ahci only", base->cap & CAP_SAM);
-        yn("port multiplier support", base->cap & CAP_SPM);
-
-
-        port = &base->ports[0];
-        cprintf("ports[0].clb = %x\n", port->clb);
-        cprintf("ports[0].clbu = %x\n", port->clbu);
-        cprintf("ports[0].fb = %x\n", port->fb);
-        cprintf("ports[0].fbu = %x\n", port->fbu);
-
-        yn("ports[0] FIS Receive Enable", port->cmd & PORT_CMD_FRE);
-
-        panic("portinit is broken");
 
         portinit(&base->ports[0], cmdlist, &fisstorage);
     }

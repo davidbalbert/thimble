@@ -37,6 +37,8 @@ stage2main(ulong koffset)
     elf = (ElfHeader *)0x10000;
     readbytes((uchar *)elf, PGSIZE, koffset);
 
+    cprintf("here1\n");
+
     if (elf->magic != ELF_MAGIC) {
         for (;;)
             hlt();

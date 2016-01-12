@@ -56,6 +56,7 @@ STAGE2OBJS = \
 	     console.o\
 	     pci.o\
 	     ahci.o\
+	     klibc.o\
 
 stage2: $(STAGE2OBJS) stage2.ld
 	$(LD) $(LDFLAGS) -N -T stage2.ld -o stage2 $(STAGE2OBJS)
@@ -85,7 +86,7 @@ qemu: kernel.img
 .PHONY: qemu-gdb
 qemu-gdb: kernel.img
 	@echo Run x86_64-elf-gdb
-	$(QEMU) $(QEMUOPTS) -gdb tcp::12345
+	$(QEMU) $(Q35_QEMUOPTS) -gdb tcp::12345
 
 .PHONY: bochs
 bochs: kernel.img
