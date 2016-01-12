@@ -147,7 +147,7 @@ static struct {
 #define NCMD 32
 
 static CommandHeader cmdlist[NCMD] __attribute__((aligned(1*KB)));
-static CommandTable cmdtbl __attribute__((algined(128)));
+//static CommandTable cmdtbl __attribute__((aligned(128)));
 static ReceivedFisStorage fisstorage __attribute__((aligned(256)));
 
 static int ahcifound = 0;
@@ -165,30 +165,36 @@ findahci(PciFunction *f)
     }
 }
 
+/*
 static int
 findslot(Port *port)
 {
-    // ...
+    // MAKE THIS ACTUALLY WORK!
+    return 0;
 }
 
 static CommandHeader *
 getcmdlist(Port *port)
 {
-    return (CommandHeader*)((port->clbu << 32) + port->clb);
+    return (CommandHeader*)(((ulong)port->clbu << 32) + port->clb);
 }
+*/
 
 void
 ahciread(uchar *addr, uint lba, uchar sectcount)
 {
-    int slot;
+    //int slot;
     Port *port;
-    CommandHeader cmdhdr;
+    //CommandHeader *cmdhdr;
+
+    cprintf("whatever\n");
+    panic("ahciread: ahci not implemented yet");
 
     port = &hba.base->ports[0];
     port->is = 0xFFFFFFFF;      // clear interrupt flags
 
-    slot = findslot(port);
-    cmdhdr = getcmdlist(port);
+    //slot = findslot(port);
+    //cmdhdr = getcmdlist(port);
 
 
 
@@ -296,7 +302,7 @@ portstop(Port *port)
     while (port->cmd & (PORT_CMD_FR | PORT_CMD_CR))
         ;
 
-    port->cmd &= ~PORT_CMD_FRE
+    port->cmd &= ~PORT_CMD_FRE;
 }
 
 static void
@@ -364,6 +370,8 @@ ahcidetect(void)
         cprintf("ports[0].fbu = %x\n", port->fbu);
 
         yn("ports[0] FIS Receive Enable", port->cmd & PORT_CMD_FRE);
+
+        panic("portinit is broken");
 
         portinit(&base->ports[0], cmdlist, &fisstorage);
     }
