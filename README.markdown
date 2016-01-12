@@ -18,11 +18,11 @@ $ source env.bash
 (thimble) $ make qemu
 
 # When you're done working on thimble, `deactivate` will restore your path.
-It's kind of like a python virtual env:
+# It's kind of like a python virtual env:
 (thimble) $ deactivate
 $
 ```
 
 # License
 
-Thimble is copyright 2015 David Albert and is available under the terms of the GNU GPLv3 or later. See COPYING for more info.
+Thimble is copyright 2015-2016 David Albert and is available under the terms of the GNU GPLv3 or later. See COPYING for more info.
