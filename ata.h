@@ -6,9 +6,9 @@
 #define ATA_MAXLBA48 ((1l << 48) - 1)
 
 // status
-#define ATA_ST_DRQ (1<<3) 	// data transfer requested
-#define ATA_ST_BSY (1<<7) 	// busy
-#define ATA_ST_ERR (1 << 0) 	// error
+#define ATA_STS_ERR (1 << 0)    // error
+#define ATA_STS_DRQ (1 << 3)    // data transfer requested
+#define ATA_STS_BSY (1 << 7)    // busy
 
 // commands
 #define ATA_CMD_READ_SECTORS 0x20

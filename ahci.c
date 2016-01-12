@@ -332,7 +332,7 @@ ahciread(uchar *addr, ulong lba, ushort sectcount)
     cmdfis->count = (uchar)(sectcount);
     cmdfis->countexp = (uchar)(sectcount >> 8);
 
-    while (port->tfd & (ATA_ST_BSY | ATA_ST_DRQ))
+    while (port->tfd & (ATA_STS_BSY | ATA_STS_DRQ))
         ;
 
     port->ci = 1<<slot; // issue the command!
