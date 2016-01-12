@@ -397,7 +397,6 @@ speed(uint cap)
     }
 }
 
-*/
 
 static void
 yn(char *feature, int present)
@@ -406,6 +405,7 @@ yn(char *feature, int present)
 
     cprintf("ahci: %s? %s\n", feature, res);
 }
+*/
 
 static int
 popcount(ulong x)
@@ -478,10 +478,6 @@ portinit(Port *port, CommandHeader *cl, CommandTable *ctlist, ReceivedFisStorage
     portstart(port);
 }
 
-// global hba control
-#define GHC_IE (1 << 1)     // interrupt enable
-#define GHC_AE (1 << 31)    // ahci enable
-
 int
 ahcidetect(void)
 {
@@ -494,9 +490,6 @@ ahcidetect(void)
         hba.nports = popcount(base->pi);
         hba.nslots = ((base->cap >> 8) & 0x1F) + 1;
         hba.dma64  = base->cap & CAP_S64A;
-
-        yn("GHC.AE", base->ghc & GHC_AE);
-        yn("GHC.IE", base->ghc & GHC_IE);
 
         portinit(&base->ports[0], cmdlist, cmdtbls, &fisstorage);
     }
