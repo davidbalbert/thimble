@@ -178,7 +178,7 @@ struct ReceivedFisStorage {
     uchar   reserved[96];
 };
 
-typedef struct ReceivedFisStorage ReceivedFisStorage;
+typedef volatile struct ReceivedFisStorage ReceivedFisStorage;
 
 
 
@@ -445,7 +445,7 @@ portinit(Port *port, CommandHeader *cl, CommandTable *ctlist, ReceivedFisStorage
     int i;
 
     checkalign(cl, 1*KB, "portinit - cl align");
-    checkalign(fisbase, 256, "portinit - fisbase align");
+    checkalign((void *)fisbase, 256, "portinit - fisbase align");
 
     cll = (uintptr)cl;
     fisbasel = (uintptr)fisbase;
