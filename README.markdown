@@ -12,7 +12,7 @@ Thimble should work on Linux or OS X, though I've only tested it on OS X.
 ## Building and running
 
 ```
-$ bash mktoolchain.bash   # Downloads and builds compiler and assembler. Only run this once.
+$ bash mktoolchain.bash   # Downloads and builds compiler, assembler and emulator. Only run this once.
 
 $ source env.bash
 (thimble) $ make qemu
