@@ -115,7 +115,7 @@ void
 printint(long n, uchar base, uchar sign)
 {
     char *numbers = "0123456789abcdef";
-    char buf[24];
+    char buf[66];
     int i = 0;
     ulong n2;
 
@@ -133,6 +133,9 @@ printint(long n, uchar base, uchar sign)
         buf[i++] = 'x';
         buf[i++] = '0';
     } else if (base == 8) {
+        buf[i++] = '0';
+    } else if (base == 2) {
+        buf[i++] = 'b';
         buf[i++] = '0';
     }
 
@@ -196,6 +199,9 @@ cprintf(char *fmt, ...)
             case 'p':
             case 'x':
                 printint(va_arg(ap, long), 16, 0);
+                break;
+            case 'b':
+                printint(va_arg(ap, long), 2, 0);
                 break;
             default:
                 cputc0('%');

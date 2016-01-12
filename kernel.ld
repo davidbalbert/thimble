@@ -5,7 +5,7 @@ SECTIONS
 {
 	. = 0xFFFF800000100000; /* KERNLINK */
 
-	.text : {
+	.text : AT(0x100000) {
 		*(.text)
 	}
 

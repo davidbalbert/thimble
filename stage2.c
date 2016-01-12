@@ -14,7 +14,7 @@ static int has_ahci = 0; // Set if we find an ahci controller
 void
 panic(char *s)
 {
-    cprintf("%s\n", s);
+    cprintf("bootpanic: %s\n", s);
     for (;;)
         hlt();
 }
@@ -37,12 +37,8 @@ stage2main(ulong koffset)
     elf = (ElfHeader *)0x10000;
     readbytes((uchar *)elf, PGSIZE, koffset);
 
-    cprintf("here1\n");
-
-    if (elf->magic != ELF_MAGIC) {
-        for (;;)
-            hlt();
-    }
+    if (elf->magic != ELF_MAGIC)
+        panic("stage2main - elf magic");
 
     ph = (ElfProgHeader *)((char *)elf + elf->phoff);
     eph = ph + elf->phnum;

@@ -193,7 +193,7 @@ static struct {
 #define NCMD 32
 
 static CommandHeader cmdlist[NCMD] __attribute__((aligned(1*KB)));
-static CommandTable cmdtbl __attribute__((aligned(128)));
+static CommandTable cmdtbls[NCMD] __attribute__((aligned(128)));
 static ReceivedFisStorage fisstorage __attribute__((aligned(256)));
 
 static int ahcifound = 0;
@@ -242,7 +242,13 @@ findslot(Port *port)
 static CommandHeader *
 getcmdlist(Port *port)
 {
-    return (CommandHeader*)(((ulong)port->clbu << 32) + port->clb);
+    return (CommandHeader *)(((ulong)port->clbu << 32) + port->clb);
+}
+
+static CommandTable *
+getcmdtbl(CommandHeader *cmdhdr)
+{
+    return (CommandTable *)(((ulong)cmdhdr->ctbau << 32) + cmdhdr->ctba);
 }
 
 static void
@@ -264,9 +270,10 @@ ahciread(uchar *addr, ulong lba, ushort sectcount)
 {
     int slot, i;
     ushort sectleft;
+    uintptr addri;
     Port *port;
     CommandHeader *cmdhdr;
-    uintptr addri;
+    CommandTable *cmdtbl;
 
     addri = (uintptr)addr;
 
@@ -281,10 +288,12 @@ ahciread(uchar *addr, ulong lba, ushort sectcount)
         panic("ahciread - 64 bit end");
 
     port = &hba.base->ports[0];
+
     port->is = 0xFFFFFFFF;      // clear interrupt flags
 
     slot = findslot(port);
     cmdhdr = &getcmdlist(port)[slot];
+    cmdtbl = getcmdtbl(cmdhdr);
 
     cmdhdr->cfl = sizeof(FisRegisterH2D)/sizeof(uint);
     cmdhdr->w = 0; // read
@@ -295,17 +304,17 @@ ahciread(uchar *addr, ulong lba, ushort sectcount)
 
     // WARING! ahciread relies on sizeof(CommandTable). If we ever
     // dynamically allocate Command Tables, we must change ahciread!
-    memzero(&cmdtbl, sizeof(CommandTable));
+    memzero(cmdtbl, sizeof(CommandTable));
 
     sectleft = sectcount;
     for (i = 0; i < cmdhdr->prdtl - 1; i++) {
-        mkprd(&cmdtbl.prdt[i], addri, 4*MB);
+        mkprd(&cmdtbl->prdt[i], addri, 4*MB);
         addri += 4*MB;
         sectleft -= 4*MB/ATA_SECTSIZE;
     }
-    mkprd(&cmdtbl.prdt[i], addri, sectleft * ATA_SECTSIZE);
+    mkprd(&cmdtbl->prdt[i], addri, sectleft * ATA_SECTSIZE);
 
-    FisRegisterH2D *cmdfis = (FisRegisterH2D *)(&cmdtbl.cfis);
+    FisRegisterH2D *cmdfis = (FisRegisterH2D *)(&cmdtbl->cfis);
 
     cmdfis->type = FIS_TYPE_REG_H2D;
     cmdfis->c = 1;
@@ -388,6 +397,8 @@ speed(uint cap)
     }
 }
 
+*/
+
 static void
 yn(char *feature, int present)
 {
@@ -395,7 +406,6 @@ yn(char *feature, int present)
 
     cprintf("ahci: %s? %s\n", feature, res);
 }
-*/
 
 static int
 popcount(ulong x)
@@ -429,9 +439,9 @@ portstop(Port *port)
 }
 
 static void
-portinit(Port *port, CommandHeader *cl, ReceivedFisStorage *fisbase)
+portinit(Port *port, CommandHeader *cl, CommandTable *ctlist, ReceivedFisStorage *fisbase)
 {
-    uintptr cll, fisbasel;
+    uintptr cll, fisbasel, ctlistl;
     int i;
 
     checkalign(cl, 1*KB, "portinit - cl align");
@@ -439,11 +449,14 @@ portinit(Port *port, CommandHeader *cl, ReceivedFisStorage *fisbase)
 
     cll = (uintptr)cl;
     fisbasel = (uintptr)fisbase;
+    ctlistl = (uintptr)ctlist;
 
     if (!hba.dma64 && cll >= 4*GB)
         panic("portinit - cl");
     if (!hba.dma64 && fisbasel >= 4*GB)
         panic("portinit - fisbase");
+    if (!hba.dma64 && ctlistl >= 4*GB)
+        panic("portinit - ctlist");
 
     portstop(port);
 
@@ -457,10 +470,17 @@ portinit(Port *port, CommandHeader *cl, ReceivedFisStorage *fisbase)
 
     for (i = 0; i < NCMD; i++) {
         cl[i].prdtl = NPRD;
+        cl[i].ctba = (uint)ctlistl;
+        if (hba.dma64)
+            cl[i].ctbau = (uint)(ctlistl >> 32);
     }
 
     portstart(port);
 }
+
+// global hba control
+#define GHC_IE (1 << 1)     // interrupt enable
+#define GHC_AE (1 << 31)    // ahci enable
 
 int
 ahcidetect(void)
@@ -475,7 +495,10 @@ ahcidetect(void)
         hba.nslots = ((base->cap >> 8) & 0x1F) + 1;
         hba.dma64  = base->cap & CAP_S64A;
 
-        portinit(&base->ports[0], cmdlist, &fisstorage);
+        yn("GHC.AE", base->ghc & GHC_AE);
+        yn("GHC.IE", base->ghc & GHC_IE);
+
+        portinit(&base->ports[0], cmdlist, cmdtbls, &fisstorage);
     }
 
     return ahcifound;
