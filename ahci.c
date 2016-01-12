@@ -137,7 +137,7 @@ typedef struct CommandTable CommandTable;
 struct FisRegisterH2D {
     uchar type;
     uint  rsv0:7;
-    uint  c:1;      // 1 - command register update, 0 = device controle update
+    uint  c:1;      // 1 - command block update, 0 = device control block update
     uchar command;  // command register
     uchar feat;     // feature register 7:0
     uchar lba0;     // lba 7:0
