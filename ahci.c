@@ -6,6 +6,11 @@
 // - use p2v inside abar
 // - when setting pointer fields in either the HBA registers or any of the
 //   system data structures, use v2p.
+//
+// TODO: we're not doing anything to make sure caches stay coherent while the
+// AHCI controller writes to main memory. I've seen different resources on the
+// internet say different things about whether x86 maintains PCI DMA cache
+// coherency. For now, it boots in QEMU, so we'll call it a day.
 
 #include "types.h"
 
