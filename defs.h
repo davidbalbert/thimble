@@ -57,3 +57,5 @@ void trapinit(void);
 // vm.c
 void seginit(void);
 void switchuvm(Proc *p);
+
+#define NELEM(x) (sizeof(x)/sizeof((x)[0]))

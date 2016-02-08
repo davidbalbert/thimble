@@ -1,4 +1,5 @@
 #include "mem.h"
+#include "syscall.h"
 
 #define EFER  0xC0000080    // extended feature enable register
 #define STAR  0xC0000081    // kernel mode %ss and %cs
@@ -12,7 +13,7 @@ syscall0:
     push    %r11        # userspace flags
     push    %rcx        # return address
 
-    mov     %rax, %r12  # temporarily save syscall num
+    mov     %rax, %r9   # temporarily save syscall num
 
     call    kstacktop   # top of kstack -> rax
 
@@ -20,7 +21,7 @@ syscall0:
     mov     %rax, %rsp  # switch to the kernel stack
     push    %rdx        # save the user stack pointer on kernel stack
 
-    mov     %r12, %rdi  # syscall num as first arg to syscall
+    mov     %r9, %rdi   # syscall num as first arg to syscall
     call    syscall
 
 .globl sysret
@@ -66,12 +67,12 @@ sysinit:
 
 .globl hello
 hello:
-    mov     $1, %rax
+    mov     $SYS_HELLO, %rax
     syscall
     ret
 
 .globl goodbye
 goodbye:
-    mov     $2, %rax
+    mov     $SYS_GOODBYE, %rax
     syscall
     ret
