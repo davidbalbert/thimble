@@ -10,25 +10,48 @@
 
 .globl syscall0
 syscall0:
+    push    %r12        # temporary storage
+    push    %r13
+
     push    %r11        # userspace flags
     push    %rcx        # return address
 
-    mov     %rax, %r9   # temporarily save syscall num
+    mov     %rax, %r12  # temporarily save syscall num
 
     call    kstacktop   # top of kstack -> rax
 
-    mov     %rsp, %rdx  # temp user stack pointer
+    mov     %rsp, %r13  # temp user stack pointer
     mov     %rax, %rsp  # switch to the kernel stack
-    push    %rdx        # save the user stack pointer on kernel stack
+    push    %r13        # save the user stack pointer on kernel stack
 
-    mov     %r9, %rdi   # syscall num as first arg to syscall
+    #push    %r9
+    #push    %r8
+    #push    %r10
+    #push    %rdx
+    #push    %rsi
+    #push    %rdi
+    #push    %r12
+
+    mov     %r12, %rdi  # syscall num as first arg to syscall
     call    syscall
 
 .globl sysret
 sysret:
+    #pop     %r12
+    #pop     %rdi
+    #pop     %rsi
+    #pop     %rdx
+    #pop     %r10
+    #pop     %r8
+    #pop     %r9
+
     pop     %rsp        # switch back to the user stack
+
     pop     %rcx        # restore return address
     pop     %r11        # restore flags
+
+    pop     %r13        # temporary storage
+    pop     %r12
 
     sysretq
 
@@ -68,11 +91,29 @@ sysinit:
 .globl hello
 hello:
     mov     $SYS_HELLO, %rax
+
+    # x86_64 System V user calling convention uses %rcx for the 4th function
+    # agument, but the syscall interface uses %r10 (%rcx is used by the syscall
+    # instruction to store the userspace %rip). We make the translation here.
+    #
+    # Note: The kernel uses the user calling convention internally. It's just
+    # the syscall interface (userspace to kernelspace) that requires this
+    # translation.
+    mov     %rcx, %r10
     syscall
     ret
 
 .globl goodbye
 goodbye:
     mov     $SYS_GOODBYE, %rax
+
+    # x86_64 System V user calling convention uses %rcx for the 4th function
+    # agument, but the syscall interface uses %r10 (%rcx is used by the syscall
+    # instruction to store the userspace %rip). We make the translation here.
+    #
+    # Note: The kernel uses the user calling convention internally. It's just
+    # the syscall interface (userspace to kernelspace) that requires this
+    # translation.
+    mov     %rcx, %r10
     syscall
     ret

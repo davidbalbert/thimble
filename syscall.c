@@ -5,10 +5,16 @@
 #include "proc.h"
 #include "syscall.h"
 
-int sys_hello(void);
-int sys_goodbye(void);
+struct SyscallFrame {
+    ulong num;
+    ulong args[6];
+};
+typedef struct SyscallFrame SyscallFrame;
 
-static int (*syscalls[])(void) = {
+int sys_hello(SyscallFrame *);
+int sys_goodbye(SyscallFrame *);
+
+static int (*syscalls[])(SyscallFrame *) = {
     [SYS_HELLO] sys_hello,
     [SYS_GOODBYE] sys_goodbye,
 };
@@ -26,7 +32,7 @@ kstacktop(void)
 }
 
 int
-sys_hello(void)
+sys_hello(SyscallFrame *f)
 {
     static int i = 0;
     cprintf("sys_hello: %d\n", i++);
@@ -34,7 +40,7 @@ sys_hello(void)
 }
 
 int
-sys_goodbye(void)
+sys_goodbye(SyscallFrame *f)
 {
     static int i = 0;
     cprintf("sys_goodbye: %d\n", i++);
@@ -42,10 +48,10 @@ sys_goodbye(void)
 }
 
 int
-syscall(int num)
+syscall(ulong num)
 {
     if (num > 0 && num < NELEM(syscalls) && syscalls[num]) {
-        return syscalls[num]();
+        return syscalls[num](0);
     } else {
         cprintf("unknown syscall: %d\n", num);
         return -1;
