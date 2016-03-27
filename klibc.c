@@ -23,15 +23,21 @@ isdigit(int c)
     return c >= '0' && c <= '9';
 }
 
-// NOTE: only supports positive decimal numbers
-int
-atoi(char *s)
+// NOTE:
+//  - base is ignored
+//  - only supports positive numbers
+long
+strtol(char *s, char **endptr, int base)
 {
-    int i = 0;
+    long i = 0;
 
     while (isdigit(*s)) {
         i = i*10 + (*s - '0');
         s++;
+    }
+
+    if (endptr) {
+        *endptr = s;
     }
 
     return i;

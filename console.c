@@ -12,6 +12,19 @@
 
 #include <stdarg.h>
 
+// Function declarations
+// Because console.c is used from both the bootloader and the
+// kernel we don't know whether to include defs.h or bootdefs.h.
+// For now, we'll just put all external function declarations here.
+// I'm not sure if I'll like this, but it's better than putting
+// them all throughout the file.
+
+void panic(char *s) __attribute__((noreturn));
+int isdigit(int c);
+long strtol(char *s, char **endptr, int base);
+
+
+
 #define COLOR 0x0700
 #define SPACE (COLOR | ' ')
 
@@ -111,11 +124,8 @@ cputs(char *s)
     updatecursor();
 }
 
-int isdigit(int c);
-int atoi(char *s);
-
 static void
-printint(long n, uchar base, uchar sign, int npad, char padchar)
+printint(long n, uchar base, uchar sign, long npad, char padchar)
 {
     char *numbers = "0123456789abcdef";
     char buf[66];
@@ -150,10 +160,6 @@ printint(long n, uchar base, uchar sign, int npad, char padchar)
         cputc0(buf[i]);
 }
 
-void panic(char *s) __attribute__((noreturn));
-
-#define NFIELDWIDTH 15
-
 void
 cprintf(char *fmt, ...)
 {
@@ -167,30 +173,28 @@ cprintf(char *fmt, ...)
     va_start(ap, fmt);
 
     for (; (c = *fmt); fmt++) {
-        int npad = 0;
+        long npad = 0;
         char padchar = ' ';
-        char fieldwidth[NFIELDWIDTH];
-        int i = 0;
 
         if (c != '%') {
             cputc0(c);
             continue;
         }
 
-        if (*(fmt+1) == '0') {
+        fmt++;
+
+        // padding character
+        if (*fmt == '0') {
             padchar = '0';
             fmt++;
         }
 
-        while (isdigit(*(fmt+1)) && i < NFIELDWIDTH - 1) {
-            fieldwidth[i++] = *(++fmt);
-        }
-        if (i > 0) {
-            fieldwidth[i] = '\0';
-            npad = atoi(fieldwidth);
+        // min field width
+        if (isdigit(*fmt)) {
+            npad = strtol(fmt, &fmt, 0);
         }
 
-        c = *(++fmt);
+        c = *fmt;
 
         if (c == 0)
             break;

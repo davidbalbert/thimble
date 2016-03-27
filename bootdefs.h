@@ -15,7 +15,7 @@ void cputc(uchar c);
 void *memset(void *p, int c, size_t len);
 void *memzero(void *p, size_t len);
 int isdigit(int c);
-int atoi(char *s);
+long strtol(char *s, char **endptr, int base);
 
 // pci.c
 typedef struct PciFunction PciFunction;
