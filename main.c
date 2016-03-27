@@ -14,24 +14,24 @@ wastetime(void)
         ;
 }
 
-void hello(void);
+int hello(int a, int b, int c, int d, int e, int f);
 
 void
 task1(void)
 {
     for(;;) {
-        hello();
+        hello(1, 2, 3, 4, 5, 6);
         wastetime();
     }
 }
 
-void goodbye(void);
+int goodbye(int a, int b, int c, int d, int e, int f);
 
 void
 task2(void)
 {
     for(;;) {
-        goodbye();
+        goodbye(6, 5, 4, 3, 2, 1);
         wastetime();
     }
 }

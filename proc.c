@@ -57,6 +57,12 @@ mkproc(void (*f)(void))
     ksp = p->kstack + KSTACKSIZE;
     usp = p->ustack + USTACKSIZE;
 
+    // This has to mirror the stack structure in
+    // syscallasm.S.
+
+    // %r12 and %r13 are used as temporary storage
+    usp -= 16;
+
     // rflags
     usp -= 8;
     *(ulong *)usp = FL_IF;
@@ -68,6 +74,9 @@ mkproc(void (*f)(void))
     // user stack
     ksp -= 8;
     *(ulong *)ksp = (ulong)usp;
+
+    // SyscallFrame (syscall num and 6 args)
+    ksp -= 7*8;
 
     // Procbegin returns to sysret
     ksp -= 8;

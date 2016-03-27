@@ -8,6 +8,11 @@
 
 #define SCE   0                // syscall enable bit of EFER
 
+
+# Note: This has to mirror the stack structure in
+# mkproc. If you make changes here, you must make
+# the same changes there!
+
 .globl syscall0
 syscall0:
     push    %r12        # temporary storage
@@ -21,29 +26,34 @@ syscall0:
     call    kstacktop   # top of kstack -> rax
 
     mov     %rsp, %r13  # temp user stack pointer
+
+    #####################
+
     mov     %rax, %rsp  # switch to the kernel stack
     push    %r13        # save the user stack pointer on kernel stack
 
-    #push    %r9
-    #push    %r8
-    #push    %r10
-    #push    %rdx
-    #push    %rsi
-    #push    %rdi
-    #push    %r12
+    push    %r9
+    push    %r8
+    push    %r10
+    push    %rdx
+    push    %rsi
+    push    %rdi
+    push    %r12
 
-    mov     %r12, %rdi  # syscall num as first arg to syscall
+    mov     %rsp, %rdi  # SyscallFrame as first arg to syscall
     call    syscall
 
 .globl sysret
 sysret:
-    #pop     %r12
-    #pop     %rdi
-    #pop     %rsi
-    #pop     %rdx
-    #pop     %r10
-    #pop     %r8
-    #pop     %r9
+    pop     %r12
+    pop     %rdi
+    pop     %rsi
+    pop     %rdx
+    pop     %r10
+    pop     %r8
+    pop     %r9
+
+    #####################
 
     pop     %rsp        # switch back to the user stack
 
