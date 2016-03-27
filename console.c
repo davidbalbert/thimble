@@ -120,7 +120,7 @@ static void
 printint(long n, uchar base, uchar sign, int npad, char padchar)
 {
     char *numbers = "0123456789abcdef";
-    char buf[NBUF] = {0};
+    char buf[NBUF];
     int i = 0;
     ulong n2;
 
@@ -172,7 +172,7 @@ cprintf(char *fmt, ...)
     for (; (c = *fmt); fmt++) {
         int npad = 0;
         char padchar = ' ';
-        char fieldwidth[NFIELDWIDTH] = {0};
+        char fieldwidth[NFIELDWIDTH];
         int i = 0;
 
         if (c != '%') {
