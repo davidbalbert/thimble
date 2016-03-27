@@ -128,7 +128,7 @@ static void
 printint(long n, uchar base, uchar sign, long npad, char padchar)
 {
     char *numbers = "0123456789abcdef";
-    char buf[66];
+    char buf[65]; // longest representation is binary. 64 chars + a null bite
     int i = 0;
     ulong n2;
 
