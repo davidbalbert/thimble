@@ -146,14 +146,13 @@ printint(long n, uchar base, uchar sign, long npad, char padchar)
     if (npad > 0 && sign)
         npad--;
 
-    if (padchar == '0' && sign)
+    if (sign && padchar == '0')
         cputc0('-');
 
-    if (i < npad)
-        for (; i < npad; npad--)
-            cputc0(padchar);
+    for (; i < npad; npad--)
+        cputc0(padchar);
 
-    if (padchar == ' ' && sign)
+    if (sign && padchar == ' ')
         cputc0('-');
 
     for (i -= 1; i > -1; i--)
