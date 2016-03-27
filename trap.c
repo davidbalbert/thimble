@@ -77,6 +77,24 @@ mkgate(InterruptGate *gate, ulong offset, ushort selector)
 }
 
 void
+dumpregs(TrapFrame *tf) {
+    cprintf("rip: 0x%016x, cs:  0x%016x, rflags: 0x%016x\n",
+            tf->rip, tf->cs, tf->rflags);
+    cprintf("rsp: 0x%016x, ss:  0x%016x, cr2: 0x%016x\n",
+            tf->rsp, tf->ss, readcr2());
+    cprintf("rax: 0x%016x, rbx: 0x%016x, rcx: 0x%016x\n",
+            tf->rax, tf->rbx, tf->rcx);
+    cprintf("rdx: 0x%016x, rdi: 0x%016x, rsi: 0x%016x\n",
+            tf->rdx, tf->rdi, tf->rsi);
+    cprintf("r8:  0x%016x, r9:  0x%016x, r10: 0x%016x\n",
+            tf->r8, tf->r9, tf-> r10);
+    cprintf("r11: 0x%016x, r12: 0x%016x, r13: 0x%016x\n",
+            tf->r11, tf->r12, tf->r13);
+    cprintf("r14: 0x%016x, r15: 0x%016x, rbp: 0x%016x\n",
+            tf->r14, tf->r15, tf->rbp);
+}
+
+void
 trap(TrapFrame *tf)
 {
     switch(tf->trapno) {
@@ -87,7 +105,8 @@ trap(TrapFrame *tf)
             handlekbd();
             break;
         default:
-            cprintf("trap: %u, error: %u, cr2: %x, rip: %x\n", tf->trapno, tf->error, readcr2(), tf->rip);
+            cprintf("trap: %u, error: %u\n", tf->trapno, tf->error);
+            dumpregs(tf);
             for (;;)
                 hlt();
             break;

@@ -14,6 +14,8 @@ void cputc(uchar c);
 // klibc.c
 void *memset(void *p, int c, size_t len);
 void *memzero(void *p, size_t len);
+int isdigit(int c);
+int atoi(char *s);
 
 // pci.c
 typedef struct PciFunction PciFunction;

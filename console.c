@@ -111,11 +111,16 @@ cputs(char *s)
     updatecursor();
 }
 
-void
-printint(long n, uchar base, uchar sign)
+#define NBUF 256
+
+int isdigit(int c);
+int atoi(char *s);
+
+static void
+printint(long n, uchar base, uchar sign, int npad, char padchar)
 {
     char *numbers = "0123456789abcdef";
-    char buf[66];
+    char buf[NBUF] = {0};
     int i = 0;
     ulong n2;
 
@@ -129,24 +134,28 @@ printint(long n, uchar base, uchar sign)
         n2 /= base;
     } while (n2 != 0);
 
-    if (base == 16) {
-        buf[i++] = 'x';
-        buf[i++] = '0';
-    } else if (base == 8) {
-        buf[i++] = '0';
-    } else if (base == 2) {
-        buf[i++] = 'b';
-        buf[i++] = '0';
-    }
+
+    if (npad > 0 && padchar == '0' && sign)
+        npad--;
+
+    if (i < npad && padchar == '0')
+        while (i < npad && i < NBUF)
+            buf[i++] = '0';
 
     if (sign)
         buf[i++] = '-';
+
+    if (i < npad && padchar == ' ')
+        while (i < npad && i < NBUF)
+            buf[i++] = ' ';
 
     for (i -= 1; i > -1; i--)
         cputc0(buf[i]);
 }
 
 void panic(char *s) __attribute__((noreturn));
+
+#define NFIELDWIDTH 15
 
 void
 cprintf(char *fmt, ...)
@@ -161,9 +170,27 @@ cprintf(char *fmt, ...)
     va_start(ap, fmt);
 
     for (; (c = *fmt); fmt++) {
+        int npad = 0;
+        char padchar = ' ';
+        char fieldwidth[NFIELDWIDTH] = {0};
+        int i = 0;
+
         if (c != '%') {
             cputc0(c);
             continue;
+        }
+
+        if (*(fmt+1) == '0') {
+            padchar = '0';
+            fmt++;
+        }
+
+        while (isdigit(*(fmt+1)) && i < NFIELDWIDTH - 1) {
+            fieldwidth[i++] = *(++fmt);
+        }
+        if (i > 0) {
+            fieldwidth[i] = '\0';
+            npad = atoi(fieldwidth);
         }
 
         c = *(++fmt);
@@ -185,23 +212,23 @@ cprintf(char *fmt, ...)
                     cputc0(*s);
                 break;
             case 'd':
-                printint(va_arg(ap, int), 10, 1);
+                printint(va_arg(ap, int), 10, 1, npad, padchar);
                 break;
             case 'o':
-                printint(va_arg(ap, int), 8, 0);
+                printint(va_arg(ap, int), 8, 0, npad, padchar);
                 break;
             case 'l':
-                printint(va_arg(ap, long), 10, 1);
+                printint(va_arg(ap, long), 10, 1, npad, padchar);
                 break;
             case 'u':
-                printint(va_arg(ap, long), 10, 0);
+                printint(va_arg(ap, long), 10, 0, npad, padchar);
                 break;
             case 'p':
             case 'x':
-                printint(va_arg(ap, long), 16, 0);
+                printint(va_arg(ap, long), 16, 0, npad, padchar);
                 break;
             case 'b':
-                printint(va_arg(ap, long), 2, 0);
+                printint(va_arg(ap, long), 2, 0, npad, padchar);
                 break;
             default:
                 cputc0('%');

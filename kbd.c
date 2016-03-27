@@ -86,7 +86,6 @@ handlekbd(void)
 
     if (skip > 0) {
         skip--;
-        cprintf("%x ", byte);
         return;
     } else if (byte == 0xE1) {
         // Skip pause button: [0xE1, 0x1D, 0x45, 0xE1, 0x9D, 0xC5]
