@@ -111,8 +111,6 @@ cputs(char *s)
     updatecursor();
 }
 
-#define NBUF 256
-
 int isdigit(int c);
 int atoi(char *s);
 
@@ -120,7 +118,7 @@ static void
 printint(long n, uchar base, uchar sign, int npad, char padchar)
 {
     char *numbers = "0123456789abcdef";
-    char buf[NBUF];
+    char buf[66];
     int i = 0;
     ulong n2;
 
@@ -135,19 +133,18 @@ printint(long n, uchar base, uchar sign, int npad, char padchar)
     } while (n2 != 0);
 
 
-    if (npad > 0 && padchar == '0' && sign)
+    if (npad > 0 && sign)
         npad--;
 
-    if (i < npad && padchar == '0')
-        while (i < npad && i < NBUF)
-            buf[i++] = '0';
+    if (padchar == '0' && sign)
+        cputc0('-');
 
-    if (sign)
-        buf[i++] = '-';
+    if (i < npad)
+        for (; i < npad; npad--)
+            cputc0(padchar);
 
-    if (i < npad && padchar == ' ')
-        while (i < npad && i < NBUF)
-            buf[i++] = ' ';
+    if (padchar == ' ' && sign)
+        cputc0('-');
 
     for (i -= 1; i > -1; i--)
         cputc0(buf[i]);
