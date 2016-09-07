@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+if [ "$0" != "$BASH_SOURCE" ]; then
+  echo "setup.bash is not for sourcing. You probably meant to source env.bash." >&2
+  return
+fi
+
+set -e
+
 GMP=https://ftp.gnu.org/gnu/gmp/gmp-6.1.0.tar.bz2
 MPFR=https://ftp.gnu.org/gnu/mpfr/mpfr-3.1.3.tar.bz2
 MPC=https://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz
@@ -7,13 +14,6 @@ BINUTILS=https://ftp.gnu.org/gnu/binutils/binutils-2.25.1.tar.bz2
 GCC=https://ftp.gnu.org/gnu/gcc/gcc-5.3.0/gcc-5.3.0.tar.bz2
 
 export MAKEFLAGS=-j4
-
-set -e
-
-if [ "$0" != "$BASH_SOURCE" ]; then
-  echo "setup.bash is not for sourcing. You probably meant to source env.bash." >&2
-  return
-fi
 
 function envfile() {
   pushd $(dirname $0) >/dev/null
