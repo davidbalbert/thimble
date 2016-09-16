@@ -52,7 +52,7 @@ if [ -z "$NODOWNLOAD" ]; then
   get $MPC
   get $BINUTILS
   get $GCC
-  git clone https://github.com/geofft/qemu.git -b 6.828-2.4.0
+  git clone https://github.com/davidbalbert/qemu.git -b 6.828-2.7.0
 fi
 
 cd $(dir $GMP)
@@ -100,7 +100,6 @@ fi
 cd qemu
 ./configure --disable-kvm --prefix=$PREFIX --target-list=x86_64-softmmu $QEMU_CONFIG_OPTS
 make
-unset MAKEFLAGS # I've had trouble with running qemu's make install in parallel
 make install
 cd ..
 
