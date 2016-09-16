@@ -19,6 +19,7 @@
 #define V2P(x) ((x) - KERNBASE)
 #define P2V(x) ((x) + KERNBASE)
 
+#define KERN_DPL     0
 #define USER_DPL     3
 
 #define SEG_KCODE    1

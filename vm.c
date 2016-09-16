@@ -78,10 +78,10 @@ switchuvm(Proc *p)
 void
 seginit(void)
 {
-    codedesc(&cpu->gdt[SEG_KCODE], 0);
-    datadesc(&cpu->gdt[SEG_KDATA], 0);
-    datadesc(&cpu->gdt[SEG_UDATA], 3);
-    codedesc(&cpu->gdt[SEG_UCODE], 3);
+    codedesc(&cpu->gdt[SEG_KCODE], KERN_DPL);
+    datadesc(&cpu->gdt[SEG_KDATA], KERN_DPL);
+    datadesc(&cpu->gdt[SEG_UDATA], USER_DPL);
+    codedesc(&cpu->gdt[SEG_UCODE], USER_DPL);
 
     lgdt(cpu->gdt, sizeof(cpu->gdt));
 }
