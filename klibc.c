@@ -1,13 +1,11 @@
 // libc routines shared between kernel space and userspace
 #include "types.h"
+#include "x86.h"
 
 void *
 memset(void *p, int c, size_t len)
 {
-    uchar *a = p;
-    for (; a < (uchar *)p + len; a++)
-        *a = c;
-
+    stosb(p, c, len);
     return p;
 }
 

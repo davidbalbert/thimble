@@ -42,7 +42,7 @@ main(void)
     cclear();
     cprintf("Hello, Thimble!\n");
 
-    initmem1(end, p2v(2 * 1024 * 1024));
+    initmem1(end, p2v(2*MB));
     schedinit();
     seginit();
     trapinit();
@@ -50,6 +50,8 @@ main(void)
     picinit();
     timerinit();
     kbdinit();
+
+    initmem2(p2v(2*MB), p2v(PHYSTOP));
 
     start(task1);
     start(task2);

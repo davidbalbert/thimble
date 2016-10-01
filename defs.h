@@ -10,6 +10,7 @@ void cputc(uchar c);
 
 // kalloc.c
 void initmem1(void *start, void *end);
+void initmem2(void *start, void *end);
 void *kalloc(void);
 void kfree(void *a);
 void *p2v(ulong paddr);

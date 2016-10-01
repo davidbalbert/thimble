@@ -108,3 +108,10 @@ initmem1(void *start, void *end)
 
     freerange(start, end);
 }
+
+void
+initmem2(void *start, void *end)
+{
+    freerange(start, end);
+    kmem.uselock = 1;
+}
