@@ -13,12 +13,13 @@ void initmem1(void *start, void *end);
 void initmem2(void *start, void *end);
 void *kalloc(void);
 void kfree(void *a);
+void *pgfloor(void *addr);
 void *p2v(ulong paddr);
 ulong v2p(void *vaddr);
 
 // klibc.c
-void *memset(void *p, int c, size_t len);
-void *memzero(void *p, size_t len);
+void *memset(void *p, int c, usize len);
+void *memzero(void *p, usize len);
 int isdigit(int c);
 long strtol(char *s, char **endptr, int base);
 
@@ -58,7 +59,10 @@ void handletimer(void);
 void trapinit(void);
 
 // vm.c
+void kvmalloc(void);
 void seginit(void);
+Pml4e *setupkvm(void);
+void switchkvm();
 void switchuvm(Proc *p);
 
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

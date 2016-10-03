@@ -12,8 +12,8 @@ void cputs(char *s);
 void cputc(uchar c);
 
 // klibc.c
-void *memset(void *p, int c, size_t len);
-void *memzero(void *p, size_t len);
+void *memset(void *p, int c, usize len);
+void *memzero(void *p, usize len);
 int isdigit(int c);
 long strtol(char *s, char **endptr, int base);
 

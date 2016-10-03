@@ -5,6 +5,8 @@
 
 #define USERTOP 0x0000800000000000      // Top of user address space.
 #define PHYSTOP 0x20000000              // Top of physical memory (512 MiB). TODO: autodetect this.
+#define DEVSPACE 0xFE000000		// Just a guess for TOLUD, taken from xv6. Detect this eventually.
+#define DEVTOP 0x100000000		// Devspace ends at 4 GB
 
 
 #define PGSIZE 0x1000
@@ -16,8 +18,14 @@
 #define PTE_U  0x4      // user accessible
 #define PTE_PS 0x80     // large page size
 
-#define V2P(x) ((x) - KERNBASE)
-#define P2V(x) ((x) + KERNBASE)
+// Bit offsets of paging structures in linear address
+#define PML4SHIFT 39
+#define PDPSHIFT  30
+#define PDSHIFT   21
+#define PTSHIFT   12
+
+#define V2P(x) (((uintptr)(x)) - KERNBASE)
+#define P2V(x) (((void *)(x)) + KERNBASE)
 
 #define KERN_DPL     0
 #define USER_DPL     3
@@ -35,6 +43,7 @@
 
 #ifndef __ASSEMBLER__
 
-extern char end[]; // End of kernel, provided by linker
+extern char end[];  // End of kernel, provided by linker
+extern char data[]; // Start of kernel data section, provided by linker
 
 #endif

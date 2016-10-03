@@ -43,6 +43,7 @@ main(void)
     cprintf("Hello, Thimble!\n");
 
     initmem1(end, p2v(2*MB));
+    kvmalloc();
     schedinit();
     seginit();
     trapinit();

@@ -17,27 +17,27 @@ static struct {
 
 
 void *
-p2v(ulong paddr)
+p2v(uintptr paddr)
 {
     return (void *)(paddr + KERNBASE);
 }
 
-ulong
+uintptr
 v2p(void *vaddr)
 {
-    return (ulong)vaddr - KERNBASE;
+    return (uintptr)vaddr - KERNBASE;
 }
 
 void *
 pgfloor(void *addr)
 {
-    return (void *)((ulong)addr & ~(PGSIZE-1));
+    return (void *)((uintptr)addr & ~(PGSIZE-1));
 }
 
 void *
 pgceil(void *addr)
 {
-    ulong a = (ulong)addr;
+    uintptr a = (uintptr)addr;
     return (void *)((a+PGSIZE-1) & ~(PGSIZE-1));
 }
 
@@ -51,7 +51,7 @@ kalloc(void)
         lock(&kmem.lock);
 
     if (!kmem.freelist)
-        return 0;
+        return nil;
 
     page = kmem.freelist;
     kmem.freelist = page->next;

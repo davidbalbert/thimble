@@ -3,14 +3,14 @@
 #include "x86.h"
 
 void *
-memset(void *p, int c, size_t len)
+memset(void *p, int c, usize len)
 {
     stosb(p, c, len);
     return p;
 }
 
 void *
-memzero(void *p, size_t len)
+memzero(void *p, usize len)
 {
     return memset(p, 0, len);
 }

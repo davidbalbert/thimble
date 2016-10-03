@@ -99,6 +99,7 @@ struct Proc {
     Registers *regs;
     uchar *kstack;
     uchar *ustack;
+    Pml4e *pgmap;
 };
 typedef struct Proc Proc;
 

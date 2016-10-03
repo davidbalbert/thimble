@@ -134,4 +134,8 @@ ltr(ushort sel)
     asm volatile("ltr %0" : : "r" (sel));
 }
 
-#define INT(v) asm volatile("int %0" : : "N" (v) : "cc", "memory")
+static inline void
+lcr3(uintptr val)
+{
+    asm volatile("mov %0, %%cr3" : : "r" (val));
+}

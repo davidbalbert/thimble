@@ -1,8 +1,11 @@
 #include "types.h"
 
+#include "defs.h"
 #include "mem.h"
 #include "proc.h"
 #include "x86.h"
+
+static Pml4e *kpgmap;
 
 // Makes a 64 bit code segment descriptor for the given dpl
 static void
@@ -62,6 +65,177 @@ tsdesc(TaskStateDescriptor *d, TaskState *ts, uint size)
     d->reserved = 0;            // zero out the "type" bits of the higher 8 bytes
 }
 
+// virtual address -> PML4 index
+static int
+pmx(void *va)
+{
+    uintptr a = (uintptr)va;
+    return (a >> PML4SHIFT) & 0x1FF;
+}
+
+// virtual address -> PDPT index
+static int
+pdpx(void *va)
+{
+    uintptr a = (uintptr)va;
+    return (a >> PDPSHIFT) & 0x1FF;
+}
+
+// virtual address -> PD index
+static int
+pdx(void *va)
+{
+    uintptr a = (uintptr)va;
+    return (a >> PDSHIFT) & 0x1FF;
+}
+
+// virtual address -> PT index
+static int
+ptx(void *va)
+{
+    uintptr a = (uintptr)va;
+    return (a >> PTSHIFT) & 0x1FF;
+}
+
+static uintptr
+pte_addr(ulong entry)
+{
+    return (entry & ~0xFFF);
+}
+
+static ulong *
+pgmapget(ulong *table, int offset)
+{
+    ulong *innertab;
+    ulong *entry = &table[offset];
+
+    if (*entry & PTE_P) {
+        innertab = (ulong *)p2v(pte_addr(*entry));
+    } else {
+        if ((innertab = kalloc()) == nil)
+            return nil;
+
+        memzero(innertab, PGSIZE);
+
+        // xv6 gives all the permissions, but where does
+        // it restrict it?
+        *entry = v2p(innertab) | PTE_W | PTE_U | PTE_P;
+    }
+
+    return innertab;
+}
+
+static Pte *
+walkpgmap(Pml4e *pgmap, void *va)
+{
+    Pdpe *pdirpt;
+    Pde *pgdir;
+    Pte *pgtab;
+
+    pdirpt = pgmapget(pgmap, pmx(va));
+
+    if (pdirpt == nil)
+        return nil;
+
+    pgdir = pgmapget(pdirpt, pdpx(va));
+
+    if (pgdir == nil)
+        return nil;
+
+    pgtab = pgmapget(pgdir, pdx(va));
+
+    if (pgtab == nil)
+        return nil;
+
+    return &pgtab[ptx(va)];
+}
+
+static void
+checkalign(void *a, int alignment, char *msg)
+{
+    uintptr aa = (uintptr)a;
+
+    if (aa & (alignment-1))
+        panic(msg);
+}
+
+static int
+mappages(Pml4e *pgmap, void *va, usize size, uintptr pa, int perm)
+{
+    char *a, *last;
+    Pte *pte;
+
+    checkalign((void *)pa, PGSIZE, "mappages - physical addr not page aligned");
+
+    a = pgfloor(va);
+    last = pgfloor((void *)((uintptr)va + size -1));
+
+    for (;;) {
+        pte = walkpgmap(pgmap, va);
+
+        if (pte == nil)
+            return -1;
+        if (*pte & PTE_P)
+            panic("remap");
+
+        *pte = pa | perm | PTE_P;
+
+        if (a == last)
+            break;
+        a += PGSIZE;
+        pa += PGSIZE;
+    }
+
+    return 0;
+}
+
+// Memeory layout borrowed heavily from xv6, but adapted for 64 bit:
+//
+//      0..USERTOP: user memory (canonical lower half; not included in kmap below)
+//
+//      KERNBASE..KERNBASE+EXTMEM -> 0..EXTMEM: I/O space (e.g. VGA), bootloader stack, etc.
+//      KERNBASE+EXTMEM..data -> EXTMEM..v2p(data): kernel text and rodata. Read-only.
+//      data..KERNBASE+PHYSTOP -> v2p(data)..PHYSTOP: kernel data and 1-1 mapping with free physical memory
+//      KERNBASE+DEVSPACE..KERNBASE+DEVTOP -> DEVSPACE..DEVTOP: memory mapped devices
+
+typedef struct Kmap Kmap;
+static struct Kmap {
+    void *addr;
+    uintptr phys_start;
+    uintptr phys_end;
+    int perm;
+} kmap[] = {
+    {(void *)KERNBASE,           0,         EXTMEM,    PTE_W}, // memory mapped devices
+    {(void *)KERNLINK,           EXTMEM,    V2P(data), 0},     // Kernel read only data
+    {(void *)data,               V2P(data), PHYSTOP,   PTE_W}, // kernel data + physical pages
+    {(void*)(KERNBASE+DEVSPACE), DEVSPACE,  DEVTOP,    PTE_W}, // more devices
+};
+
+
+Pml4e *
+setupkvm(void)
+{
+    Pml4e *pgmap = kalloc();
+    Kmap *k;
+
+    if (pgmap == nil)
+        return nil;
+
+    memzero(pgmap, PGSIZE);
+
+    for (k = kmap; k < &kmap[NELEM(kmap)]; k++)
+        if (mappages(pgmap, k->addr, k->phys_end-k->phys_start, k->phys_start, k->perm) < 0)
+            return nil;
+
+    return pgmap;
+}
+
+void
+switchkvm()
+{
+    lcr3(v2p(kpgmap));
+}
+
 // Sets up virtual memory for process p
 void
 switchuvm(Proc *p)
@@ -73,6 +247,13 @@ switchuvm(Proc *p)
     cpu->ts.rsp0 = (ulong)p->kstack + KSTACKSIZE;
 
     ltr(SEG_TSS << 3);
+}
+
+void
+kvmalloc(void)
+{
+    kpgmap = setupkvm();
+    switchkvm();
 }
 
 void
