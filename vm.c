@@ -73,7 +73,7 @@ pmx(void *va)
     return (a >> PML4SHIFT) & 0x1FF;
 }
 
-// virtual address -> PDPT index
+// virtual address -> PDP index
 static int
 pdpx(void *va)
 {
@@ -97,10 +97,11 @@ ptx(void *va)
     return (a >> PTSHIFT) & 0x1FF;
 }
 
+// paging structure entry -> physical address
 static uintptr
 pte_addr(ulong entry)
 {
-    return (entry & ~0xFFF);
+    return entry & ~0xFFF;
 }
 
 static ulong *
