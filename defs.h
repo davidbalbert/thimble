@@ -12,6 +12,7 @@ void cprintf(char *fmt, ...);
 void cclear(void);
 void cputs(char *s);
 void cputc(uchar c);
+void cvprintf(char *fmt, va_list ap);
 
 // kalloc.c
 void initmem1(void *start, void *end);
@@ -46,7 +47,7 @@ void picinit(void);
 void picenable(uchar irq);
 
 // proc.c
-void panic(char *s) __attribute__((noreturn));
+void panic(char *fmt, ...) __attribute__((noreturn));
 void schedinit(void);
 void scheduler(void) __attribute__((noreturn));
 void start(uchar *data, usize size);

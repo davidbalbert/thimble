@@ -10,8 +10,6 @@
 #include "mem.h"
 #include "x86.h"
 
-#include <stdarg.h>
-
 // Function declarations
 // Because console.c is used from both the bootloader and the
 // kernel we don't know whether to include defs.h or bootdefs.h.
@@ -160,16 +158,13 @@ printint(long n, uchar base, uchar sign, long npad, char padchar)
 }
 
 void
-cprintf(char *fmt, ...)
+cvprintf(char *fmt, va_list ap)
 {
-    va_list ap;
     char c;
     char *s;
 
-    if (fmt == 0)
+    if (fmt == nil)
         panic("null fmt");
-
-    va_start(ap, fmt);
 
     for (; (c = *fmt); fmt++) {
         long npad = 0;
@@ -236,7 +231,15 @@ cprintf(char *fmt, ...)
                 break;
         }
     }
-
-    va_end(ap);
     updatecursor();
 }
+
+void
+cprintf(char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    cvprintf(fmt, ap);
+    va_end(ap);
+}
+

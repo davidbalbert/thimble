@@ -12,9 +12,17 @@ static int has_ahci = 0; // Set if we find an ahci controller
 
 // required by the console driver
 void
-panic(char *s)
+panic(char *fmt, ...)
 {
-    cprintf("bootpanic: %s\n", s);
+    va_list ap;
+    cprintf("bootpanic: ");
+
+    va_start(ap, fmt);
+    cvprintf(fmt, ap);
+    va_end(ap);
+
+    cputc('\n');
+
     for (;;)
         hlt();
 }

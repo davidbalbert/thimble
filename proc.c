@@ -108,10 +108,18 @@ mkproc(uchar *data, usize memsz)
 }
 
 void
-panic(char *s)
+panic(char *fmt, ...)
 {
+    va_list ap;
+
     cli();
-    cprintf("cpu%d: panic: %s\n", cpu->id, s);
+    cprintf("cpu%d: panic: ", cpu->id);
+
+    va_start(ap, fmt);
+    cvprintf(fmt, ap);
+    va_end(ap);
+
+    cputc('\n');
 
     for (;;)
         hlt();

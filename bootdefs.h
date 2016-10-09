@@ -10,6 +10,7 @@ void cprintf(char *fmt, ...);
 void cclear(void);
 void cputs(char *s);
 void cputc(uchar c);
+void cvprintf(char *fmt, va_list ap);
 
 // klibc.c
 void *memset(void *p, int c, usize len);
@@ -26,4 +27,4 @@ void pcieach(pciiter f);
 uint pcibar(PciFunction *f, uchar bar);
 
 // stage2.c
-void panic(char *s) __attribute__((noreturn));
+void panic(char *fmt, ...) __attribute__((noreturn));

@@ -1,3 +1,5 @@
+#include <stdarg.h>
+
 #define nil ((void *)0)
 
 typedef unsigned int   uint;
@@ -6,5 +8,4 @@ typedef unsigned char  uchar;
 typedef unsigned long  ulong;
 
 typedef unsigned long  uintptr;
-
 typedef unsigned long  usize;

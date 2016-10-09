@@ -15,9 +15,9 @@ main(void)
     cclear();
     cprintf("Hello, Thimble!\n");
 
+    schedinit();
     initmem1(end, p2v(2*MB));
     kvmalloc();
-    schedinit();
     seginit();
     trapinit();
     sysinit();
