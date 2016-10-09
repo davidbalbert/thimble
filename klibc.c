@@ -1,5 +1,5 @@
 // libc routines shared between kernel space and userspace
-#include "types.h"
+#include "u.h"
 #include "x86.h"
 
 void *

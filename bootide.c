@@ -1,4 +1,4 @@
-#include "types.h"
+#include "u.h"
 
 #include "ata.h"
 #include "bootdefs.h"

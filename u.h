@@ -8,8 +8,3 @@ typedef unsigned long  ulong;
 typedef unsigned long  uintptr;
 
 typedef unsigned long  usize;
-
-typedef unsigned long  Pml4e;
-typedef unsigned long  Pdpe;
-typedef unsigned long  Pde;
-typedef unsigned long  Pte;

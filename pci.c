@@ -1,5 +1,5 @@
 // PCI driver. Used by stage2 bootloader.
-#include "types.h"
+#include "u.h"
 
 #include "pci.h"
 #include "x86.h"

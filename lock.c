@@ -1,4 +1,4 @@
-#include "types.h"
+#include "u.h"
 
 #include "cpu.h"
 #include "defs.h"

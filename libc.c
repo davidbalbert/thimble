@@ -1,4 +1,4 @@
-#include "types.h"
+#include "u.h"
 #include "libc.h"
 #include "syscall.h"
 

@@ -1,4 +1,4 @@
-#include "types.h"
+#include "u.h"
 
 #include "irq.h"
 #include "x86.h"

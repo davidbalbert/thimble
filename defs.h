@@ -1,3 +1,8 @@
+typedef unsigned long  Pml4e;
+typedef unsigned long  Pdpe;
+typedef unsigned long  Pde;
+typedef unsigned long  Pte;
+
 typedef struct SpinLock SpinLock;
 typedef struct Registers Registers;
 typedef struct Proc Proc;

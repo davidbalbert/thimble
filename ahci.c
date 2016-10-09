@@ -12,7 +12,7 @@
 // internet say different things about whether x86 maintains PCI DMA cache
 // coherency. For now, it boots in QEMU, so we'll call it a day.
 
-#include "types.h"
+#include "u.h"
 
 #include "ata.h"
 #include "bootdefs.h"

@@ -5,7 +5,7 @@
 // Printing from the kernel will write over anything printed from the
 // bootloader.
 
-#include "types.h"
+#include "u.h"
 
 #include "mem.h"
 #include "x86.h"
