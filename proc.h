@@ -98,8 +98,8 @@ struct Proc {
     ProcState state;
     Registers *regs;
     uchar *kstack;
-    uchar *ustack;
     Pml4e *pgmap;
+    usize sz;           // total size in memory
 };
 typedef struct Proc Proc;
 

@@ -14,12 +14,14 @@ void initmem2(void *start, void *end);
 void *kalloc(void);
 void kfree(void *a);
 void *pgfloor(void *addr);
+void *pgceil(void *addr);
 void *p2v(ulong paddr);
 ulong v2p(void *vaddr);
 
 // klibc.c
-void *memset(void *p, int c, usize len);
-void *memzero(void *p, usize len);
+void *memmove(void *dst, void *src, usize n);
+void *memset(void *p, int c, usize n);
+void *memzero(void *p, usize n);
 int isdigit(int c);
 long strtol(char *s, char **endptr, int base);
 
@@ -42,7 +44,7 @@ void picenable(uchar irq);
 void panic(char *s) __attribute__((noreturn));
 void schedinit(void);
 void scheduler(void) __attribute__((noreturn));
-void start(void (*f)(void));
+void start(uchar *data, usize size);
 void yield(void);
 
 // switch.S
@@ -59,10 +61,15 @@ void handletimer(void);
 void trapinit(void);
 
 // vm.c
+usize allocuvm(Pml4e *pgmap, usize oldsz, usize newsz);
+void clearpteu(Pml4e *pgmap, void *addr);
 void kvmalloc(void);
+void loaduvm(Pml4e *pgmap, char *addr, uchar *data, usize sz);
 void seginit(void);
 Pml4e *setupkvm(void);
 void switchkvm();
 void switchuvm(Proc *p);
+void *uva2ka(Pml4e *pgmap, void *addr);
+Pte *walkpgmap(Pml4e *pgmap, void *va, int alloc);
 
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

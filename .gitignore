@@ -8,3 +8,8 @@ stage2
 ivec.S
 stage2size.txt
 stage2size.h
+
+task1
+task1.h
+task2
+task2.h

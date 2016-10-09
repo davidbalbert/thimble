@@ -3,16 +3,36 @@
 #include "x86.h"
 
 void *
-memset(void *p, int c, usize len)
+memmove(void *dst, void *src, usize n)
 {
-    stosb(p, c, len);
+    const char *s = src;
+    char *d = dst;
+
+    if (s < d && s+n > d) {
+        s += n;
+        d += n;
+
+        while (n--)
+            *--d = *--s;
+    } else {
+        while (n--)
+            *d++ = *s++;
+    }
+
+    return dst;
+}
+
+void *
+memset(void *p, int c, usize n)
+{
+    stosb(p, c, n);
     return p;
 }
 
 void *
-memzero(void *p, usize len)
+memzero(void *p, usize n)
 {
-    return memset(p, 0, len);
+    return memset(p, 0, n);
 }
 
 int

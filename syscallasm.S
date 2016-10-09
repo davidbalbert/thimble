@@ -97,33 +97,3 @@ sysinit:
     wrmsr
 
     ret
-
-.globl hello
-hello:
-    mov     $SYS_HELLO, %rax
-
-    # x86_64 System V user calling convention uses %rcx for the 4th function
-    # agument, but the syscall interface uses %r10 (%rcx is used by the syscall
-    # instruction to store the userspace %rip). We make the translation here.
-    #
-    # Note: The kernel uses the user calling convention internally. It's just
-    # the syscall interface (userspace to kernelspace) that requires this
-    # translation.
-    mov     %rcx, %r10
-    syscall
-    ret
-
-.globl goodbye
-goodbye:
-    mov     $SYS_GOODBYE, %rax
-
-    # x86_64 System V user calling convention uses %rcx for the 4th function
-    # agument, but the syscall interface uses %r10 (%rcx is used by the syscall
-    # instruction to store the userspace %rip). We make the translation here.
-    #
-    # Note: The kernel uses the user calling convention internally. It's just
-    # the syscall interface (userspace to kernelspace) that requires this
-    # translation.
-    mov     %rcx, %r10
-    syscall
-    ret

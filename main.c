@@ -6,35 +6,8 @@
 #include "mem.h"
 #include "x86.h"
 
-void
-wastetime(void)
-{
-    ulong j;
-    for (j = 0; j < 100000000; j++)
-        ;
-}
-
-int hello(int a, int b, int c, int d, int e, int f);
-
-void
-task1(void)
-{
-    for(;;) {
-        hello(1, 2, 3, 4, 5, 6);
-        wastetime();
-    }
-}
-
-int goodbye(int a, int b, int c, int d, int e, int f);
-
-void
-task2(void)
-{
-    for(;;) {
-        goodbye(6, 5, 4, 3, 2, 1);
-        wastetime();
-    }
-}
+#include "task1.h"
+#include "task2.h"
 
 int
 main(void)
@@ -54,8 +27,8 @@ main(void)
 
     initmem2(p2v(2*MB), p2v(PHYSTOP));
 
-    start(task1);
-    start(task2);
+    start(task1, task1_len);
+    start(task2, task2_len);
 
     scheduler();
 }

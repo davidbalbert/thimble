@@ -33,11 +33,10 @@ procbegin(void)
 void sysret(void);
 
 static void
-mkproc(void (*f)(void))
+mkproc(uchar *data, usize memsz)
 {
     Proc *p;
-    uchar *ksp;
-    uchar *usp;
+    uchar *ksp, *usp;
 
     if (ptable.n >= NPROCS)
         panic("mkproc - nprocs");
@@ -45,17 +44,34 @@ mkproc(void (*f)(void))
     p = &ptable.procs[ptable.n++];
 
     p->kstack = kalloc();
-    if (p->kstack == 0)
+    if (p->kstack == nil)
         panic("mkproc - kstack");
-
-    p->ustack = kalloc();
-    if (p->ustack == 0)
-        panic("mkproc - ustack");
 
     p->state = READY;
 
     ksp = p->kstack + KSTACKSIZE;
-    usp = p->ustack + USTACKSIZE;
+
+    p->pgmap = setupkvm();
+    if (p->pgmap == nil)
+        panic("mkproc - pgmap");
+
+    p->sz = 0;
+    if ((p->sz = allocuvm(p->pgmap, p->sz, memsz)) == 0)
+        panic("mkproc - alloc text");
+
+    loaduvm(p->pgmap, (void *)0, data, memsz);
+
+    // allocate stack. lower page is a guard
+    if ((p->sz = allocuvm(p->pgmap, p->sz, 2*PGSIZE)) == 0)
+        panic("mkproc - alloc stack");
+    clearpteu(p->pgmap, (void *)(p->sz - 2*PGSIZE));
+
+    // get user stack pointer)
+    usp = uva2ka(p->pgmap, (void *)p->sz);
+
+    // fake return address
+    usp -= 8;
+    *(ulong *)usp = (ulong)-1;
 
     // This has to mirror the stack structure in
     // syscallasm.S.
@@ -69,7 +85,7 @@ mkproc(void (*f)(void))
 
     // entry point
     usp -= 8;
-    *(ulong *)usp = (ulong)f;
+    *(ulong *)usp = (ulong)0; // text is loaded at zero
 
     // user stack
     ksp -= 8;
@@ -102,10 +118,10 @@ panic(char *s)
 }
 
 void
-start(void (*f)(void))
+start(uchar *data, usize size)
 {
     lock(&ptable.lock);
-    mkproc(f);
+    mkproc(data, size);
     unlock(&ptable.lock);
 }
 
@@ -146,8 +162,9 @@ scheduler(void)
 
             switchuvm(proc);
             swtch(&cpu->scheduler, p->regs);
+            switchkvm();
 
-            proc = 0;
+            proc = nil;
         }
         unlock(&ptable.lock);
     }

@@ -11,7 +11,6 @@
 
 #define PGSIZE 0x1000
 #define KSTACKSIZE PGSIZE
-#define USTACKSIZE PGSIZE
 
 #define PTE_P  0x1      // present
 #define PTE_W  0x2      // writable
