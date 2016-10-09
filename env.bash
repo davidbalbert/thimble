@@ -31,6 +31,11 @@ export PATH=$PREFIX/bin:$PATH
 export MANPATH=$PREFIX/share/man:$MANPATH
 eval export $(libpath)=$PREFIX/lib:\$$(libpath)
 
+if [[ ! -v MAKEFLAGS ]]; then
+  makeflags_set=1
+  export MAKEFLAGS=-j4
+fi
+
 PS1="(thimble) $PS1"
 
 function deactivate() {
@@ -39,6 +44,16 @@ function deactivate() {
   eval export $(libpath)=$prev_libpath
   export MANPATH=$prev_manpath
   PS1=$prev_ps1
+
+  if [[ -v makeflags_set ]]; then
+    unset MAKEFLAGS
+  fi
+
+  unset prev_path
+  unset prev_libpath
+  unset prev_manpath
+  unset prev_ps1
+  unset makeflags_set
   unset deactivate
 }
 

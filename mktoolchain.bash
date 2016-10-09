@@ -13,8 +13,6 @@ MPC=https://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz
 BINUTILS=https://ftp.gnu.org/gnu/binutils/binutils-2.27.tar.bz2
 GCC=https://ftp.gnu.org/gnu/gcc/gcc-6.2.0/gcc-6.2.0.tar.bz2
 
-export MAKEFLAGS=-j4
-
 function envfile() {
   pushd $(dirname $0) >/dev/null
   echo $(pwd)/env.bash
