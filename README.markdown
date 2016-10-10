@@ -23,9 +23,11 @@ $ source env.bash
 $
 ```
 
-## Inspiration
+## Xv6
 
-Thimble takes a lot of inspiration (including coding conventions and function naming) from xv6. As Thimble has grown, it has become more distinct from [xv6](https://pdos.csail.mit.edu/6.828/2016/xv6.html), but there are a lot of similar design decisions that should feel familiar to anyone who knows the xv6 codebase.
+Thimble takes a lot of inspiration (including coding conventions and function naming) and some source code from [xv6](https://pdos.csail.mit.edu/6.828/2016/xv6.html). As Thimble has grown, it has become more distinct from xv6, but there are a lot of similar design decisions that should feel familiar to anyone who knows the xv6 codebase.
+
+For the xv6 license, see `ACKNOWLEDGEMENTS`
 
 # License
 
