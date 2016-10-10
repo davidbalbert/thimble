@@ -237,7 +237,7 @@ static struct Kmap {
     int perm;
 } kmap[] = {
     {(void *)KERNBASE,           0,         EXTMEM,    PTE_W}, // memory mapped devices
-    {(void *)KERNLINK,           EXTMEM,    V2P(data), 0},     // Kernel read only data
+    {(void *)KERNBASE+EXTMEM,    EXTMEM,    V2P(data), 0},     // Kernel read only data
     {(void *)data,               V2P(data), PHYSTOP,   PTE_W}, // kernel data + physical pages
     {(void*)(KERNBASE+DEVSPACE), DEVSPACE,  DEVTOP,    PTE_W}, // more devices
 };
