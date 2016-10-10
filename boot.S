@@ -81,11 +81,9 @@ seta20.2:
     # First, identity map the first 4 GB. We mark each entry as present,
     # writable, and user accessible.
     #
-    # TODO: once our kernel has its own per process page tables, get rid of PTE_U.
-
     mov     $0x1000, %eax
     mov     $0x2000, %edx
-    or      $(PTE_P|PTE_W|PTE_U), %edx
+    or      $(PTE_P|PTE_W), %edx
     mov     %edx, (%eax)
 
     # Then map KERNBASE. We can point KERNBASE at the same PDP as the low
@@ -95,7 +93,7 @@ seta20.2:
 
     # Now map in the first GB
     mov     $0x2000, %eax
-    mov     $(PTE_P|PTE_W|PTE_U|PTE_PS), %edx
+    mov     $(PTE_P|PTE_W|PTE_PS), %edx
     mov     %edx, (%eax)
 
     # Second GB
