@@ -267,6 +267,15 @@ switchkvm()
     lcr3(v2p(kpgmap));
 }
 
+void
+kvmalloc(void)
+{
+    if ((kpgmap = setupkvm()) == nil)
+        panic("kvmalloc");
+
+    switchkvm();
+}
+
 usize
 allocuvm(Pml4e *pgmap, usize oldsz, usize newsz)
 {
@@ -343,15 +352,6 @@ switchuvm(Proc *p)
     lcr3(v2p(p->pgmap));
 
     popcli();
-}
-
-void
-kvmalloc(void)
-{
-    if ((kpgmap = setupkvm()) == nil)
-        panic("kvmalloc");
-
-    switchkvm();
 }
 
 void
