@@ -71,6 +71,9 @@ mkproc(uchar *data, usize memsz)
 
     // get user stack pointer
     ustack = (uchar *)p->sz;
+
+    // p->sz isn't mapped in (0 to p->sz - 1 is), so we can't just
+    // ask uva2ka for the kernel address of p->sz
     usp = uva2ka(p->pgmap, (void *)(p->sz - PGSIZE)) + PGSIZE;
 
     // fake return address
