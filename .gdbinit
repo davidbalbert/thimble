@@ -4,5 +4,5 @@ set arch i386:x86-64
 echo + symbol-file kernel\n
 symbol-file kernel
 
-echo + target remote localhost:12345\n
-target remote localhost:12345
+echo + target remote localhost:1234\n
+target remote localhost:1234
