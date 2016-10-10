@@ -202,7 +202,7 @@ mappages(Pml4e *pgmap, void *va, usize size, uintptr pa, int perm)
     last = pgfloor((void *)((uintptr)va + size - 1));
 
     for (;;) {
-        pte = walkpgmap(pgmap, va, 1);
+        pte = walkpgmap(pgmap, a, 1);
 
         if (pte == nil)
             return -1;

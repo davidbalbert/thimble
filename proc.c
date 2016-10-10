@@ -36,7 +36,9 @@ static void
 mkproc(uchar *data, usize memsz)
 {
     Proc *p;
-    uchar *ksp, *usp;
+    uchar *ksp;     // kernal virtual address of kernal stack pointer
+    uchar *usp;     // kernel virtual address of user stack pointer
+    uchar *ustack;  // user virtual address of user stack pointer
 
     if (ptable.n >= NPROCS)
         panic("mkproc - nprocs");
@@ -62,15 +64,18 @@ mkproc(uchar *data, usize memsz)
     loaduvm(p->pgmap, (void *)0, data, memsz);
 
     // allocate stack. lower page is a guard
-    if ((p->sz = allocuvm(p->pgmap, p->sz, 2*PGSIZE)) == 0)
+    p->sz = (usize)pgceil((void *)p->sz);
+    if ((p->sz = allocuvm(p->pgmap, p->sz, p->sz + 2*PGSIZE)) == 0)
         panic("mkproc - alloc stack");
     clearpteu(p->pgmap, (void *)(p->sz - 2*PGSIZE));
 
-    // get user stack pointer)
-    usp = uva2ka(p->pgmap, (void *)p->sz);
+    // get user stack pointer
+    ustack = (uchar *)p->sz;
+    usp = uva2ka(p->pgmap, (void *)(p->sz - PGSIZE)) + PGSIZE;
 
     // fake return address
     usp -= 8;
+    ustack -= 8;
     *(ulong *)usp = (ulong)-1;
 
     // This has to mirror the stack structure in
@@ -78,18 +83,21 @@ mkproc(uchar *data, usize memsz)
 
     // %r12 and %r13 are used as temporary storage
     usp -= 16;
+    ustack -= 16;
 
     // rflags
     usp -= 8;
+    ustack -= 8;
     *(ulong *)usp = FL_IF;
 
     // entry point
     usp -= 8;
+    ustack -= 8;
     *(ulong *)usp = (ulong)0; // text is loaded at zero
 
     // user stack
     ksp -= 8;
-    *(ulong *)ksp = (ulong)usp;
+    *(ulong *)ksp = (ulong)ustack;
 
     // SyscallFrame (syscall num and 6 args)
     ksp -= 7*8;

@@ -25,14 +25,12 @@ start1:
                             # (rather than decrement) index registers.
 
 
-    mov     $0x7BFE, %sp    # Set up the stack directly below the bootloader in
-    mov     %sp, %bp        # memory. We can't set it to 0x7BFF, because the stack
-                            # has to be 16-bit (2 byte) alligned. We're storing our
-                            # paging structures at 0x1000, 0x2000, 0x3000, and 0x4000,
-                            # so the stack can grow from 0x7BFE to 0x5000 without
-                            # overwriting anything important (see
-                            # http://wiki.osdev.org/Memory_Map_(x86)). That's more than
-                            # 11 KiB of usable space, which should be plenty.
+    mov     $start, %sp     # Set up the bootloader's stack directly below the
+    mov     %sp, %bp        # bootloader in memory. We're storing our paging structures
+                            # at 0x1000, 0x2000, 0x3000, and 0x4000, so the stack can
+                            # grow from 0x7C00 to 0x5000 without overwriting anything
+                            # important (see http://wiki.osdev.org/Memory_Map_(x86)).
+                            # The kernel will use a different stack (see entry.S).
 
     # Enable the A20 gate for > 1 MB memory access
     # From xv6
@@ -173,7 +171,6 @@ gdt:
     GDT_ENTRY(0, 0, 0, 0)
     GDT_ENTRY(0, 0, 0b10011010, 0b0010)     # Code segment
     GDT_ENTRY(0, 0, 0b10010010, 0)          # Data segment
-    # We need a TSS segment here, but I don't know what that is yet.
 
 gdtdesc:
     .word   (gdtdesc - gdt - 1)     # sizeof(gdt) - 1

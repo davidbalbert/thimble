@@ -16,7 +16,7 @@ main(void)
     cprintf("Hello, Thimble!\n");
 
     schedinit();
-    initmem1(end, p2v(2*MB));
+    initmem1(end, p2v(4*MB));
     kvmalloc();
     seginit();
     trapinit();
@@ -25,7 +25,7 @@ main(void)
     timerinit();
     kbdinit();
 
-    initmem2(p2v(2*MB), p2v(PHYSTOP));
+    initmem2(p2v(4*MB), p2v(PHYSTOP));
 
     start(task1, task1_len);
     start(task2, task2_len);
