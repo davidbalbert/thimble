@@ -1,5 +1,7 @@
 #define ELF_MAGIC 0x464C457F
 
+#define ELF_PROG_LOAD 1
+
 typedef struct {
     uint magic;
     uchar ident[12];

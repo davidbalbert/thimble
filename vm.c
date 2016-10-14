@@ -309,10 +309,11 @@ allocuvm(Pml4e *pgmap, usize oldsz, usize newsz)
 }
 
 void
-loaduvm(Pml4e *pgmap, char *addr, uchar *data, usize sz)
+loaduvm(Pml4e *pgmap, char *addr, uchar *data, ulong sz)
 {
     Pte *pte;
-    usize i, n;
+    ulong i;
+    usize n;
     char *pg;
 
     checkalign(addr, 4096, "loaduvm - addr not page aligned");

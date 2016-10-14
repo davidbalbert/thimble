@@ -1,7 +1,8 @@
 #include "u.h"
 
-#include "defs.h"
 #include "cpu.h"
+#include "defs.h"
+#include "elf.h"
 #include "lock.h"
 #include "mem.h"
 #include "proc.h"
@@ -33,12 +34,14 @@ procbegin(void)
 void sysret(void);
 
 static void
-mkproc(uchar *data, usize memsz)
+mkproc(uchar *data)
 {
     Proc *p;
     uchar *ksp;     // kernal virtual address of kernal stack pointer
     uchar *usp;     // kernel virtual address of user stack pointer
     uchar *ustack;  // user virtual address of user stack pointer
+    ElfHeader *elf;
+    ElfProgHeader *ph, *eph;
 
     if (ptable.n >= NPROCS)
         panic("mkproc - nprocs");
@@ -58,10 +61,27 @@ mkproc(uchar *data, usize memsz)
         panic("mkproc - pgmap");
 
     p->sz = 0;
-    if ((p->sz = allocuvm(p->pgmap, p->sz, memsz)) == 0)
-        panic("mkproc - alloc text");
 
-    loaduvm(p->pgmap, (void *)0, data, memsz);
+    elf = (ElfHeader *)data;
+
+    if (elf->magic != ELF_MAGIC)
+        panic("mkproc - elf magic");
+
+    ph = (ElfProgHeader *)(data + elf->phoff);
+    eph = ph + elf->phnum;
+
+    for (; ph < eph; ph++) {
+        if (ph->type != ELF_PROG_LOAD)
+            continue;
+        if (ph->filesz > ph->memsz)
+            panic("mkproc - filesz");
+        if (ph->vaddr % PGSIZE != 0)
+            panic("mkproc - align");
+        if ((p->sz = allocuvm(p->pgmap, p->sz, p->sz + ph->memsz)) == 0)
+            panic("mkproc - allocuvm");
+
+        loaduvm(p->pgmap, (void *)ph->vaddr, data + ph->offset, ph->filesz);
+    }
 
     // allocate stack. lower page is a guard
     p->sz = (usize)pgceil((void *)p->sz);
@@ -96,7 +116,7 @@ mkproc(uchar *data, usize memsz)
     // entry point
     usp -= 8;
     ustack -= 8;
-    *(ulong *)usp = (ulong)0; // text is loaded at zero
+    *(ulong *)usp = elf->entry; // text is loaded at zero
 
     // user stack
     ksp -= 8;
@@ -137,10 +157,10 @@ panic(char *fmt, ...)
 }
 
 void
-start(uchar *data, usize size)
+start(uchar *data)
 {
     lock(&ptable.lock);
-    mkproc(data, size);
+    mkproc(data);
     unlock(&ptable.lock);
 }
 

@@ -50,7 +50,7 @@ void picenable(uchar irq);
 void panic(char *fmt, ...) __attribute__((noreturn));
 void schedinit(void);
 void scheduler(void) __attribute__((noreturn));
-void start(uchar *data, usize size);
+void start(uchar *data);
 void yield(void);
 
 // switch.S

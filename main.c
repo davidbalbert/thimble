@@ -27,8 +27,8 @@ main(void)
 
     initmem2(p2v(4*MB), p2v(PHYSTOP));
 
-    start(task1, task1_len);
-    start(task2, task2_len);
+    start(task1);
+    start(task2);
 
     scheduler();
 }

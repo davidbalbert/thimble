@@ -45,11 +45,11 @@ LIBCOBJS = \
 	   libc.o\
 	   libcasm.o\
 
-task1: ustart.o task1.o $(LIBCOBJS)
-	$(LD) $(LDFLAGS) --oformat=binary -e _start -Ttext=0 -o task1 $^
+task1: task1.o $(LIBCOBJS)
+	$(LD) $(LDFLAGS) -e main -Ttext=0 -o task1 $^
 
-task2: ustart.o task2.o $(LIBCOBJS)
-	$(LD) $(LDFLAGS) --oformat=binary -e _start -Ttext=0 -o task2 $^
+task2: task2.o $(LIBCOBJS)
+	$(LD) $(LDFLAGS) -e main -Ttext=0 -o task2 $^
 
 task1.h: task1
 	xxd -i task1 > task1.h
