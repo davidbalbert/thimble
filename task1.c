@@ -32,6 +32,7 @@ main(void)
 
     buf[nbytes] = '\0';
     print(buf);
+    print("\n");
 
     for(;;) {
         hello(1, 2, 3, 4, 5, 6);
