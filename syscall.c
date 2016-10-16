@@ -15,14 +15,20 @@ typedef struct SyscallFrame SyscallFrame;
 long sys_hello(SyscallFrame *);
 long sys_goodbye(SyscallFrame *);
 long sys_print(SyscallFrame *);
+long sys_printlong(SyscallFrame *);
+
 long sys_open(SyscallFrame *);
 long sys_close(SyscallFrame *);
+long sys_read(SyscallFrame *);
 
 static long (*syscalls[])(SyscallFrame *) = {
     [SYS_HELLO] sys_hello,
     [SYS_GOODBYE] sys_goodbye,
     [SYS_PRINT] sys_print,
+    [SYS_PRINTLONG] sys_printlong,
     [SYS_OPEN] sys_open,
+    [SYS_CLOSE] sys_close,
+    [SYS_READ] sys_read,
 };
 
 // Be careful. This is called in kernel mode but on the user's
@@ -48,6 +54,24 @@ arglong(SyscallFrame *f, int n, long *ip)
     return 0;
 }
 
+long
+argptr(SyscallFrame *f, int n, uintptr *p, usize size)
+{
+    long l;
+
+    if (n > 5)
+        panic("argptr");
+
+    if (arglong(f, n, &l) < 0)
+        return -1;
+    if ((uintptr)l >= proc->sz || (uintptr)l+size > proc->sz)
+        return -1;
+
+    *p = (uintptr)l;
+
+    return 0;
+}
+
 // returns length of string, not including null
 long
 argstr(SyscallFrame *f, int n, char **pp)
@@ -70,7 +94,7 @@ argstr(SyscallFrame *f, int n, char **pp)
         if (*p == 0)
             return p - *pp;
 
-    return - 1;
+    return -1;
 }
 
 long
@@ -125,6 +149,19 @@ sys_print(SyscallFrame *f)
         return -1;
 
     cprintf("%s", s);
+
+    return 0;
+}
+
+long
+sys_printlong(SyscallFrame *f)
+{
+    long l;
+
+    if (arglong(f, 0, &l) < 0)
+        return -1;
+
+    cprintf("%l\n", l);
 
     return 0;
 }

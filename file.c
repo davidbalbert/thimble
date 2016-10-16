@@ -6,8 +6,8 @@
 
 typedef struct File File;
 struct File {
-    long (*read)(File *f, void *buf, usize nbytes);
-    long (*write)(File *f, void *buf, usize nbytes);
+    long (*read)(File *f, char *buf, usize nbytes);
+    long (*write)(File *f, char *buf, usize nbytes);
 
     int ref;    // reference count
     char *data;
@@ -23,13 +23,17 @@ static File files[NFILE];
 static char *hello = "Hello Thimble from a file!";
 
 static long
-readfile(File *f, void *buf, usize nbytes)
+readfile(File *f, char *buf, usize nbytes)
 {
-    return -1;
+    if (f->sz < nbytes)
+        nbytes = f->sz;
+
+    memmove(buf, f->data, nbytes);
+    return nbytes;
 }
 
 static long
-writefile(File *f, void *buf, usize nbytes)
+writefile(File *f, char *buf, usize nbytes)
 {
     // TODO: set errstr
     return -1;
@@ -45,6 +49,7 @@ allocfile(void)
             f->ref++;
             f->read = readfile;
             f->write = writefile;
+            return f;
         }
     }
 
@@ -142,3 +147,46 @@ sys_open(SyscallFrame *f)
     return fd;
 }
 
+long
+sys_close(SyscallFrame *f)
+{
+    return -1;
+}
+
+long sys_read(SyscallFrame *f)
+{
+    int fd;
+    long l;
+    uintptr buf;
+    usize nbytes;
+    File *file;
+
+    // fd
+    if (arglong(f, 0, &l) < 0) {
+        // todo errstr
+        return -1;
+    }
+    fd = (int)l;
+
+    // nbytes (needed for argptr)
+    if (arglong(f, 2, &l) < 0) {
+        // todo errstr
+        return -1;
+    }
+    nbytes = (usize)l;
+
+    // buf
+    if (argptr(f, 1, &buf, nbytes) < 0) {
+        // todo errstr
+        return -1;
+    }
+
+    if (fd >= proc->nextfd) {
+        // todo errstr
+        return -1;
+    }
+
+    file = proc->files[fd];
+
+    return file->read(file, (char *)buf, nbytes);
+}

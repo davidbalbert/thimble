@@ -16,14 +16,26 @@ goodbye(int a, int b, int c, int d, int e, int f)
     return syscall(SYS_GOODBYE, a, b, c, d, e, f);
 }
 
-long
+void
 print(char *s)
 {
-    return syscall(SYS_PRINT, s);
+    syscall(SYS_PRINT, s);
+}
+
+void
+printlong(long l)
+{
+    syscall(SYS_PRINTLONG, l);
 }
 
 int
 open(char *file, int omode)
 {
-    return syscall(SYS_OPEN, file, omode);
+    return (int)syscall(SYS_OPEN, file, omode);
+}
+
+long
+read(int fd, void *buf, usize nbytes)
+{
+    return syscall(SYS_READ, fd, buf, nbytes);
 }

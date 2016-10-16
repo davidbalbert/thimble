@@ -62,6 +62,7 @@ void swtch(Registers **from, Registers *to);
 // syscall.c
 
 long arglong(SyscallFrame *f, int n, long *ip);
+long argptr(SyscallFrame *f, int n, uintptr *p, usize size);
 long argstr(SyscallFrame *f, int n, char **pp);
 
 // syscallasm.S
