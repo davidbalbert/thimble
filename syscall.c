@@ -112,7 +112,7 @@ sys_goodbye(SyscallFrame *f)
     if (fail)
         return -1;
 
-    cprintf("sys_hello(%d, %d, %d, %d, %d, %d): %d\n",
+    cprintf("sys_goodbye(%d, %d, %d, %d, %d, %d): %d\n",
             a, b, c, d, e, g, i++);
     return 0;
 }
