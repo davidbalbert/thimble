@@ -16,6 +16,7 @@ OBJS = \
        vm.o\
        syscall.o\
        syscallasm.o\
+       file.o\
 
 TOOLCHAIN=x86_64-elf
 

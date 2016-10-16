@@ -12,6 +12,7 @@ wastetime(void)
 int
 main(void)
 {
+    print("Hello task1!\n");
     for(;;) {
         hello(1, 2, 3, 4, 5, 6);
         wastetime();

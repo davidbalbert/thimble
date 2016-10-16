@@ -12,12 +12,17 @@ struct SyscallFrame {
 };
 typedef struct SyscallFrame SyscallFrame;
 
-int sys_hello(SyscallFrame *);
-int sys_goodbye(SyscallFrame *);
+long sys_hello(SyscallFrame *);
+long sys_goodbye(SyscallFrame *);
+long sys_print(SyscallFrame *);
+long sys_open(SyscallFrame *);
+long sys_close(SyscallFrame *);
 
-static int (*syscalls[])(SyscallFrame *) = {
+static long (*syscalls[])(SyscallFrame *) = {
     [SYS_HELLO] sys_hello,
     [SYS_GOODBYE] sys_goodbye,
+    [SYS_PRINT] sys_print,
+    [SYS_OPEN] sys_open,
 };
 
 // Be careful. This is called in kernel mode but on the user's
@@ -34,40 +39,100 @@ kstacktop(void)
 
 // Fetch the nth syscall argument. N starts at 0.
 long
-arglong(SyscallFrame *f, int n)
+arglong(SyscallFrame *f, int n, long *ip)
 {
     if (n > 5)
         panic("arglong");
 
-    return f->args[n];
+    *ip = f->args[n];
+    return 0;
 }
 
-int
+// returns length of string, not including null
+long
+argstr(SyscallFrame *f, int n, char **pp)
+{
+    long l;
+    uintptr addr;
+    char *p;
+
+    if (n > 5)
+        panic("argstr");
+
+    arglong(f, n, &l);
+    addr = (uintptr)l;
+
+    if (addr >= proc->sz)
+        return -1;
+
+    *pp = (char *)addr;
+    for (p = (char *)addr; p < (char *)proc->sz; p++)
+        if (*p == 0)
+            return p - *pp;
+
+    return - 1;
+}
+
+long
 sys_hello(SyscallFrame *f)
 {
     static int i = 0;
+
+    long a, b, c, d, e, g;
+    int fail =
+        arglong(f, 0, &a) ||
+        arglong(f, 1, &b) ||
+        arglong(f, 2, &c) ||
+        arglong(f, 3, &d) ||
+        arglong(f, 4, &e) ||
+        arglong(f, 5, &g);
+
+    if (fail)
+        return -1;
+
     cprintf("sys_hello(%d, %d, %d, %d, %d, %d): %d\n",
-            arglong(f, 0), arglong(f, 1), arglong(f, 2),
-            arglong(f, 3), arglong(f, 4), arglong(f, 5),
-            i++);
+            a, b, c, d, e, g, i++);
     return 0;
 }
 
-int
+long
 sys_goodbye(SyscallFrame *f)
 {
     static int i = 0;
-    cprintf("sys_goodbye(%d, %d, %d, %d, %d, %d): %d\n",
-            arglong(f, 0), arglong(f, 1), arglong(f, 2),
-            arglong(f, 3), arglong(f, 4), arglong(f, 5),
-            i++);
+
+    long a, b, c, d, e, g;
+    int fail =
+        arglong(f, 0, &a) ||
+        arglong(f, 1, &b) ||
+        arglong(f, 2, &c) ||
+        arglong(f, 3, &d) ||
+        arglong(f, 4, &e) ||
+        arglong(f, 5, &g);
+
+    if (fail)
+        return -1;
+
+    cprintf("sys_hello(%d, %d, %d, %d, %d, %d): %d\n",
+            a, b, c, d, e, g, i++);
     return 0;
 }
 
-int
+long
+sys_print(SyscallFrame *f)
+{
+    char *s;
+    if (argstr(f, 0, &s) < 0)
+        return -1;
+
+    cprintf("%s", s);
+
+    return 0;
+}
+
+long
 syscall(SyscallFrame *f)
 {
-    if (f->num > 0 && f->num < NELEM(syscalls) && syscalls[f->num]) {
+    if (f->num > 0 && f->num < nelem(syscalls) && syscalls[f->num]) {
         return syscalls[f->num](f);
     } else {
         cprintf("unknown syscall: %d\n", f->num);

@@ -60,6 +60,8 @@ mkproc(uchar *data)
     if (p->pgmap == nil)
         panic("mkproc - pgmap");
 
+    memzero(p->errstr, ERRMAX);
+    p->nextfd = 0;
     p->sz = 0;
 
     elf = (ElfHeader *)data;

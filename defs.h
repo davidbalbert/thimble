@@ -6,6 +6,7 @@ typedef unsigned long  Pte;
 typedef struct SpinLock SpinLock;
 typedef struct Registers Registers;
 typedef struct Proc Proc;
+typedef struct SyscallFrame SyscallFrame;
 
 // console.c
 void cprintf(char *fmt, ...);
@@ -29,6 +30,8 @@ void *memmove(void *dst, void *src, usize n);
 void *memset(void *p, int c, usize n);
 void *memzero(void *p, usize n);
 int isdigit(int c);
+int strcmp(char *s1, char *s2);
+usize strlen(char *s);
 long strtol(char *s, char **endptr, int base);
 
 // kbd.c
@@ -56,6 +59,11 @@ void yield(void);
 // switch.S
 void swtch(Registers **from, Registers *to);
 
+// syscall.c
+
+long arglong(SyscallFrame *f, int n, long *ip);
+long argstr(SyscallFrame *f, int n, char **pp);
+
 // syscallasm.S
 void sysinit(void);
 
@@ -78,4 +86,3 @@ void switchuvm(Proc *p);
 void *uva2ka(Pml4e *pgmap, void *addr);
 Pte *walkpgmap(Pml4e *pgmap, void *va, int alloc);
 
-#define NELEM(x) (sizeof(x)/sizeof((x)[0]))

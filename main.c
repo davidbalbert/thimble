@@ -16,7 +16,9 @@ main(void)
     cprintf("Hello, Thimble!\n");
 
     schedinit();
-    initmem1(end, p2v(4*MB));
+    // TODO: allocate fewer things (files, etc.) statically in the
+    // kernel so we need to map less memory initially
+    initmem1(end, p2v(16*MB));
     kvmalloc();
     seginit();
     trapinit();
@@ -25,7 +27,7 @@ main(void)
     timerinit();
     kbdinit();
 
-    initmem2(p2v(4*MB), p2v(PHYSTOP));
+    initmem2(p2v(16*MB), p2v(PHYSTOP));
 
     start(task1);
     start(task2);

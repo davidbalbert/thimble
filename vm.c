@@ -254,7 +254,7 @@ setupkvm(void)
 
     memzero(pgmap, PGSIZE);
 
-    for (k = kmap; k < &kmap[NELEM(kmap)]; k++)
+    for (k = kmap; k < &kmap[nelem(kmap)]; k++)
         if (mappages(pgmap, k->addr, k->phys_end-k->phys_start, k->phys_start, k->perm) < 0)
             return nil;
 

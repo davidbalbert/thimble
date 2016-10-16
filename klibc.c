@@ -60,3 +60,39 @@ strtol(char *s, char **endptr, int base)
 
     return i;
 }
+
+int
+strcmp(char *s1, char *s2)
+{
+    char *p1, *p2;
+
+    p1 = s1;
+    p2 = s2;
+
+    for (;;) {
+        if (*p1 == '\0' && *p2 == '\0')
+            return 0;
+        else if (*p1 == '\0')
+            return -1;
+        else if (*p2 == '\0')
+            return 1;
+        else if (*p1 < *p2)
+            return -1;
+        else if (*p1 > *p2)
+            return 1;
+
+        p1++;
+        p2++;
+    }
+}
+
+usize
+strlen(char *s)
+{
+    usize len;
+
+    for (len = 0; *s != '\0'; s++, len++)
+        ;
+
+    return len;
+}

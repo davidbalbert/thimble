@@ -94,12 +94,20 @@ typedef enum {
     READY,
 } ProcState;
 
+#define ERRMAX 1024
+#define NFD    1024
+
+typedef struct File File;
+
 struct Proc {
     ProcState state;
     Registers *regs;
     uchar *kstack;
     Pml4e *pgmap;
     usize sz;           // total size in memory
+    char errstr[ERRMAX];
+    File *files[NFD];
+    int nextfd;
 };
 typedef struct Proc Proc;
 

@@ -9,3 +9,5 @@ typedef unsigned long  ulong;
 
 typedef unsigned long  uintptr;
 typedef unsigned long  usize;
+
+#define nelem(x) (sizeof(x)/sizeof((x)[0]))
