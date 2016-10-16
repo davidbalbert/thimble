@@ -5,3 +5,4 @@
 #define SYS_OPEN    5
 #define SYS_CLOSE   6
 #define SYS_READ    7
+#define SYS_WRITE   8

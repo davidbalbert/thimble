@@ -39,3 +39,9 @@ read(int fd, void *buf, usize nbytes)
 {
     return syscall(SYS_READ, fd, buf, nbytes);
 }
+
+long
+write(int fd, void *buf, usize nbytes)
+{
+    return syscall(SYS_WRITE, fd, buf, nbytes);
+}

@@ -13,26 +13,21 @@ int
 main(void)
 {
     int fd;
-    char buf[1024];
-    usize nbytes;
+    char *s = "Hello, /dev/cons!\n";
 
-    fd = open("/hello.txt", OREAD);
+    fd = open("/dev/cons", OWRITE);
 
     if (fd < 0) {
-        print("couldn't open /hello.txt\n");
+        print("couldn't open /dev/cons\n");
         for (;;)
             ;
     }
 
-    if ((nbytes = read(fd, buf, sizeof(buf) - 1)) < 0) {
-        print("couldn't read /hello.txt\n");
+    if (write(fd, s, strlen(s)) < 0) {
+        print("couldn't write to /dev/cons");
         for (;;)
             ;
     }
-
-    buf[nbytes] = '\0';
-    print(buf);
-    print("\n");
 
     for(;;) {
         hello(1, 2, 3, 4, 5, 6);

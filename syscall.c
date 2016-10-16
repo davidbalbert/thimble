@@ -20,6 +20,7 @@ long sys_printlong(SyscallFrame *);
 long sys_open(SyscallFrame *);
 long sys_close(SyscallFrame *);
 long sys_read(SyscallFrame *);
+long sys_write(SyscallFrame *);
 
 static long (*syscalls[])(SyscallFrame *) = {
     [SYS_HELLO] sys_hello,
@@ -29,6 +30,7 @@ static long (*syscalls[])(SyscallFrame *) = {
     [SYS_OPEN] sys_open,
     [SYS_CLOSE] sys_close,
     [SYS_READ] sys_read,
+    [SYS_WRITE] sys_write,
 };
 
 // Be careful. This is called in kernel mode but on the user's

@@ -15,3 +15,13 @@ void printlong(long l);
 int open(char *file, int omode);
 int close(int fd);
 long read(int fd, void *buf, usize nbytes);
+long write(int fd, void *buf, usize nbytes);
+
+
+void *memmove(void *dst, void *src, usize n);
+void *memset(void *p, int c, usize n);
+void *memzero(void *p, usize n);
+int isdigit(int c);
+int strcmp(char *s1, char *s2);
+usize strlen(char *s);
+long strtol(char *s, char **endptr, int base);

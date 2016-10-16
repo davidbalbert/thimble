@@ -47,13 +47,46 @@ allocfile(void)
     for (f = &files[0]; f < &files[nelem(files)]; f++) {
         if (f->ref == 0) {
             f->ref++;
-            f->read = readfile;
-            f->write = writefile;
             return f;
         }
     }
 
     return nil;
+}
+
+static void
+initfile(File *f, char *data, usize size)
+{
+    f->read = readfile;
+    f->write = writefile;
+    f->data = data;
+    f->sz = size;
+}
+
+static long
+readcons(File *f, char *buf, usize nbytes)
+{
+    return -1;
+}
+
+static long
+writecons(File *f, char *buf, usize nbytes)
+{
+    char s[nbytes+1];
+
+    memmove(s, buf, nbytes);
+    s[nbytes] = '\0';
+
+    cprintf("%s", s);
+
+    return nbytes;
+}
+
+static void
+consfile(File *f)
+{
+    f->read = readcons;
+    f->write = writecons;
 }
 
 static int
@@ -91,13 +124,15 @@ getfile(char *fname)
         return nil;
 
     if (strcmp(fname, "/hello.txt") == 0) {
-        f->data = hello;
-        f->sz = strlen(hello);
-        return f;
+        initfile(f, hello, strlen(hello));
+    } else if (strcmp(fname, "/dev/cons") == 0) {
+        consfile(f);
     } else {
         freefile(f);
-        return nil;
+        f = nil;
     }
+
+    return f;
 }
 
 static int
@@ -133,7 +168,7 @@ sys_open(SyscallFrame *f)
     }
 
     file = getfile(fname);
-    if (f == nil)
+    if (file == nil)
         return -1;
 
     fd = allocfd(proc, file);
@@ -153,7 +188,8 @@ sys_close(SyscallFrame *f)
     return -1;
 }
 
-long sys_read(SyscallFrame *f)
+long
+sys_read(SyscallFrame *f)
 {
     int fd;
     long l;
@@ -189,4 +225,43 @@ long sys_read(SyscallFrame *f)
     file = proc->files[fd];
 
     return file->read(file, (char *)buf, nbytes);
+}
+
+long
+sys_write(SyscallFrame *f)
+{
+    int fd;
+    long l;
+    uintptr buf;
+    usize nbytes;
+    File *file;
+
+    // fd
+    if (arglong(f, 0, &l) < 0) {
+        // todo errstr
+        return -1;
+    }
+    fd = (int)l;
+
+    // nbytes (needed for argptr)
+    if (arglong(f, 2, &l) < 0) {
+        // todo errstr
+        return -1;
+    }
+    nbytes = (usize)l;
+
+    // buf
+    if (argptr(f, 1, &buf, nbytes) < 0) {
+        // todo errstr
+        return -1;
+    }
+
+    if (fd >= proc->nextfd) {
+        // todo errstr
+        return -1;
+    }
+
+    file = proc->files[fd];
+
+    return file->write(file, (char *)buf, nbytes);
 }
