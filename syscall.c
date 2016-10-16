@@ -100,6 +100,27 @@ argstr(SyscallFrame *f, int n, char **pp)
 }
 
 long
+argfd(SyscallFrame *f, int n, int *fd)
+{
+    long l;
+
+    if (n > 5)
+        panic("argstr");
+
+    if (arglong(f, n, &l) < 0)
+        return -1;
+
+    if ((int)l >= proc->nextfd) {
+        // todo errstr
+        return -1;
+    }
+
+    *fd = (int)l;
+
+    return 0;
+}
+
+long
 sys_hello(SyscallFrame *f)
 {
     static int i = 0;

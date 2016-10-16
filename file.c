@@ -198,11 +198,8 @@ sys_read(SyscallFrame *f)
     File *file;
 
     // fd
-    if (arglong(f, 0, &l) < 0) {
-        // todo errstr
+    if (argfd(f, 0, &fd) < 0)
         return -1;
-    }
-    fd = (int)l;
 
     // nbytes (needed for argptr)
     if (arglong(f, 2, &l) < 0) {
@@ -213,11 +210,6 @@ sys_read(SyscallFrame *f)
 
     // buf
     if (argptr(f, 1, &buf, nbytes) < 0) {
-        // todo errstr
-        return -1;
-    }
-
-    if (fd >= proc->nextfd) {
         // todo errstr
         return -1;
     }
@@ -237,11 +229,8 @@ sys_write(SyscallFrame *f)
     File *file;
 
     // fd
-    if (arglong(f, 0, &l) < 0) {
-        // todo errstr
+    if (argfd(f, 0, &fd) < 0)
         return -1;
-    }
-    fd = (int)l;
 
     // nbytes (needed for argptr)
     if (arglong(f, 2, &l) < 0) {
@@ -252,11 +241,6 @@ sys_write(SyscallFrame *f)
 
     // buf
     if (argptr(f, 1, &buf, nbytes) < 0) {
-        // todo errstr
-        return -1;
-    }
-
-    if (fd >= proc->nextfd) {
         // todo errstr
         return -1;
     }
