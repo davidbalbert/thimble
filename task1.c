@@ -13,9 +13,16 @@ int
 main(void)
 {
     int fd;
+    char buf[1024];
     char *s = "Hello, /dev/cons!\n";
 
     fd = open("/dev/cons", OWRITE);
+
+    if (write(123, "hello\n", 6) >= 0) {
+        print("shouldn't be able to write to fd 123\n");
+        for (;;)
+            ;
+    }
 
     if (fd < 0) {
         print("couldn't open /dev/cons\n");
@@ -24,7 +31,21 @@ main(void)
     }
 
     if (write(fd, s, strlen(s)) < 0) {
-        print("couldn't write to /dev/cons");
+        print("couldn't write to /dev/cons\n");
+        for (;;)
+            ;
+    }
+
+    if (read(fd, buf, sizeof(buf) - 1) >= 0) {
+        print("shouldn't have been able to read /dev/cons open for writing only");
+        for (;;)
+            ;
+    }
+
+    close(fd);
+
+    if (write(fd, "hello\n", 6) >= 0) {
+        print("shouldn't be able to write to closed fd\n");
         for (;;)
             ;
     }

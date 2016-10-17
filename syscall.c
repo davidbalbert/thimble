@@ -1,6 +1,7 @@
 #include "u.h"
 
 #include "defs.h"
+#include "file.h"
 #include "mem.h"
 #include "proc.h"
 #include "syscall.h"
@@ -103,19 +104,25 @@ long
 argfd(SyscallFrame *f, int n, int *fd)
 {
     long l;
+    int i;
+
 
     if (n > 5)
         panic("argstr");
 
     if (arglong(f, n, &l) < 0)
         return -1;
+    i = (int)l;
 
-    if ((int)l >= proc->nextfd) {
+    if (i >= proc->nextfd || proc->files[i] == nil) {
         // todo errstr
         return -1;
     }
 
-    *fd = (int)l;
+    if (proc->files[i]->ref < 1)
+        panic("argfd - proc->files[fd] references unallocated file");
+
+    *fd = i;
 
     return 0;
 }

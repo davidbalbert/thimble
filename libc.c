@@ -34,6 +34,12 @@ open(char *file, int omode)
     return (int)syscall(SYS_OPEN, file, omode);
 }
 
+int
+close(int fd)
+{
+    return (int)syscall(SYS_CLOSE, fd);
+}
+
 long
 read(int fd, void *buf, usize nbytes)
 {

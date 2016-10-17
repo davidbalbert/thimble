@@ -1,23 +1,11 @@
 #include "u.h"
 
 #include "defs.h"
+#include "file.h"
 #include "lib.h"
 #include "proc.h"
 
-typedef struct File File;
-struct File {
-    long (*read)(File *f, char *buf, usize nbytes);
-    long (*write)(File *f, char *buf, usize nbytes);
-
-    int ref;    // reference count
-    char *data;
-    usize sz;
-    usize pos;
-    int omode;
-};
-
 #define NFILE 2048
-
 static File files[NFILE];
 
 static char *hello = "Hello Thimble from a file!";
@@ -116,6 +104,13 @@ freefile(File *f)
     f->pos = 0;
 }
 
+static void
+releasefile(File *f)
+{
+    if (--f->ref == 0)
+        freefile(f);
+}
+
 static File *
 getfile(char *fname)
 {
@@ -171,6 +166,8 @@ sys_open(SyscallFrame *f)
     if (file == nil)
         return -1;
 
+    file->omode = omode;
+
     fd = allocfd(proc, file);
 
     if (fd == -1) {
@@ -185,7 +182,20 @@ sys_open(SyscallFrame *f)
 long
 sys_close(SyscallFrame *f)
 {
-    return -1;
+    int fd;
+    File *file;
+
+    if (argfd(f, 0, &fd)) {
+        // todo errstr
+        return -1;
+    }
+
+    file = proc->files[fd];
+
+    releasefile(file);
+    proc->files[fd] = nil;
+
+    return 0;
 }
 
 long
@@ -215,6 +225,11 @@ sys_read(SyscallFrame *f)
     }
 
     file = proc->files[fd];
+
+    if (!(file->omode & (OREAD | ORDWR))) {
+        // todo errstr
+        return -1;
+    }
 
     return file->read(file, (char *)buf, nbytes);
 }
@@ -246,6 +261,11 @@ sys_write(SyscallFrame *f)
     }
 
     file = proc->files[fd];
+
+    if (!(file->omode &(OWRITE | ORDWR))) {
+        // todo errstr
+        return -1;
+    }
 
     return file->write(file, (char *)buf, nbytes);
 }
