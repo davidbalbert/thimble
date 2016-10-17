@@ -17,6 +17,8 @@ readfile(File *f, char *buf, usize nbytes)
         nbytes = f->sz;
 
     memmove(buf, f->data, nbytes);
+    f->pos += nbytes;
+
     return nbytes;
 }
 
