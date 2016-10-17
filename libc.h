@@ -1,8 +1,3 @@
-long hello(int a, int b, int c, int d, int e, int f);
-long goodbye(int a, int b, int c, int d, int e, int f);
-void print(char *s);
-void printlong(long l);
-
 #define OREAD   (1<<0)
 #define OWRITE  (1<<1)
 #define ORDWR   (1<<2)

@@ -9,49 +9,51 @@ wastetime(void)
         ;
 }
 
+// placeholder until I port printf/print
+void
+ltoa(long n, char *buf)
+{
+    char *numbers = "0123456789";
+    char tmp[21]; // max number of digits for a decimal long, optional sign, and null byte.
+    ulong n2;
+    int i, j;
+
+    if (n < 0)
+        n2 = -n;
+    else
+        n2 = n;
+
+    i = 0;
+
+    do {
+        tmp[i++] = numbers[n2 % 10];
+        n2 /= 10;
+    } while (n2 != 0);
+
+    if (n < 0)
+        tmp[i++] = '-';
+
+    for (j = 0, i -= 1; i >= 0; i--, j++)
+        buf[j] = tmp[i];
+
+    buf[j] = '\0';
+}
+
 int
 main(void)
 {
     int fd;
-    char buf[1024];
-    char *s = "Hello, /dev/cons!\n";
+    char buf[21];
+    long l = 0;
+    char *label = "task1: ";
 
     fd = open("/dev/cons", OWRITE);
 
-    if (write(123, "hello\n", 6) >= 0) {
-        print("shouldn't be able to write to fd 123\n");
-        for (;;)
-            ;
-    }
-
-    if (fd < 0) {
-        print("couldn't open /dev/cons\n");
-        for (;;)
-            ;
-    }
-
-    if (write(fd, s, strlen(s)) < 0) {
-        print("couldn't write to /dev/cons\n");
-        for (;;)
-            ;
-    }
-
-    if (read(fd, buf, sizeof(buf) - 1) >= 0) {
-        print("shouldn't have been able to read /dev/cons open for writing only");
-        for (;;)
-            ;
-    }
-
-    close(fd);
-
-    if (write(fd, "hello\n", 6) >= 0) {
-        print("shouldn't be able to write to closed fd\n");
-        for (;;)
-            ;
-    }
-
     for(;;) {
-        hello(1, 2, 3, 4, 5, 6);
+        write(fd, label, strlen(label));
+        ltoa(l++, buf);
+        write(fd, buf, strlen(buf));
+        write(fd, "\n", 1);
         wastetime();
     }
 }

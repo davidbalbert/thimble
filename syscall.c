@@ -13,21 +13,12 @@ struct SyscallFrame {
 };
 typedef struct SyscallFrame SyscallFrame;
 
-long sys_hello(SyscallFrame *);
-long sys_goodbye(SyscallFrame *);
-long sys_print(SyscallFrame *);
-long sys_printlong(SyscallFrame *);
-
 long sys_open(SyscallFrame *);
 long sys_close(SyscallFrame *);
 long sys_read(SyscallFrame *);
 long sys_write(SyscallFrame *);
 
 static long (*syscalls[])(SyscallFrame *) = {
-    [SYS_HELLO] sys_hello,
-    [SYS_GOODBYE] sys_goodbye,
-    [SYS_PRINT] sys_print,
-    [SYS_PRINTLONG] sys_printlong,
     [SYS_OPEN] sys_open,
     [SYS_CLOSE] sys_close,
     [SYS_READ] sys_read,
@@ -123,75 +114,6 @@ argfd(SyscallFrame *f, int n, int *fd)
         panic("argfd - proc->files[fd] references unallocated file");
 
     *fd = i;
-
-    return 0;
-}
-
-long
-sys_hello(SyscallFrame *f)
-{
-    static int i = 0;
-
-    long a, b, c, d, e, g;
-    int fail =
-        arglong(f, 0, &a) ||
-        arglong(f, 1, &b) ||
-        arglong(f, 2, &c) ||
-        arglong(f, 3, &d) ||
-        arglong(f, 4, &e) ||
-        arglong(f, 5, &g);
-
-    if (fail)
-        return -1;
-
-    cprintf("sys_hello(%d, %d, %d, %d, %d, %d): %d\n",
-            a, b, c, d, e, g, i++);
-    return 0;
-}
-
-long
-sys_goodbye(SyscallFrame *f)
-{
-    static int i = 0;
-
-    long a, b, c, d, e, g;
-    int fail =
-        arglong(f, 0, &a) ||
-        arglong(f, 1, &b) ||
-        arglong(f, 2, &c) ||
-        arglong(f, 3, &d) ||
-        arglong(f, 4, &e) ||
-        arglong(f, 5, &g);
-
-    if (fail)
-        return -1;
-
-    cprintf("sys_goodbye(%d, %d, %d, %d, %d, %d): %d\n",
-            a, b, c, d, e, g, i++);
-    return 0;
-}
-
-long
-sys_print(SyscallFrame *f)
-{
-    char *s;
-    if (argstr(f, 0, &s) < 0)
-        return -1;
-
-    cprintf("%s", s);
-
-    return 0;
-}
-
-long
-sys_printlong(SyscallFrame *f)
-{
-    long l;
-
-    if (arglong(f, 0, &l) < 0)
-        return -1;
-
-    cprintf("%l\n", l);
 
     return 0;
 }
