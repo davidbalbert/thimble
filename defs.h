@@ -14,6 +14,7 @@ void cclear(void);
 void cputs(char *s);
 void cputc(uchar c);
 void cvprintf(char *fmt, va_list ap);
+void cwrite(char *buf, usize nbytes);
 
 // kalloc.c
 void initmem1(void *start, void *end);
@@ -60,7 +61,6 @@ void yield(void);
 void swtch(Registers **from, Registers *to);
 
 // syscall.c
-
 long argfd(SyscallFrame *f, int n, int *fd);
 long arglong(SyscallFrame *f, int n, long *ip);
 long argptr(SyscallFrame *f, int n, uintptr *p, usize size);

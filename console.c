@@ -79,7 +79,9 @@ static void cputs0(char *s);
 static void
 cputc0(uchar c)
 {
-    if (c == '\n') {
+    if (c == '\0') // todo: include all other non-printable characters
+        return;
+    else if (c == '\n') {
         pos += COLS - pos%COLS;
 
         if (pos >= CSIZE)
@@ -243,3 +245,10 @@ cprintf(char *fmt, ...)
     va_end(ap);
 }
 
+void
+cwrite(char *buf, usize nbytes)
+{
+    for (; nbytes > 0; nbytes--, buf++)
+        cputc0(*buf);
+    updatecursor();
+}

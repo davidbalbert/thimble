@@ -51,6 +51,7 @@ initfile(File *f, char *data, usize size)
     f->write = writefile;
     f->data = data;
     f->sz = size;
+    f->pos = 0;
 }
 
 static long
@@ -62,13 +63,7 @@ readcons(File *f, char *buf, usize nbytes)
 static long
 writecons(File *f, char *buf, usize nbytes)
 {
-    char s[nbytes+1];
-
-    memmove(s, buf, nbytes);
-    s[nbytes] = '\0';
-
-    cprintf("%s", s);
-
+    cwrite(buf, nbytes);
     return nbytes;
 }
 
@@ -109,7 +104,8 @@ freefile(File *f)
 static void
 releasefile(File *f)
 {
-    if (--f->ref == 0)
+    f->ref--;
+    if (f->ref == 0)
         freefile(f);
 }
 
