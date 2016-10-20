@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 if [ "$0" != "$BASH_SOURCE" ]; then
-  echo "setup.bash is not for sourcing. You probably meant to source env.bash." >&2
+  echo "mktoolchain.bash is not for sourcing. You probably meant to source env.bash." >&2
   return
 fi
 
