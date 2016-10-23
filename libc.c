@@ -27,3 +27,15 @@ write(int fd, void *buf, usize nbytes)
 {
     return syscall(SYS_WRITE, fd, buf, nbytes);
 }
+
+int
+fork(void)
+{
+    return rfork(RFFDG|RFREND|RFPROC);
+}
+
+int
+rfork(int flags)
+{
+    return syscall(SYS_RFORK, flags);
+}

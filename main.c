@@ -29,8 +29,8 @@ main(void)
 
     initmem2(p2v(16*MB), p2v(PHYSTOP));
 
-    start(task1);
-    start(task2);
+    mkproc(task1);
+    mkproc(task2);
 
     scheduler();
 }

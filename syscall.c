@@ -7,22 +7,18 @@
 #include "syscall.h"
 #include "x86.h"
 
-struct SyscallFrame {
-    ulong num;
-    ulong args[6];
-};
-typedef struct SyscallFrame SyscallFrame;
-
 long sys_open(SyscallFrame *);
 long sys_close(SyscallFrame *);
 long sys_read(SyscallFrame *);
 long sys_write(SyscallFrame *);
+long sys_rfork(SyscallFrame *);
 
 static long (*syscalls[])(SyscallFrame *) = {
     [SYS_OPEN] sys_open,
     [SYS_CLOSE] sys_close,
     [SYS_READ] sys_read,
     [SYS_WRITE] sys_write,
+    [SYS_RFORK] sys_rfork,
 };
 
 // Be careful. This is called in kernel mode but on the user's
@@ -31,20 +27,50 @@ static long (*syscalls[])(SyscallFrame *) = {
 uchar *
 kstacktop(void)
 {
-    if (proc == 0)
+    if (proc == nil)
         panic("kstacktop");
 
     return proc->kstack + KSTACKSIZE;
 }
 
+void
+saveusp(uchar *usp)
+{
+    if (proc == nil)
+        panic("saveusp");
+
+    proc->usp = usp;
+}
+
+uchar *
+getusp(void)
+{
+    if (proc == nil)
+        panic("getusp");
+
+    return proc->usp;
+}
+
+
 // Fetch the nth syscall argument. N starts at 0.
 long
-arglong(SyscallFrame *f, int n, long *ip)
+arglong(SyscallFrame *f, int n, long *lp)
 {
     if (n > 5)
         panic("arglong");
 
-    *ip = f->args[n];
+    *lp = f->args[n];
+    return 0;
+}
+
+long
+argint(SyscallFrame *f, int n, int *ip)
+{
+    long l;
+    if (arglong(f, n, &l) < 0)
+        return -1;
+
+    *ip = (int)l;
     return 0;
 }
 

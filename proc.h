@@ -89,6 +89,8 @@ struct Cpu {
 typedef struct Cpu Cpu;
 
 typedef enum {
+    UNUSED,
+    EMBRYO,
     RUNNING,
     WAITING,
     READY,
@@ -102,7 +104,9 @@ typedef struct File File;
 struct Proc {
     ProcState state;
     Registers *regs;
-    uchar *kstack;
+    int pid;
+    uchar *kstack;      // base of the kernel stack
+    uchar *usp;         // top of the user stack, saved in syscall0
     Pml4e *pgmap;
     usize sz;           // total size in memory
     char errstr[ERRMAX];
@@ -110,6 +114,12 @@ struct Proc {
     int nextfd;
 };
 typedef struct Proc Proc;
+
+struct SyscallFrame {
+    ulong num;
+    ulong args[6];
+};
+typedef struct SyscallFrame SyscallFrame;
 
 extern Cpu  *cpu;   // current cpu
 extern Proc *proc;  // current process

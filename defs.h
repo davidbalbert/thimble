@@ -54,7 +54,7 @@ void picenable(uchar irq);
 void panic(char *fmt, ...) __attribute__((noreturn));
 void schedinit(void);
 void scheduler(void) __attribute__((noreturn));
-void start(uchar *data);
+void mkproc(uchar *data);
 void yield(void);
 
 // switch.S
@@ -62,7 +62,8 @@ void swtch(Registers **from, Registers *to);
 
 // syscall.c
 long argfd(SyscallFrame *f, int n, int *fd);
-long arglong(SyscallFrame *f, int n, long *ip);
+long argint(SyscallFrame *f, int n, int *ip);
+long arglong(SyscallFrame *f, int n, long *lp);
 long argptr(SyscallFrame *f, int n, uintptr *p, usize size);
 long argstr(SyscallFrame *f, int n, char **pp);
 
@@ -79,6 +80,7 @@ void trapinit(void);
 // vm.c
 usize allocuvm(Pml4e *pgmap, usize oldsz, usize newsz);
 void clearpteu(Pml4e *pgmap, void *addr);
+void freeuvm(Pml4e *pgmap);
 void kvmalloc(void);
 void loaduvm(Pml4e *pgmap, char *addr, uchar *data, usize sz);
 void seginit(void);

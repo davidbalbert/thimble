@@ -6,14 +6,14 @@
 #define LSTAR 0xC0000082    // %rip for syscall entry
 #define FMASK 0xC0000084
 
-#define SCE   0                // syscall enable bit of EFER
+#define SCE   0             // syscall enable bit of EFER
 
 
 # Note: This has to mirror the stack structure in
 # mkproc. If you make changes here, you must make
 # the same changes there!
 
-.globl syscall0
+.global syscall0
 syscall0:
     push    %r12        # temporary storage
     push    %r13
@@ -23,28 +23,52 @@ syscall0:
 
     mov     %rax, %r12  # temporarily save syscall num
 
-    call    kstacktop   # top of kstack -> rax
-
-    mov     %rsp, %r13  # temp user stack pointer
-
-    #####################
-
-    mov     %rax, %rsp  # switch to the kernel stack
-    push    %r13        # save the user stack pointer on kernel stack
-
+    # save syscall args before calling kstacktop
     push    %r9
     push    %r8
     push    %r10
     push    %rdx
     push    %rsi
     push    %rdi
-    push    %r12
+
+    call    kstacktop   # top of kstack -> rax
+
+    pop     %rdi
+    pop     %rsi
+    pop     %rdx
+    pop     %r10
+    pop     %r8
+    pop     %r9
+
+
+    mov     %rsp, %r13  # temp user stack pointer
+
+    #####################
+
+    mov     %rax, %rsp  # switch to the kernel stack
+
+    # build a SyscallFrame
+    push    %r9
+    push    %r8
+    push    %r10
+    push    %rdx
+    push    %rsi
+    push    %rdi
+    push    %r12        # contains rax
 
     mov     %rsp, %rdi  # SyscallFrame as first arg to syscall
+
+    # save user stack pointer
+    push    %rdi        # temporarily save rdi so we can use it for a function argument
+    mov     %r13, %rdi
+    call    saveusp     # save the user stack pointer in proc
+    pop     %rdi
+
     call    syscall
 
-.globl sysret
+.global sysret
 sysret:
+    # get rid of SyscallFrame
     pop     %r12
     pop     %rdi
     pop     %rsi
@@ -53,9 +77,15 @@ sysret:
     pop     %r8
     pop     %r9
 
+    # get user stack pointer
+    push    %rax        # temporarily save syscall return value
+    call    getusp
+    mov     %rax, %r13  # save user stack pointer
+    pop     %rax        # restore syscal return value
+
     #####################
 
-    pop     %rsp        # switch back to the user stack
+    mov     %r13, %rsp  # switch back to the user stack
 
     pop     %rcx        # restore return address
     pop     %r11        # restore flags
@@ -65,7 +95,7 @@ sysret:
 
     sysretq
 
-.globl sysinit
+.global sysinit
 sysinit:
     # Enable syscall/sysret
     # There's a lot of poking at MSRs. Rdmsr and wrmsr operate on

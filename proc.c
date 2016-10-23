@@ -3,6 +3,7 @@
 #include "cpu.h"
 #include "defs.h"
 #include "elf.h"
+#include "lib.h"
 #include "lock.h"
 #include "mem.h"
 #include "proc.h"
@@ -12,9 +13,10 @@
 
 static struct {
     SpinLock lock;
-    int n;
     Proc procs[NPROCS];
 } ptable;
+
+int nextpid = 1;
 
 #define MAXCPU 8
 
@@ -33,28 +35,84 @@ procbegin(void)
 
 void sysret(void);
 
+static Proc *
+allocproc(void)
+{
+    Proc *p;
+    uchar *sp;
+
+    lock(&ptable.lock);
+
+    for (p = ptable.procs; p < &ptable.procs[NPROCS]; p++)
+        if (p->state == UNUSED)
+            goto found;
+
+    unlock(&ptable.lock);
+    return nil;
+
+found:
+    p->state = EMBRYO;
+    p->pid = nextpid++;
+
+    unlock(&ptable.lock);
+
+    if ((p->kstack = kalloc()) == nil) {
+        p->state = UNUSED;
+        return nil;
+    }
+
+    sp = p->kstack + KSTACKSIZE;
+
+    // This has to match the kernel stack structure in
+    // syscallasm.S.
+
+    sp -= sizeof(SyscallFrame);
+
+    // Procbegin returns to sysret
+    sp -= 8;
+    *(ulong *)sp = (ulong)sysret;
+
+    sp -= sizeof(Registers);
+
+    p->regs = (Registers *)sp;
+    memzero(p->regs, sizeof(Registers));
+
+    // Our first call to swtch will return to procbegin
+    p->regs->rip = (ulong)procbegin;
+
+    return p;
+}
+
 static void
+freeproc(Proc *p)
+{
+    lock(&ptable.lock);
+
+    kfree(p->kstack);
+    p->kstack = nil;
+
+    freeuvm(p->pgmap);
+    p->pgmap = nil;
+
+    p->state = UNUSED;
+
+    // TODO: close file references
+
+    unlock(&ptable.lock);
+}
+
+void
 mkproc(uchar *data)
 {
     Proc *p;
-    uchar *ksp;     // kernal virtual address of kernal stack pointer
-    uchar *usp;     // kernel virtual address of user stack pointer
-    uchar *ustack;  // user virtual address of user stack pointer
+    uchar *usp;     // user virtual address of user stack pointer
+    uchar *ustack;  // kernel virtual address of user stack pointer
     ElfHeader *elf;
     ElfProgHeader *ph, *eph;
 
-    if (ptable.n >= NPROCS)
-        panic("mkproc - nprocs");
-
-    p = &ptable.procs[ptable.n++];
-
-    p->kstack = kalloc();
-    if (p->kstack == nil)
-        panic("mkproc - kstack");
-
-    p->state = READY;
-
-    ksp = p->kstack + KSTACKSIZE;
+    p = allocproc();
+    if (p == nil)
+        panic("mkproc - allocproc");
 
     p->pgmap = setupkvm();
     if (p->pgmap == nil)
@@ -92,52 +150,39 @@ mkproc(uchar *data)
     clearpteu(p->pgmap, (void *)(p->sz - 2*PGSIZE));
 
     // get user stack pointer
-    ustack = (uchar *)p->sz;
+    usp = (uchar *)p->sz;
 
     // p->sz isn't mapped in (0 to p->sz - 1 is), so we can't just
     // ask uva2ka for the kernel address of p->sz
-    usp = uva2ka(p->pgmap, (void *)(p->sz - PGSIZE)) + PGSIZE;
+    ustack = uva2ka(p->pgmap, (void *)(p->sz - PGSIZE)) + PGSIZE;
 
     // fake return address
-    usp -= 8;
     ustack -= 8;
-    *(ulong *)usp = (ulong)-1;
+    usp -= 8;
+    *(ulong *)ustack = (ulong)-1;
 
-    // This has to mirror the stack structure in
+    // This has to mirror the user stack structure in
     // syscallasm.S.
 
     // %r12 and %r13 are used as temporary storage
-    usp -= 16;
     ustack -= 16;
+    usp -= 16;
 
     // rflags
-    usp -= 8;
     ustack -= 8;
-    *(ulong *)usp = FL_IF;
+    usp -= 8;
+    *(ulong *)ustack = FL_IF;
 
     // entry point
-    usp -= 8;
     ustack -= 8;
-    *(ulong *)usp = elf->entry; // text is loaded at zero
+    usp -= 8;
+    *(ulong *)ustack = elf->entry; // text is loaded at zero
 
-    // user stack
-    ksp -= 8;
-    *(ulong *)ksp = (ulong)ustack;
+    p->usp = usp;
 
-    // SyscallFrame (syscall num and 6 args)
-    ksp -= 7*8;
-
-    // Procbegin returns to sysret
-    ksp -= 8;
-    *(ulong *)ksp = (ulong)sysret;
-
-    ksp -= sizeof(Registers);
-
-    p->regs = (Registers *)ksp;
-    memzero(p->regs, sizeof(Registers));
-
-    // Our first call to swtch will return to procbegin
-    p->regs->rip = (ulong)procbegin;
+    lock(&ptable.lock);
+    p->state = READY;
+    unlock(&ptable.lock);
 }
 
 void
@@ -158,12 +203,46 @@ panic(char *fmt, ...)
         hlt();
 }
 
-void
-start(uchar *data)
+int
+rfork(int flags)
 {
-    lock(&ptable.lock);
-    mkproc(data);
-    unlock(&ptable.lock);
+    Proc *newp;
+    uchar *kstack;
+
+    if (!(flags & RFPROC))
+        return 0;
+
+    newp = allocproc();
+    if (newp == nil) {
+        // todo errstr
+        return -1;
+    }
+
+    if (!(flags & RFFDG))
+        panic("rfork - cannot share fd table yet");
+
+    if ((kstack = kalloc()) == nil) {
+        freeproc(newp);
+        // todo errstr
+        return -1;
+    }
+
+    memmove(kstack, proc->kstack, PGSIZE);
+
+    return 0;
+}
+
+long
+sys_rfork(SyscallFrame *f)
+{
+    int flags;
+
+    if (argint(f, 0, &flags) < 0) {
+        // todo errstr
+        return -1;
+    }
+
+    return rfork(flags);
 }
 
 static void

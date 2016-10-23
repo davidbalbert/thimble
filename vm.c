@@ -356,6 +356,12 @@ switchuvm(Proc *p)
 }
 
 void
+freeuvm(Pml4e *pgmap)
+{
+    // todo
+}
+
+void
 seginit(void)
 {
     codedesc(&cpu->gdt[SEG_KCODE], KERN_DPL);
