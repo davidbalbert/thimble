@@ -78,8 +78,8 @@ seta20.2:
     mov     $(0x2000 / 4), %ecx
     rep stosl               # Zeroes (EAX) out 0x2000 (ECX) bytes in 4 byte increments starting at 0x1000 (EDI)
 
-    # First, identity map the first 4 GB. We mark each entry as present,
-    # writable, and user accessible.
+    # First, identity map the first 4 GB. We mark each entry as present
+    # and writable.
     #
     mov     $0x1000, %eax
     mov     $0x2000, %edx
