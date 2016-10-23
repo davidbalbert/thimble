@@ -16,6 +16,9 @@ void cputc(uchar c);
 void cvprintf(char *fmt, va_list ap);
 void cwrite(char *buf, usize nbytes);
 
+// file.c
+void fileinit(void);
+
 // kalloc.c
 void initmem1(void *start, void *end);
 void initmem2(void *start, void *end);

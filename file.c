@@ -3,10 +3,15 @@
 #include "defs.h"
 #include "file.h"
 #include "lib.h"
+#include "lock.h"
 #include "proc.h"
 
-#define NFILE 2048
-static File files[NFILE];
+#define NFILE 100
+
+static struct {
+    SpinLock lock;
+    File files[NFILE];
+} ftable;
 
 static char *hello = "Hello Thimble from a file!";
 
@@ -34,12 +39,15 @@ allocfile(void)
 {
     File *f;
 
-    for (f = &files[0]; f < &files[nelem(files)]; f++) {
+    lock(&ftable.lock);
+    for (f = ftable.files; f < &ftable.files[nelem(ftable.files)]; f++) {
         if (f->ref == 0) {
             f->ref++;
+            unlock(&ftable.lock);
             return f;
         }
     }
+    unlock(&ftable.lock);
 
     return nil;
 }
@@ -92,6 +100,8 @@ allocfd(Proc *p, File *f)
 static void
 freefile(File *f)
 {
+    lock(&ftable.lock);
+
     f->read = nil;
     f->write = nil;
 
@@ -99,6 +109,8 @@ freefile(File *f)
     f->data = nil;
     f->sz = 0;
     f->pos = 0;
+
+    unlock(&ftable.lock);
 }
 
 static void
@@ -266,4 +278,10 @@ sys_write(SyscallFrame *f)
     }
 
     return file->write(file, (char *)buf, nbytes);
+}
+
+void
+fileinit(void)
+{
+    initlock(&ftable.lock);
 }
