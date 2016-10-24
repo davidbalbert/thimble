@@ -101,6 +101,7 @@ typedef enum {
 
 typedef struct File File;
 
+typedef struct Proc Proc;
 struct Proc {
     ProcState state;
     Registers *regs;
@@ -112,8 +113,8 @@ struct Proc {
     char errstr[ERRMAX];
     File *files[NFD];
     int nextfd;
+    Proc *parent;
 };
-typedef struct Proc Proc;
 
 struct SyscallFrame {
     ulong num;

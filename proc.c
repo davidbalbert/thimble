@@ -88,11 +88,15 @@ freeproc(Proc *p)
 {
     lock(&ptable.lock);
 
-    kfree(p->kstack);
-    p->kstack = nil;
+    if (p->kstack) {
+        kfree(p->kstack);
+        p->kstack = nil;
+    }
 
-    freeuvm(p->pgmap);
-    p->pgmap = nil;
+    if (p->pgmap) {
+        freeuvm(p->pgmap);
+        p->pgmap = nil;
+    }
 
     p->state = UNUSED;
 
@@ -218,18 +222,29 @@ rfork(int flags)
         return -1;
     }
 
-    if (!(flags & RFFDG))
-        panic("rfork - cannot share fd table yet");
-
-    if ((kstack = kalloc()) == nil) {
+    newp->pgmap = copyuvm(proc->pgmap, proc->sz);
+    if (newp->pgmap == nil) {
         freeproc(newp);
-        // todo errstr
         return -1;
     }
 
-    memmove(kstack, proc->kstack, PGSIZE);
+    newp->sz = proc->sz;
+    newp->parent = proc;
 
-    return 0;
+    if (!(flags & RFFDG))
+        panic("rfork - cannot share fd table yet");
+    else
+        copyfds(proc, newp); // also copy nextfd here
+
+
+    // how to return zero in new proc? need to mess with kstack?
+
+
+    lock(&ptable.lock);
+    newp->state = READY;
+    unlock(&ptable.lock);
+
+    return newp->pid;
 }
 
 long

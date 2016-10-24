@@ -355,9 +355,15 @@ switchuvm(Proc *p)
     popcli();
 }
 
+Pml4e *
+copyuvm(Pml4e *oldmap, usize sz)
+{
+}
+
 void
 freeuvm(Pml4e *pgmap)
 {
+    cprintf("freeuvm not implemented yet!\n");
     // todo
 }
 

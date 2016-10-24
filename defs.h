@@ -83,6 +83,7 @@ void trapinit(void);
 // vm.c
 usize allocuvm(Pml4e *pgmap, usize oldsz, usize newsz);
 void clearpteu(Pml4e *pgmap, void *addr);
+Pml4e copyuvm(Pml4e *oldmap, usize sz);
 void freeuvm(Pml4e *pgmap);
 void kvmalloc(void);
 void loaduvm(Pml4e *pgmap, char *addr, uchar *data, usize sz);
