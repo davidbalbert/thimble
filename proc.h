@@ -117,6 +117,7 @@ struct Proc {
 };
 
 struct SyscallFrame {
+    long ret;
     ulong num;
     ulong args[6];
 };

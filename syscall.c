@@ -144,13 +144,13 @@ argfd(SyscallFrame *f, int n, int *fd)
     return 0;
 }
 
-long
+void
 syscall(SyscallFrame *f)
 {
     if (f->num > 0 && f->num < nelem(syscalls) && syscalls[f->num]) {
-        return syscalls[f->num](f);
+        f->ret = syscalls[f->num](f);
     } else {
         cprintf("unknown syscall: %d\n", f->num);
-        return -1;
+        f->ret = -1;
     }
 }

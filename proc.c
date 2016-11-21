@@ -211,7 +211,6 @@ int
 rfork(int flags)
 {
     Proc *newp;
-    uchar *kstack;
 
     if (!(flags & RFPROC))
         return 0;

@@ -98,9 +98,15 @@ allocfd(Proc *p, File *f)
 }
 
 static void
-freefile(File *f)
+releasefile(File *f)
 {
     lock(&ftable.lock);
+
+    f->ref--;
+    if (f->ref > 0) {
+        unlock(&ftable.lock);
+        return;
+    }
 
     f->read = nil;
     f->write = nil;
@@ -113,12 +119,14 @@ freefile(File *f)
     unlock(&ftable.lock);
 }
 
-static void
-releasefile(File *f)
+static File *
+retainfile(File *f)
 {
-    f->ref--;
-    if (f->ref == 0)
-        freefile(f);
+    lock(&ftable.lock);
+    f->ref++;
+    unlock(&ftable.lock);
+
+    return f;
 }
 
 static File *
@@ -133,7 +141,7 @@ getfile(char *fname)
     } else if (strcmp(fname, "/dev/cons") == 0) {
         consfile(f);
     } else {
-        freefile(f);
+        releasefile(f);
         f = nil;
     }
 
@@ -182,7 +190,7 @@ sys_open(SyscallFrame *f)
 
     if (fd == -1) {
         // todo errstr
-        freefile(file);
+        releasefile(file);
         return -1;
     }
 
@@ -278,6 +286,22 @@ sys_write(SyscallFrame *f)
     }
 
     return file->write(file, (char *)buf, nbytes);
+}
+
+void
+copyfds(Proc *oldp, Proc *newp)
+{
+    int i;
+    File *f;
+
+    for (i = 0; i < NFD; i++) {
+        f = oldp->files[i];
+
+        if (f == nil)
+            continue;
+
+        newp->files[i] = retainfile(f);
+    }
 }
 
 void

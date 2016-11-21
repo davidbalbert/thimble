@@ -99,9 +99,15 @@ ptx(void *va)
 
 // paging structure entry -> physical address
 static uintptr
-pte_addr(ulong entry)
+pte_addr(Pte entry)
 {
     return entry & ~0xFFF;
+}
+
+static int
+pte_flags(Pte entry)
+{
+    return entry & 0xFFF;
 }
 
 static ulong *
@@ -358,6 +364,41 @@ switchuvm(Proc *p)
 Pml4e *
 copyuvm(Pml4e *oldmap, usize sz)
 {
+    uintptr a;
+    Pml4e *newmap;
+    Pte *pte;
+    uchar *oldmem, *newmem;
+    uint flags;
+
+    newmap = setupkvm();
+    if (newmap == nil)
+        return nil;
+
+    for (a = 0; a < sz; a += PGSIZE) {
+        pte = walkpgmap(oldmap, (void *)a, 0);
+        if (pte == nil)
+            panic("copyuvm - nil pte");
+        if (!*pte & PTE_P)
+            panic("copyuvm - page not present");
+
+        oldmem = p2v(pte_addr(*pte));
+        flags = pte_flags(*pte);
+
+        newmem = kalloc();
+        if (newmem == nil)
+            goto bad;
+
+        memmove(newmem, oldmem, PGSIZE);
+
+        if (mappages(newmap, (void *)a, PGSIZE, v2p(newmem), flags) < 0)
+            goto bad;
+    }
+
+    return newmap;
+
+bad:
+    freeuvm(newmap);
+    return nil;
 }
 
 void

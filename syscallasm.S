@@ -54,7 +54,8 @@ syscall0:
     push    %rdx
     push    %rsi
     push    %rdi
-    push    %r12        # contains rax
+    push    %r12        # contains rax (syscall num)
+    push    $0          # make room for syscall return value
 
     mov     %rsp, %rdi  # SyscallFrame as first arg to syscall
 
@@ -69,6 +70,7 @@ syscall0:
 .global sysret
 sysret:
     # get rid of SyscallFrame
+    pop     %rax
     pop     %r12
     pop     %rdi
     pop     %rsi
