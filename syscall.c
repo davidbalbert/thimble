@@ -33,25 +33,6 @@ kstacktop(void)
     return proc->kstack + KSTACKSIZE;
 }
 
-void
-saveusp(uchar *usp)
-{
-    if (proc == nil)
-        panic("saveusp");
-
-    proc->usp = usp;
-}
-
-uchar *
-getusp(void)
-{
-    if (proc == nil)
-        panic("getusp");
-
-    return proc->usp;
-}
-
-
 // Fetch the nth syscall argument. N starts at 0.
 long
 arglong(SyscallFrame *f, int n, long *lp)
@@ -148,9 +129,10 @@ void
 syscall(SyscallFrame *f)
 {
     if (f->num > 0 && f->num < nelem(syscalls) && syscalls[f->num]) {
-        f->ret = syscalls[f->num](f);
+        proc->sf = f;
+        f->rax = syscalls[f->num](f);
     } else {
         cprintf("unknown syscall: %d\n", f->num);
-        f->ret = -1;
+        f->rax = -1;
     }
 }

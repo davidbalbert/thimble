@@ -105,9 +105,9 @@ typedef struct Proc Proc;
 struct Proc {
     ProcState state;
     Registers *regs;
+    SyscallFrame *sf;
     int pid;
     uchar *kstack;      // base of the kernel stack
-    uchar *usp;         // top of the user stack, saved in syscall0
     Pml4e *pgmap;
     usize sz;           // total size in memory
     char errstr[ERRMAX];
@@ -117,7 +117,8 @@ struct Proc {
 };
 
 struct SyscallFrame {
-    long ret;
+    long rax;           // syscall return value
+    ulong rsp;          // user stack pointer
     ulong num;
     ulong args[6];
 };

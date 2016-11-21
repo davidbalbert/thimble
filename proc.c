@@ -67,6 +67,8 @@ found:
     // syscallasm.S.
 
     sp -= sizeof(SyscallFrame);
+    p->sf = (SyscallFrame *)sp;
+    memzero(p->sf, sizeof(SyscallFrame));
 
     // Procbegin returns to sysret
     sp -= 8;
@@ -182,7 +184,7 @@ mkproc(uchar *data)
     usp -= 8;
     *(ulong *)ustack = elf->entry; // text is loaded at zero
 
-    p->usp = usp;
+    p->sf->rsp = (ulong)usp;
 
     lock(&ptable.lock);
     p->state = READY;
@@ -235,9 +237,8 @@ rfork(int flags)
     else
         copyfds(proc, newp); // also copy nextfd here
 
-
-    // how to return zero in new proc? need to mess with kstack?
-
+    newp->sf->rax = 0; // return 0 in child
+    newp->sf->rsp = proc->sf->rsp;
 
     lock(&ptable.lock);
     newp->state = READY;

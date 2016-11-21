@@ -302,6 +302,8 @@ copyfds(Proc *oldp, Proc *newp)
 
         newp->files[i] = retainfile(f);
     }
+
+    newp->nextfd = oldp->nextfd;
 }
 
 void

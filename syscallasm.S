@@ -55,15 +55,10 @@ syscall0:
     push    %rsi
     push    %rdi
     push    %r12        # contains rax (syscall num)
-    push    $0          # make room for syscall return value
+    push    %r13        # user rsp
+    push    $0          # syscall return value
 
     mov     %rsp, %rdi  # SyscallFrame as first arg to syscall
-
-    # save user stack pointer
-    push    %rdi        # temporarily save rdi so we can use it for a function argument
-    mov     %r13, %rdi
-    call    saveusp     # save the user stack pointer in proc
-    pop     %rdi
 
     call    syscall
 
@@ -71,6 +66,7 @@ syscall0:
 sysret:
     # get rid of SyscallFrame
     pop     %rax
+    pop     %r13
     pop     %r12
     pop     %rdi
     pop     %rsi
@@ -78,12 +74,6 @@ sysret:
     pop     %r10
     pop     %r8
     pop     %r9
-
-    # get user stack pointer
-    push    %rax        # temporarily save syscall return value
-    call    getusp
-    mov     %rax, %r13  # save user stack pointer
-    pop     %rax        # restore syscal return value
 
     #####################
 
