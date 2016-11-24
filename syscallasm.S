@@ -15,6 +15,8 @@
 
 .global syscall0
 syscall0:
+    cli                 # make sure we're not interrupted in kernel mode on the user stack
+
     push    %r12        # temporary storage
     push    %r13
 
@@ -48,6 +50,8 @@ syscall0:
 
     mov     %rax, %rsp  # switch to the kernel stack
 
+    sti                 # we're on the kernel stack, so we can get interrupted again.
+
     # build a SyscallFrame
     push    %r9
     push    %r8
@@ -77,6 +81,13 @@ sysret:
     pop     %r9
 
     #####################
+
+    cli                 # make sure we don't get interrupted while in kernel
+                        # mode on the user stack. Sysret will renable interrupts
+                        # when %rflags is restored from %r11. See SYSRET in the
+                        # Intel Software Developer's Manual.
+                        #
+                        # TODO: disable NMIs as well.
 
     mov     %r13, %rsp  # switch back to the user stack
 
