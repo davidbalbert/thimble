@@ -39,7 +39,7 @@ kernel.img: boot stage2 kernel stage2size.txt
 kernel: $(OBJS) kernel.ld
 	$(LD) $(LDFLAGS) -T kernel.ld -o kernel $(OBJS)
 
-main.c: task1.h task2.h
+main.c: task1.h
 
 LIBCOBJS = \
 	   klibc.o\
@@ -49,14 +49,8 @@ LIBCOBJS = \
 task1: task1.o $(LIBCOBJS)
 	$(LD) $(LDFLAGS) -e main -Ttext=0 -o task1 $^
 
-task2: task2.o $(LIBCOBJS)
-	$(LD) $(LDFLAGS) -e main -Ttext=0 -o task2 $^
-
 task1.h: task1
 	xxd -i task1 > task1.h
-
-task2.h: task2
-	xxd -i task2 > task2.h
 
 boot.o: stage2size.h
 
@@ -89,7 +83,7 @@ ivec.S: ivec.rb
 
 .PHONY: clean
 clean:
-	rm -rf boot stage2 kernel ivec.S stage2size.* *.img *.o *.d task1 task2 task1.h task2.h
+	rm -rf boot stage2 kernel ivec.S stage2size.* *.img *.o *.d task1 task1.h
 
 
 QEMUOPTS = -monitor stdio -drive file=kernel.img,format=raw -m 512

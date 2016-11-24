@@ -18,6 +18,7 @@ syscall0:
     push    %r12        # temporary storage
     push    %r13
 
+    push    %rbp
     push    %r11        # userspace flags
     push    %rcx        # return address
 
@@ -54,7 +55,7 @@ syscall0:
     push    %rdx
     push    %rsi
     push    %rdi
-    push    %r12        # contains rax (syscall num)
+    push    %r12        # syscall number
     push    %r13        # user rsp
     push    $0          # syscall return value
 
@@ -81,6 +82,7 @@ sysret:
 
     pop     %rcx        # restore return address
     pop     %r11        # restore flags
+    pop     %rbp
 
     pop     %r13        # temporary storage
     pop     %r12

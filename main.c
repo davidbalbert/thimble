@@ -7,7 +7,6 @@
 #include "x86.h"
 
 #include "task1.h"
-#include "task2.h"
 
 int
 main(void)
@@ -31,7 +30,6 @@ main(void)
     initmem2(p2v(16*MB), p2v(PHYSTOP));
 
     mkproc(task1);
-    mkproc(task2);
 
     scheduler();
 }

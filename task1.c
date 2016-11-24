@@ -45,9 +45,22 @@ main(void)
     int fd;
     char buf[21];
     long l = 0;
-    char *label = "task1: ";
+    char *label;
+    int pid;
 
     fd = open("/dev/cons", OWRITE);
+
+    pid = fork();
+    if (pid == 0) {
+        label = "child: ";
+    } else if (pid > 0) {
+        label = "parent: ";
+    } else {
+        char *msg = "fork failed\n";
+        write(fd, msg, strlen(msg));
+        for (;;)
+            ;
+    }
 
     for(;;) {
         write(fd, label, strlen(label));
