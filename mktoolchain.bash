@@ -7,11 +7,11 @@ fi
 
 set -e
 
-GMP=https://ftp.gnu.org/gnu/gmp/gmp-6.1.1.tar.bz2
-MPFR=https://ftp.gnu.org/gnu/mpfr/mpfr-3.1.4.tar.bz2
-MPC=https://ftp.gnu.org/gnu/mpc/mpc-1.0.3.tar.gz
-BINUTILS=https://ftp.gnu.org/gnu/binutils/binutils-2.27.tar.bz2
-GCC=https://ftp.gnu.org/gnu/gcc/gcc-6.2.0/gcc-6.2.0.tar.bz2
+GMP=https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2
+MPFR=https://ftp.gnu.org/gnu/mpfr/mpfr-4.0.1.tar.bz2
+MPC=https://ftp.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz
+BINUTILS=https://ftp.gnu.org/gnu/binutils/binutils-2.30.tar.bz2
+GCC=https://ftp.gnu.org/gnu/gcc/gcc-7.3.0/gcc-7.3.0.tar.gz
 
 function envfile() {
   pushd $(dirname $0) >/dev/null
@@ -50,7 +50,7 @@ if [ -z "$NODOWNLOAD" ]; then
   get $MPC
   get $BINUTILS
   get $GCC
-  git clone https://github.com/davidbalbert/qemu.git -b 6.828-2.7.0
+  git clone https://github.com/geofft/qemu.git -b 6.828-2.9.0
 fi
 
 cd $(dir $GMP)
