@@ -12,7 +12,7 @@ Thimble should work on Linux or OS X, though I've only tested it on OS X.
 ## Building and running
 
 ```
-$ bash mktoolchain.bash   # Downloads and builds compiler, assembler and emulator. Only run this once.
+$ bash mktoolchain.x86_64.bash   # Downloads and builds compiler, assembler and emulator. Only run this once.
 
 $ source env.bash
 (thimble) $ make qemu
@@ -31,4 +31,4 @@ For the xv6 license, see `ACKNOWLEDGEMENTS`
 
 # License
 
-Thimble is copyright 2015-2016 David Albert and is available under the terms of the GNU GPLv3 or later. See COPYING for more info.
+Thimble is copyright 2015-2019 David Albert and is available under the terms of the GNU GPLv3 or later. See COPYING for more info.
