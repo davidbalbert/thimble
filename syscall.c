@@ -5,7 +5,6 @@
 #include "mem.h"
 #include "proc.h"
 #include "syscall.h"
-#include "x86.h"
 
 long sys_open(SyscallFrame *);
 long sys_close(SyscallFrame *);

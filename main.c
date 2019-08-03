@@ -4,7 +4,6 @@
 #include "cpu.h"
 #include "irq.h"
 #include "mem.h"
-#include "x86.h"
 
 #include "task1.h"
 

@@ -1,34 +1,18 @@
 OBJS := \
-       entry.o\
        main.o\
-       console.o\
-       trap.o\
-       ivec.o\
-       alltraps.o\
-       pic.o\
-       kbd.o\
-       swtch.o\
-       lock.o\
-       proc.o\
        kalloc.o\
-       klibc.o\
-       timer.o\
-       vm.o\
        syscall.o\
-       syscallasm.o\
        file.o\
 
-TOOLCHAIN := x86_64-elf
+ifeq ($(ARCH), arm64)
+	include arm64.mk
+else
+	include x86_64.mk
+endif
 
 CC := $(TOOLCHAIN)-gcc
 LD := $(TOOLCHAIN)-ld
 OBJCOPY := $(TOOLCHAIN)-objcopy
-
-QEMU := qemu-system-x86_64
-
-CFLAGS := -m64 -O0 -MD -fno-builtin -Wall -Werror -mcmodel=large -g
-ASFLAGS := -m64 -MD -g -Wa,-divide
-LDFLAGS := -m elf_x86_64 -static -nostdlib -N
 
 kernel.img: boot stage2 kernel stage2size.txt
 	dd bs=512 count=16384 if=/dev/zero of=kernel.img
@@ -84,25 +68,3 @@ ivec.S: ivec.rb
 .PHONY: clean
 clean:
 	rm -rf boot stage2 kernel ivec.S stage2size.* *.img *.o *.d task1 task1.h
-
-
-QEMUOPTS = -monitor stdio -drive file=kernel.img,format=raw -m 512
-
-Q35_QEMUOPTS = -monitor stdio \
-	       -M q35 \
-	       -m 512 \
-	       -device ide-hd,drive=hd0,bus=ide.0 \
-	       -drive file=kernel.img,format=raw,if=none,id=hd0 \
-
-.PHONY: qemu
-qemu: kernel.img
-	$(QEMU) $(Q35_QEMUOPTS)
-
-.PHONY: qemu-gdb
-qemu-gdb: kernel.img
-	@echo Run x86_64-elf-gdb
-	$(QEMU) $(Q35_QEMUOPTS) -gdb tcp::1234 -S
-
-.PHONY: bochs
-bochs: kernel.img
-	bochs

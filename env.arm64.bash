@@ -1,3 +1,3 @@
-ARCH=arm64
+export ARCH=arm64
 
 source env.common.bash
