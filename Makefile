@@ -1,4 +1,4 @@
-OBJS = \
+OBJS := \
        entry.o\
        main.o\
        console.o\
@@ -18,17 +18,17 @@ OBJS = \
        syscallasm.o\
        file.o\
 
-TOOLCHAIN=x86_64-elf
+TOOLCHAIN := x86_64-elf
 
-CC = $(TOOLCHAIN)-gcc
-LD = $(TOOLCHAIN)-ld
-OBJCOPY = $(TOOLCHAIN)-objcopy
+CC := $(TOOLCHAIN)-gcc
+LD := $(TOOLCHAIN)-ld
+OBJCOPY := $(TOOLCHAIN)-objcopy
 
-QEMU = qemu-system-x86_64
+QEMU := qemu-system-x86_64
 
-CFLAGS = -m64 -O0 -MD -fno-builtin -Wall -Werror -mcmodel=large -g
-ASFLAGS = -m64 -MD -g -Wa,-divide
-LDFLAGS = -m elf_x86_64 -static -nostdlib -N
+CFLAGS := -m64 -O0 -MD -fno-builtin -Wall -Werror -mcmodel=large -g
+ASFLAGS := -m64 -MD -g -Wa,-divide
+LDFLAGS := -m elf_x86_64 -static -nostdlib -N
 
 kernel.img: boot stage2 kernel stage2size.txt
 	dd bs=512 count=16384 if=/dev/zero of=kernel.img
@@ -41,7 +41,7 @@ kernel: $(OBJS) kernel.ld
 
 main.c: task1.h
 
-LIBCOBJS = \
+LIBCOBJS := \
 	   klibc.o\
 	   libc.o\
 	   libcasm.o\
@@ -64,7 +64,7 @@ stage2size.h: stage2size.txt
 	echo '#define STAGE2SIZE' $(shell cat stage2size.txt) > stage2size.h
 
 
-STAGE2OBJS = \
+STAGE2OBJS := \
 	     stage2asm.o\
 	     stage2.o\
 	     bootide.o\
