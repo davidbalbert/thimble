@@ -36,7 +36,7 @@ if [[ ! -v MAKEFLAGS ]]; then
   export MAKEFLAGS=-j4
 fi
 
-PS1="(thimble) $PS1"
+PS1="(thimble $ARCH) $PS1"
 
 function deactivate() {
   unset PREFIX
@@ -55,6 +55,7 @@ function deactivate() {
   unset prev_ps1
   unset makeflags_set
   unset deactivate
+  unset ARCH
 }
 
 if [ $(uname) == "Darwin" ]; then

@@ -14,12 +14,12 @@ Thimble should work on Linux or OS X, though I've only tested it on OS X.
 ```
 $ bash mktoolchain.x86_64.bash   # Downloads and builds compiler, assembler and emulator. Only run this once.
 
-$ source env.bash
-(thimble) $ make qemu
+$ source env.x86_64.bash
+(thimble x86_64) $ make qemu
 
 # When you're done working on thimble, `deactivate` will restore your path.
 # It's kind of like a python virtual env:
-(thimble) $ deactivate
+(thimble x86_64) $ deactivate
 $
 ```
 

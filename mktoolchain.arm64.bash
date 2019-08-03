@@ -15,11 +15,11 @@ GCC=https://ftp.gnu.org/gnu/gcc/gcc-9.1.0/gcc-9.1.0.tar.gz
 
 function envfile() {
   pushd $(dirname $0) >/dev/null
-  echo $(pwd)/env.bash
+  echo $(pwd)/env.common.bash
   popd >/dev/null
 }
 
-. $(envfile)
+source $(envfile)
 
 function get() {
   local name
