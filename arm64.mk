@@ -16,3 +16,5 @@ default: kernel
 .PHONY: qemu
 qemu: kernel
 	$(QEMU) -M raspi3 -serial null -serial mon:stdio -kernel kernel
+
+-include arm64/*.d

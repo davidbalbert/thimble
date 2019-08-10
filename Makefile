@@ -4,11 +4,7 @@ OBJS := \
        #syscall.o\
        #file.o\
 
-ifeq ($(ARCH), arm64)
-	include arm64.mk
-else
-	include x86_64.mk
-endif
+include $(ARCH).mk
 
 CC := $(TOOLCHAIN)-gcc
 LD := $(TOOLCHAIN)-ld

@@ -9,6 +9,10 @@
 
 #define MMIO_BASE 0x3F000000
 
+// rpi4?
+//#define MMIO_BASE 0xFE000000
+
+
 #define GPFSEL0         ((volatile u32 *)(MMIO_BASE+0x00200000))
 #define GPFSEL1         ((volatile u32 *)(MMIO_BASE+0x00200004))
 #define GPFSEL2         ((volatile u32 *)(MMIO_BASE+0x00200008))
