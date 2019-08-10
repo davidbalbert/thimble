@@ -33,7 +33,7 @@ long strtol(char *s, char **endptr, int base);
 
 // TODO: we should have a console lock
 
-static ushort *vmem = (ushort *)P2V(0xB8000);
+static volatile ushort *vmem = (ushort *)P2V(0xB8000);
 static ushort pos = 0;
 
 static void
