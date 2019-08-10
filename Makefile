@@ -1,8 +1,8 @@
 OBJS := \
        main.o\
-       kalloc.o\
-       syscall.o\
-       file.o\
+       #kalloc.o\
+       #syscall.o\
+       #file.o\
 
 ifeq ($(ARCH), arm64)
 	include arm64.mk
@@ -20,21 +20,21 @@ kernel.img: boot stage2 kernel stage2size.txt
 	dd bs=512 if=stage2 of=kernel.img conv=notrunc seek=1
 	dd bs=512 if=kernel of=kernel.img conv=notrunc seek=$(shell expr $(shell cat stage2size.txt) + 1)
 
-kernel: $(OBJS) kernel.ld
-	$(LD) $(LDFLAGS) -T kernel.ld -o kernel $(OBJS)
+kernel: $(OBJS) $(ARCH)/kernel.ld
+	$(LD) $(LDFLAGS) -T $(ARCH)/kernel.ld -o kernel $(OBJS)
 
-main.c: task1.h
+#main.c: task1.h
 
 LIBCOBJS := \
 	   klibc.o\
 	   libc.o\
 	   libcasm.o\
 
-task1: task1.o $(LIBCOBJS)
-	$(LD) $(LDFLAGS) -e main -Ttext=0 -o task1 $^
+#task1: task1.o $(LIBCOBJS)
+	#$(LD) $(LDFLAGS) -e main -Ttext=0 -o task1 $^
 
-task1.h: task1
-	xxd -i task1 > task1.h
+#task1.h: task1
+	#xxd -i task1 > task1.h
 
 boot.o: stage2size.h
 

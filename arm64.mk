@@ -1,13 +1,18 @@
 TOOLCHAIN := aarch64-elf
 
-QEMU := qemu-system-aarch64
-
 CFLAGS := -O0 -MD -fno-builtin -Wall -Werror -g
 ASFLAGS := -MD -g
 LDFLAGS := -m aarch64elf -static -nostdlib -N
 
+QEMU := qemu-system-aarch64
+
+OBJS += \
+	arm64/start.o\
+	arm64/cpu.o\
+
 .PHONY: default
 default: kernel
 
+.PHONY: qemu
 qemu: kernel
-	@echo Not implemented
+	$(QEMU) -M raspi3 -monitor stdio -kernel kernel

@@ -5,11 +5,12 @@
 #include "irq.h"
 #include "mem.h"
 
-#include "task1.h"
+//#include "task1.h"
 
 int
 main(void)
 {
+    /*
     cclear();
     cprintf("Hello, Thimble!\n");
 
@@ -28,7 +29,10 @@ main(void)
 
     initmem2(p2v(16*MB), p2v(PHYSTOP));
 
-    mkproc(task1);
-
     scheduler();
+    */
+
+    for (;;) {
+        halt();
+    }
 }
