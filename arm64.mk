@@ -9,6 +9,7 @@ QEMU := qemu-system-aarch64
 OBJS += \
 	arm64/start.o\
 	arm64/cpu.o\
+	arm64/uart.o\
 
 .PHONY: default
 default: kernel
