@@ -3,5 +3,7 @@
 void
 halt(void)
 {
-    wfi();
+    for (;;) {
+        wfi();
+    }
 }

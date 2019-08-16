@@ -11,7 +11,7 @@ GMP=https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2
 MPFR=https://ftp.gnu.org/gnu/mpfr/mpfr-4.0.2.tar.bz2
 MPC=https://ftp.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz
 BINUTILS=https://ftp.gnu.org/gnu/binutils/binutils-2.32.tar.bz2
-GCC=https://ftp.gnu.org/gnu/gcc/gcc-9.1.0/gcc-9.1.0.tar.gz
+GCC=https://ftp.gnu.org/gnu/gcc/gcc-9.2.0/gcc-9.2.0.tar.gz
 
 function envfile() {
   pushd $(dirname $0) >/dev/null
@@ -45,14 +45,15 @@ function dir() {
 mkdir -p $PREFIX
 
 if [ -z "$NODOWNLOAD" ]; then
-  get $GMP
-  get $MPFR
-  get $MPC
+  #get $GMP
+  #get $MPFR
+  #get $MPC
   get $BINUTILS
   get $GCC
   git clone https://github.com/geofft/qemu.git -b 6.828-2.9.0
 fi
 
+<<COMMENT
 cd $(dir $GMP)
 ./configure --prefix=$PREFIX
 make
@@ -70,6 +71,7 @@ cd $(dir $MPC)
 make
 make install
 cd ..
+COMMENT
 
 cd $(dir $BINUTILS)
 ./configure --prefix=$PREFIX --target=x86_64-elf --disable-werror

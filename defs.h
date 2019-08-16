@@ -9,12 +9,23 @@ typedef struct Proc Proc;
 typedef struct SyscallFrame SyscallFrame;
 
 // console.c
+
+typedef struct Console Console;
+
+Console *uart_console;
+Console *vga_console;
+
+void cinit(Console *c);
 void cprintf(char *fmt, ...);
 void cclear(void);
 void cputs(char *s);
 void cputc(uchar c);
 void cvprintf(char *fmt, va_list ap);
 void cwrite(char *buf, usize nbytes);
+
+// $(ARCH)/cpu.c
+
+void halt(void) __attribute__((noreturn));
 
 // file.c
 void fileinit(void);
@@ -94,4 +105,3 @@ void switchkvm();
 void switchuvm(Proc *p);
 void *uva2ka(Pml4e *pgmap, void *addr);
 Pte *walkpgmap(Pml4e *pgmap, void *va, int alloc);
-

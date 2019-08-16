@@ -1,127 +1,34 @@
-// Simple console driver. Can be used by the kernel and the stage 2 bootloader.
-// No external dependencies besides a void panic(char *) function.
-//
-// N.b. The cursor position is not shared between the bootloader and kernel.
-// Printing from the kernel will write over anything printed from the
-// bootloader.
-
 #include "u.h"
 
-#include "mem.h"
-#include "x86.h"
-
-// Function declarations
-// Because console.c is used from both the bootloader and the
-// kernel we don't know whether to include defs.h or bootdefs.h.
-// For now, we'll just put all external function declarations here.
-// I'm not sure if I'll like this, but it's better than putting
-// them all throughout the file.
-
-void panic(char *s) __attribute__((noreturn));
-int isdigit(int c);
-long strtol(char *s, char **endptr, int base);
-
-
-
-#define COLOR 0x0700
-#define SPACE (COLOR | ' ')
-
-#define COLS 80
-#define ROWS 25
-
-#define CSIZE (COLS*ROWS)
+#include "console.h"
+#include "defs.h"
 
 // TODO: we should have a console lock
 
-static volatile ushort *vmem = (ushort *)P2V(0xB8000);
-static ushort pos = 0;
+static Console *console;
 
-static void
-updatecursor(void)
+void
+cinit(Console *cons)
 {
-    // cursor LOW port to vga INDEX register
-    outb(0x3D4, 0x0F);
-    outb(0x3D5, pos);
-    // cursor HIGH port to vga INDEX register
-    outb(0x3D4, 0x0E);
-    outb(0x3D5, pos>>8);
+    console = cons;
 }
 
 void
 cclear(void)
 {
-    int i;
-
-    for (i = 0; i < CSIZE; i++) {
-        vmem[i] = SPACE;
-    }
-
-    pos = 0;
-    updatecursor();
-}
-
-static void
-cscroll(void)
-{
-    int i;
-
-    for (i = 0; i < CSIZE - COLS; i++)
-        vmem[i] = vmem[i + COLS];
-
-    for (i = CSIZE - COLS; i < CSIZE; i++)
-        vmem[i] = SPACE;
-
-    pos = CSIZE - COLS;
-}
-
-static void cputs0(char *s);
-
-static void
-cputc0(uchar c)
-{
-    if (c == '\0') // todo: include all other non-printable characters
-        return;
-    else if (c == '\n') {
-        pos += COLS - pos%COLS;
-
-        if (pos >= CSIZE)
-            cscroll();
-
-        return;
-    } else if (c == '\t') {
-        cputs0("        ");
-        return;
-    } else if (c == '\b') {
-        if (pos % COLS != 0)
-            vmem[--pos] = SPACE;
-        return;
-    }
-
-    if (pos >= CSIZE)
-        cscroll();
-
-    vmem[pos++] = COLOR | c;
+    console->clear();
 }
 
 void
 cputc(uchar c)
 {
-    cputc0(c);
-    updatecursor();
-}
-
-static void
-cputs0(char *s)
-{
-    for (; *s; s++)
-        cputc0(*s);
+    console->putc(c);
 }
 
 void
 cputs(char *s)
 {
-    cputs0(s);
-    updatecursor();
+    console->puts(s);
 }
 
 static void
@@ -147,16 +54,16 @@ printint(long n, uchar base, uchar sign, long npad, char padchar)
         npad--;
 
     if (sign && padchar == '0')
-        cputc0('-');
+        cputc('-');
 
     for (; i < npad; npad--)
-        cputc0(padchar);
+        cputc(padchar);
 
     if (sign && padchar == ' ')
-        cputc0('-');
+        cputc('-');
 
     for (i -= 1; i > -1; i--)
-        cputc0(buf[i]);
+        cputc(buf[i]);
 }
 
 void
@@ -165,15 +72,20 @@ cvprintf(char *fmt, va_list ap)
     char c;
     char *s;
 
-    if (fmt == nil)
-        panic("null fmt");
+    if (fmt == nil) {
+        cputs("panic: null fmt");
+        for (;;) {
+            halt();
+        }
+        //panic("null fmt");
+    }
 
     for (; (c = *fmt); fmt++) {
         long npad = 0;
         char padchar = ' ';
 
         if (c != '%') {
-            cputc0(c);
+            cputc(c);
             continue;
         }
 
@@ -197,16 +109,16 @@ cvprintf(char *fmt, va_list ap)
 
         switch (c) {
             case '%':
-                cputc0('%');
+                cputc('%');
                 break;
             case 'c':
-                cputc0((char)va_arg(ap, int));
+                cputc((char)va_arg(ap, int));
             case 's':
                 s = va_arg(ap, char *);
                 if (s == 0)
                     s = "(null)";
                 for (; *s; s++)
-                    cputc0(*s);
+                    cputc(*s);
                 break;
             case 'd':
                 printint(va_arg(ap, int), 10, 1, npad, padchar);
@@ -228,12 +140,11 @@ cvprintf(char *fmt, va_list ap)
                 printint(va_arg(ap, long), 2, 0, npad, padchar);
                 break;
             default:
-                cputc0('%');
-                cputc0(c);
+                cputc('%');
+                cputc(c);
                 break;
         }
     }
-    updatecursor();
 }
 
 void
@@ -248,7 +159,7 @@ cprintf(char *fmt, ...)
 void
 cwrite(char *buf, usize nbytes)
 {
-    for (; nbytes > 0; nbytes--, buf++)
-        cputc0(*buf);
-    updatecursor();
+    for (; nbytes > 0; nbytes--, buf++) {
+        cputc(*buf);
+    }
 }

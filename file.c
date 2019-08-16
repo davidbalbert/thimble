@@ -71,7 +71,7 @@ readcons(File *f, char *buf, usize nbytes)
 static long
 writecons(File *f, char *buf, usize nbytes)
 {
-    cwrite(buf, nbytes);
+    vcwrite(buf, nbytes);
     return nbytes;
 }
 

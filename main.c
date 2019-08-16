@@ -9,14 +9,17 @@
 
 //#include "task1.h"
 
+
+char uart_getc(void);
+
 int
 main(void)
 {
-    uart_init();
-    uart_puts("Hello, Thimble!\n");
+    cinit(uart_console);
+    cprintf("Hello, Thimble!\n");
 
     for (;;) {
-        uart_send(uart_getc());
+        cputc(uart_getc());
     }
 
     /*

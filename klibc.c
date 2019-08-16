@@ -1,6 +1,6 @@
 // libc routines shared between kernel space and userspace
 #include "u.h"
-#include "x86.h"
+//#include "x86.h"
 
 void *
 memmove(void *dst, void *src, usize n)
@@ -22,6 +22,7 @@ memmove(void *dst, void *src, usize n)
     return dst;
 }
 
+/*
 void *
 memset(void *p, int c, usize n)
 {
@@ -34,6 +35,7 @@ memzero(void *p, usize n)
 {
     return memset(p, 0, n);
 }
+*/
 
 int
 isdigit(int c)

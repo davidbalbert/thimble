@@ -29,7 +29,7 @@ OBJS += \
 	timer.o\
 	vm.o\
 	syscallasm.o\
-
+	x86_64/vgacons.o\
 
 
 .PHONY: default

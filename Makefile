@@ -1,10 +1,12 @@
 OBJS := \
        main.o\
+       console.o\
+       klibc.o\
        #kalloc.o\
        #syscall.o\
        #file.o\
 
-include $(ARCH).mk
+include $(ARCH)/$(ARCH).mk
 
 CC := $(TOOLCHAIN)-gcc
 LD := $(TOOLCHAIN)-ld
@@ -63,4 +65,4 @@ ivec.S: ivec.rb
 
 .PHONY: clean
 clean:
-	rm -rf boot stage2 kernel ivec.S stage2size.* *.img *.o *.d task1 task1.h
+	rm -rf boot stage2 kernel ivec.S stage2size.* *.img *.o *.d $(ARCH)/*.o $(ARCH)/*.d task1 task1.h

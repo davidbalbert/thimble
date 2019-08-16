@@ -1,5 +1,7 @@
 #include "../u.h"
 
+#include "../console.h"
+
 #define MMIO_BASE 0x3F000000
 
 // rpi4?
@@ -91,7 +93,7 @@ uart_init(void)
  * Send a character
  */
 void
-uart_send(uchar c) {
+uart_putc(uchar c) {
     for (;;) {
         if (*AUX_MU_LSR & LSR_CAN_TX) {
             break;
@@ -130,9 +132,22 @@ void
 uart_puts(char *s) {
     while(*s) {
         if(*s == '\n') {
-            uart_send('\r');
+            uart_putc('\r');
         }
 
-        uart_send(*s++);
+        uart_putc(*s++);
     }
 }
+
+static void
+uart_clear(void)
+{
+}
+
+static Console uart_console0 = {
+    .puts = uart_puts,
+    .putc = uart_putc,
+    .clear = uart_clear,
+};
+
+Console *uart_console = &uart_console0;
