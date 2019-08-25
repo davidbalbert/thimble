@@ -20,6 +20,7 @@ int
 main(void)
 {
     cinit(vga_console);
+    cclear();
     cprintf("Hello, Thimble!\n");
 
     for (;;) {
@@ -28,9 +29,6 @@ main(void)
     }
 
     /*
-    cclear();
-    cprintf("Hello, Thimble!\n");
-
     schedinit();
     // TODO: allocate fewer things (files, etc.) statically in the
     // kernel so we need to map less memory initially
