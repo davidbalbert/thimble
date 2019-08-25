@@ -6,6 +6,12 @@ void ahciread(uchar *addr, ulong lba, ushort count);
 void ideread(uchar *addr, uint lba, uchar count);
 
 // console.c
+typedef struct Console Console;
+
+Console *uart_console;
+Console *vga_console;
+
+void cinit(Console *c);
 void cprintf(char *fmt, ...);
 void cclear(void);
 void cputs(char *s);

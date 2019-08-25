@@ -5,10 +5,10 @@
 // Printing from the kernel will write over anything printed from the
 // bootloader.
 
-#include "../u.h"
+#include "u.h"
 
-#include "../console.h"
-#include "../mem.h"
+#include "console.h"
+#include "mem.h"
 #include "x86.h"
 
 // Function declarations
@@ -137,4 +137,4 @@ static Console vga_console0 = {
     .putc = vcputc,
 };
 
-Console *vga_console = &vga_console;
+Console *vga_console = &vga_console0;

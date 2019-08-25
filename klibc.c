@@ -29,13 +29,25 @@ memset(void *p, int c, usize n)
     stosb(p, c, n);
     return p;
 }
+*/
+
+void *
+memset(void *p, int c, usize n)
+{
+    uchar *cp = p;
+
+    for (usize i = 0; i < n; i++) {
+        cp[i] = (uchar)c;
+    }
+
+    return p;
+}
 
 void *
 memzero(void *p, usize n)
 {
     return memset(p, 0, n);
 }
-*/
 
 int
 isdigit(int c)

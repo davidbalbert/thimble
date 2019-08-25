@@ -12,12 +12,6 @@ CC := $(TOOLCHAIN)-gcc
 LD := $(TOOLCHAIN)-ld
 OBJCOPY := $(TOOLCHAIN)-objcopy
 
-kernel.img: boot stage2 kernel stage2size.txt
-	dd bs=512 count=16384 if=/dev/zero of=kernel.img
-	dd bs=512 if=boot of=kernel.img conv=notrunc
-	dd bs=512 if=stage2 of=kernel.img conv=notrunc seek=1
-	dd bs=512 if=kernel of=kernel.img conv=notrunc seek=$(shell expr $(shell cat stage2size.txt) + 1)
-
 kernel: $(OBJS) $(ARCH)/kernel.ld
 	$(LD) $(LDFLAGS) -T $(ARCH)/kernel.ld -o kernel $(OBJS)
 
@@ -34,29 +28,31 @@ LIBCOBJS := \
 #task1.h: task1
 	#xxd -i task1 > task1.h
 
-boot.o: stage2size.h
+x86_64/boot.o: x86_64/stage2size.h
 
-boot: boot.o boot.ld
-	$(LD) $(LDFLAGS) -N -T boot.ld -o boot boot.o
+x86_64/boot: x86_64/boot.o x86_64/boot.ld
+	$(LD) $(LDFLAGS) -N -T x86_64/boot.ld -o x86_64/boot x86_64/boot.o
 
-stage2size.txt: stage2
-	wc -c stage2 | awk '{ print int(($$1 + 511) / 512) }' > stage2size.txt
+x86_64/stage2size.txt: x86_64/stage2
+	wc -c x86_64/stage2 | awk '{ print int(($$1 + 511) / 512) }' > x86_64/stage2size.txt
 
-stage2size.h: stage2size.txt
-	echo '#define STAGE2SIZE' $(shell cat stage2size.txt) > stage2size.h
+x86_64/stage2size.h: x86_64/stage2size.txt
+	echo '#define STAGE2SIZE' $(shell cat x86_64/stage2size.txt) > x86_64/stage2size.h
 
 
 STAGE2OBJS := \
-	     stage2asm.o\
-	     stage2.o\
-	     bootide.o\
-	     console.o\
-	     pci.o\
-	     ahci.o\
+	     x86_64/stage2asm.o\
+	     x86_64/stage2.o\
+	     x86_64/bootide.o\
+	     x86_64/pci.o\
+	     x86_64/ahci.o\
+			 x86_64/vgacons.o\
+			 x86_64/cpu.o\
+			 console.o\
 	     klibc.o\
 
-stage2: $(STAGE2OBJS) stage2.ld
-	$(LD) $(LDFLAGS) -N -T stage2.ld -o stage2 $(STAGE2OBJS)
+x86_64/stage2: $(STAGE2OBJS) x86_64/stage2.ld
+	$(LD) $(LDFLAGS) -N -T x86_64/stage2.ld -o x86_64/stage2 $(STAGE2OBJS)
 
 ivec.S: ivec.rb
 	ruby ivec.rb > ivec.S
@@ -65,4 +61,4 @@ ivec.S: ivec.rb
 
 .PHONY: clean
 clean:
-	rm -rf boot stage2 kernel ivec.S stage2size.* *.img *.o *.d $(ARCH)/*.o $(ARCH)/*.d task1 task1.h
+	rm -rf x86_64/boot x86_64/stage2 kernel ivec.S x86_64/stage2size.* *.img *.o *.d $(ARCH)/*.o $(ARCH)/*.d task1 task1.h

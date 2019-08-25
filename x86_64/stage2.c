@@ -38,6 +38,8 @@ stage2main(ulong koffset)
     void (*entry)(void);
     uchar *pa;
 
+    cinit(vga_console);
+
     cclear();
 
     has_ahci = ahcidetect();
