@@ -10,16 +10,21 @@
 //#include "task1.h"
 
 
+/*
 char uart_getc(void);
+*/
+
+void vcputc(uchar c);
 
 int
 main(void)
 {
-    cinit(uart_console);
+    cinit(vga_console);
     cprintf("Hello, Thimble!\n");
 
     for (;;) {
-        cputc(uart_getc());
+        halt();
+        //cputc(uart_getc());
     }
 
     /*

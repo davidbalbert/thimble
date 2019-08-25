@@ -16,7 +16,6 @@ Q35_QEMUOPTS := -monitor stdio \
 
 OBJS += \
 	entry.o\
-	console.o\
 	trap.o\
 	ivec.o\
 	alltraps.o\
@@ -25,11 +24,14 @@ OBJS += \
 	swtch.o\
 	lock.o\
 	proc.o\
-	klibc.o\
+	kalloc.o\
+	file.o\
+	syscall.o\
 	timer.o\
 	vm.o\
 	syscallasm.o\
 	x86_64/vgacons.o\
+	x86_64/cpu.o\
 
 
 .PHONY: default
@@ -37,9 +39,9 @@ default: kernel.img
 
 kernel.img: x86_64/boot x86_64/stage2 x86_64/stage2size.txt kernel
 	dd bs=512 count=16384 if=/dev/zero of=kernel.img
-	dd bs=512 if=boot of=kernel.img conv=notrunc
-	dd bs=512 if=stage2 of=kernel.img conv=notrunc seek=1
-	dd bs=512 if=kernel of=kernel.img conv=notrunc seek=$(shell expr $(shell cat stage2size.txt) + 1)
+	dd bs=512 if=x86_64/boot of=kernel.img conv=notrunc
+	dd bs=512 if=x86_64/stage2 of=kernel.img conv=notrunc seek=1
+	dd bs=512 if=kernel of=kernel.img conv=notrunc seek=$(shell expr $(shell cat x86_64/stage2size.txt) + 1)
 
 
 .PHONY: qemu
