@@ -1,6 +1,6 @@
 TOOLCHAIN := aarch64-elf
 
-CFLAGS := -O0 -MD -fno-builtin -Wall -Werror -g
+CFLAGS := -O0 -MD -fno-builtin -Wall -Werror -g -I.
 ASFLAGS := -MD -g
 LDFLAGS := -m aarch64elf -static -nostdlib -N
 

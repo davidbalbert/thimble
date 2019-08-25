@@ -1,6 +1,6 @@
-#include "../u.h"
+#include "u.h"
 
-#include "../console.h"
+#include "console.h"
 
 #define MMIO_BASE 0x3F000000
 
