@@ -19,13 +19,12 @@ void vcputc(uchar c);
 int
 main(void)
 {
-    cinit(vga_console);
+    cinit(uart_console);
     cclear();
     cprintf("Hello, Thimble!\n");
 
     for (;;) {
-        halt();
-        //cputc(uart_getc());
+        cputc(uart_getc());
     }
 
     /*
