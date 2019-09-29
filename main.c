@@ -6,6 +6,7 @@
 #include "mem.h"
 
 #include "arm64/uart.h"
+#include "arm64/arm64.h"
 
 //#include "task1.h"
 
@@ -22,6 +23,7 @@ main(void)
     cinit(uart_console);
     cclear();
     cprintf("Hello, Thimble!\n");
+    cprintf("EL: %d\n", el());
 
     for (;;) {
         cputc(uart_getc());
