@@ -23,7 +23,7 @@ main(void)
     cinit(uart_console);
     cclear();
     cprintf("Hello, Thimble!\n");
-    cprintf("EL: %d\n", el());
+    cprintf("Exception Level: EL%d\n", el());
 
     for (;;) {
         cputc(uart_getc());
