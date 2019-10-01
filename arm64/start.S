@@ -12,11 +12,12 @@ _start:
     // Maybe we can get rid of SCR_EL3_HCE
     mov x2, #(SCR_EL3_RW | SCR_EL3_HCE | SCR_EL3_SMD | RES1 << 5 | RES1 << 4 | SCR_EL3_NS)
     msr SCR_EL3, x2
-    // TODO
-    mov     x2, #0x3c9
-    msr     spsr_el3, x2
-    adr     x2, el2
-    msr     elr_el3, x2
+
+    mov x2, #(SPSR_EL3_D | SPSR_EL3_A | SPSR_EL3_I | SPSR_EL3_F | SPSR_EL3_M_EL2H)
+    msr SPSR_EL3, x2
+
+    adr x2, el2
+    msr ELR_EL3, x2
     eret
 
 el2:
