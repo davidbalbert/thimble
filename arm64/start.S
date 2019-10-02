@@ -21,30 +21,31 @@ _start:
     eret
 
 el2:
-    //mrs x0, CurrentEL
-    //lsr x0, x0, #2
-    //and x0, x0, #3
+    mrs x0, CurrentEL
+    lsr x0, x0, #2
+    and x0, x0, #3
 
-    //cmp x0, #2
-    //bne el1
+    cmp x0, #2
+    bne el1
 
-    // enable CNTP for EL1
-    //mrs     x0, cnthctl_el2
-    //orr     x0, x0, #3
-    //msr     cnthctl_el2, x0
-    //msr     cntvoff_el2, xzr
+    // enable CNTP for EL1 (TODO)
+    mrs     x0, cnthctl_el2
+    orr     x0, x0, #3
+    msr     cnthctl_el2, x0
+    msr     cntvoff_el2, xzr
 
     // enable AArch64 in EL1
-    //mov x0, #(HCR_EL2_RW)
-    //orr x0, x0, #(RES1 << 1)
-    //msr HCR_EL2, x0
+    mov x0, #(HCR_EL2_RW)
+    orr x0, x0, #(RES1 << 1)
+    msr HCR_EL2, x0
 
-    // change execution level to EL1
-    //mov     x2, #0x3c4
-    //msr     spsr_el2, x2
-    //adr     x2, el1
-    //msr     elr_el2, x2
-    //eret
+    // change execution level to EL1 (TODO)
+    mov     x2, #0x3c4
+    msr     spsr_el2, x2
+    adr     x2, el1
+    msr     elr_el2, x2
+
+    eret
 
 el1:
     // stop all processors besides cpu0

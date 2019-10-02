@@ -20,6 +20,9 @@ void vcputc(uchar c);
 int
 main(void)
 {
+    for (;;) {
+        halt();
+    }
     cinit(uart_console);
     cclear();
     cprintf("Hello, Thimble!\n");
