@@ -22,3 +22,6 @@
 #define SPSR_EL2_D  (1 << 9)     // Debug mask
 
 #define CPACR_EL1_FPEN_NOTRAP (0b11 << 20) // don't trap accesses to FP, SIMD in EL0 and EL1
+
+#define CNTHCTL_EL2_EL1PCTEN 1        // don't trap access to physical counter register in EL0/1
+#define CNTHCTL_EL2_EL1PCEN  (1 << 1) // don't trap access to physical timer register in EL0/1

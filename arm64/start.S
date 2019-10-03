@@ -11,43 +11,42 @@ _start:
 
     // Maybe we can get rid of SCR_EL3_HCE
     mov x1, #(SCR_EL3_RW | SCR_EL3_HCE | SCR_EL3_SMD | RES1 << 5 | RES1 << 4 | SCR_EL3_NS)
-    msr SCR_EL3, x1
+    msr scr_el3, x1
 
     mov x1, #(SPSR_EL3_D | SPSR_EL3_A | SPSR_EL3_I | SPSR_EL3_F | SPSR_EL3_M_EL2H)
-    msr SPSR_EL3, x1
+    msr spsr_el3, x1
 
     adr x1, el2
-    msr ELR_EL3, x1
+    msr elr_el3, x1
     eret
 
 el2:
     mrs x0, CurrentEL
-    lsr x0, x0, #2
-    and x0, x0, #3
+    lsr x0, x0, #2 // shift EL down
+    and x0, x0, #3 // clear other bits
 
     cmp x0, #2
     bne el1
 
-    // enable CNTP for EL1 (TODO)
-    mrs     x0, cnthctl_el2
-    orr     x0, x0, #3
-    msr     cnthctl_el2, x0
-    msr     cntvoff_el2, xzr
+    // enable CNTP for EL1
+    mov x0, #(CNTHCTL_EL2_EL1PCEN | CNTHCTL_EL2_EL1PCTEN)
+    msr cnthctl_el2, x0
+    msr cntvoff_el2, xzr
 
     // Don't trap floating point registers
     mov x0, #(CPACR_EL1_FPEN_NOTRAP)
-    msr CPACR_EL1, x0
+    msr cpacr_el1, x0
 
     // enable AArch64 in EL1
     mov x0, #(HCR_EL2_RW)
     orr x0, x0, #(RES1 << 1)
-    msr HCR_EL2, x0
+    msr hcr_el2, x0
 
-    // change execution level to EL1 (TODO)
-    mov     x2, #(SPSR_EL2_D | SPSR_EL2_A | SPSR_EL2_I | SPSR_EL2_F | SPSR_EL2_M_EL1H)
-    msr     spsr_el2, x2
-    adr     x2, el1
-    msr     elr_el2, x2
+    // change execution level to EL1
+    mov x2, #(SPSR_EL2_D | SPSR_EL2_A | SPSR_EL2_I | SPSR_EL2_F | SPSR_EL2_M_EL1H)
+    msr spsr_el2, x2
+    adr x2, el1
+    msr elr_el2, x2
 
     eret
 
