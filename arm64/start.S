@@ -40,7 +40,7 @@ el2:
     msr HCR_EL2, x0
 
     // change execution level to EL1 (TODO)
-    mov     x2, #0x3c4
+    mov     x2, #(SPSR_EL2_D | SPSR_EL2_A | SPSR_EL2_I | SPSR_EL2_F | SPSR_EL2_M_EL1H)
     msr     spsr_el2, x2
     adr     x2, el1
     msr     elr_el2, x2
