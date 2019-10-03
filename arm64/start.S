@@ -34,6 +34,10 @@ el2:
     msr     cnthctl_el2, x0
     msr     cntvoff_el2, xzr
 
+    // Don't trap floating point registers
+    mov x0, #(CPACR_EL1_FPEN_NOTRAP)
+    msr CPACR_EL1, x0
+
     // enable AArch64 in EL1
     mov x0, #(HCR_EL2_RW)
     orr x0, x0, #(RES1 << 1)

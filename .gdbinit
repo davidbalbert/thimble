@@ -1,5 +1,5 @@
-echo + set arch i386:x86-64\n
-set arch i386:x86-64
+#echo + set arch i386:x86-64\n
+#set arch i386:x86-64
 
 echo + symbol-file kernel\n
 symbol-file kernel

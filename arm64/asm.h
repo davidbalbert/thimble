@@ -20,3 +20,5 @@
 #define SPSR_EL2_I  (1 << 7)     // IRQ mask
 #define SPSR_EL2_A  (1 << 8)     // SError mask
 #define SPSR_EL2_D  (1 << 9)     // Debug mask
+
+#define CPACR_EL1_FPEN_NOTRAP (0b11 << 20) // don't trap accesses to FP, SIMD in EL0 and EL1
