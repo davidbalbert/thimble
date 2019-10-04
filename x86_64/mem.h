@@ -3,10 +3,10 @@
 #define KERNBASE 0xFFFF800000000000     // First kernel virtual address
 #define KERNLINK (KERNBASE+EXTMEM)      // Kernel linked here
 
-#define USERTOP 0x0000800000000000      // Top of user address space.
-#define PHYSTOP 0x20000000              // Top of physical memory (512 MiB). TODO: autodetect this.
-#define DEVSPACE 0xFE000000		// Just a guess for TOLUD, taken from xv6. Detect this eventually.
-#define DEVTOP 0x100000000		// Devspace ends at 4 GB
+#define USERTOP  0x0000800000000000     // Top of user address space.
+#define PHYSTOP  0x20000000             // Top of physical memory (512 MiB). TODO: autodetect this.
+#define DEVSPACE 0xFE000000		          // Just a guess for TOLUD, taken from xv6. Detect this eventually.
+#define DEVTOP   0x100000000		        // Devspace ends at 4 GB
 
 
 #define PGSIZE 0x1000
