@@ -65,6 +65,11 @@ loop:
     b loop
 
 boot_cpu0:
+    // basic memory management
+    mov x0, #(16 << TCR_T0SZ_SHIFT)
+    orr x0, x0, #(16 << TCR_T1SZ_SHIFT)
+    // TODO: continue mmu setup
+
     ldr x0, =STACKTOP
     mov sp, x0
     bl main

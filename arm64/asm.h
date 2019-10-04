@@ -1,7 +1,5 @@
 #define RES1 1
 
-// https://developer.arm.com/docs/ddi0595/b/aarch64-system-registers/scr_el3
-
 #define SCR_EL3_NS  1           // Non-secure bit - EL0 and EL1 are not in Secure state
 #define SCR_EL3_SMD (1 << 7)    // Secure Monitor Call disable - disables SMC instruction
 #define SCR_EL3_RW  (1 << 10)   // EL2 is 64 bit, EL0 and EL1 can be 64 bit
@@ -25,3 +23,6 @@
 
 #define CNTHCTL_EL2_EL1PCTEN 1        // don't trap access to physical counter register in EL0/1
 #define CNTHCTL_EL2_EL1PCEN  (1 << 1) // don't trap access to physical timer register in EL0/1
+
+#define TCR_T0SZ_SHIFT 0
+#define TCR_T1SZ_SHIFT 16
