@@ -10,7 +10,7 @@ _start:
     bne el2
 
     // Maybe we can get rid of SCR_EL3_HCE
-    mov x1, #(SCR_EL3_RW | SCR_EL3_HCE | SCR_EL3_SMD | RES1 << 5 | RES1 << 4 | SCR_EL3_NS)
+    mov x1, #(SCR_EL3_RW | SCR_EL3_SMD | RES1 << 5 | RES1 << 4 | SCR_EL3_NS)
     msr scr_el3, x1
 
     mov x1, #(SPSR_EL3_D | SPSR_EL3_A | SPSR_EL3_I | SPSR_EL3_F | SPSR_EL3_M_EL2H)
@@ -38,7 +38,7 @@ el2:
     msr cpacr_el1, x0
 
     // enable AArch64 in EL1
-    mov x0, #(HCR_EL2_RW)
+    mov x0, #(HCR_EL2_RW | HCR_EL2_HCD)
     orr x0, x0, #(RES1 << 1)
     msr hcr_el2, x0
 
