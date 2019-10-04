@@ -28,6 +28,9 @@ el2:
     cmp x0, #2
     bne el1
 
+    // initialize sctlr_el1
+    msr sctlr_el1, xzr
+
     // enable CNTP for EL1
     mov x0, #(CNTHCTL_EL2_EL1PCEN | CNTHCTL_EL2_EL1PCTEN)
     msr cnthctl_el2, x0
