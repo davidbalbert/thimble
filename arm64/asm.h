@@ -36,3 +36,7 @@
 #define TCR_SH1_INNER (0b11 << 28)
 #define TCR_TG1_4KB (0b10 << 30)     // 4KB granules in TTBR1_EL1
 #define TCR_IPS_48BIT (0b101 << 32)  // 48 bit intermediate physical address size
+
+#define SCTLR_EL1_M 1         // MMU enable
+#define SCTLR_EL1_C (1 << 2)  // data cache enable
+#define SCTLR_EL1_I (1 << 12) // instruction cache enable

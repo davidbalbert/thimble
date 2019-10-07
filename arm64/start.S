@@ -77,7 +77,7 @@ boot_cpu0:
     mov x1, #(TCR_IPS_48BIT)
     orr x0, x0, x1
 
-    msr tcr_el3, x0
+    msr tcr_el1, x0
 
     // ATTR0 Device-nGnRnE
     // ATTR1 Device.
@@ -86,7 +86,19 @@ boot_cpu0:
     ldr x1, =0xFF440400
     msr mair_el1, x1
 
+    adr x0, pgtable_0
+    msr ttbr0_el1, x0
+    msr ttbr1_el1, x0
 
+    isb
+
+    mrs x0, sctlr_el1
+    orr x0, x0, #(SCTLR_EL1_I)
+    orr x0, x0, #(SCTLR_EL1_C)
+    orr x0, x0, #(SCTLR_EL1_M)
+    msr sctlr_el1, x0
+    dsb sy
+    isb
 
     ldr x0, =STACKTOP
     mov sp, x0
@@ -107,11 +119,17 @@ halt:
 .align 12 // 4KB
 pgtable_0:
 pg_table_entry pgtable_1, 0
+.rept 511
+.quad 0
+.endr
 
 // Boot page tables
 .align 12
 pgtable_1:
 pg_table_entry pgtable_2, 0
+.rept 511
+.quad 0
+.endr
 
 .align 12
 pgtable_2:
@@ -120,3 +138,6 @@ pg_table_block 0x200000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
 pg_table_block 0x400000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
 pg_table_block 0x600000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
 pg_table_block 0x800000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
+.rept 507
+.quad 0
+.endr

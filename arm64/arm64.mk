@@ -18,4 +18,8 @@ default: kernel
 qemu: kernel
 	$(QEMU) -M raspi3 -serial null -serial mon:stdio -kernel kernel
 
+.PHONY: gdb
+gdb: kernel
+	$(QEMU) -M raspi3 -serial null -serial mon:stdio -kernel kernel -gdb tcp::1234 -S
+
 -include arm64/*.d
