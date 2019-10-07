@@ -15,8 +15,6 @@
 char uart_getc(void);
 */
 
-void vcputc(uchar c);
-
 int
 main(void)
 {

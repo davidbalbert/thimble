@@ -15,19 +15,6 @@ OBJCOPY := $(TOOLCHAIN)-objcopy
 kernel: $(OBJS) $(ARCH)/kernel.ld
 	$(LD) $(LDFLAGS) -T $(ARCH)/kernel.ld -o kernel $(OBJS)
 
-#main.c: task1.h
-
-LIBCOBJS := \
-	   klibc.o\
-	   libc.o\
-	   libcasm.o\
-
-#task1: task1.o $(LIBCOBJS)
-	#$(LD) $(LDFLAGS) -e main -Ttext=0 -o task1 $^
-
-#task1.h: task1
-	#xxd -i task1 > task1.h
-
 x86_64/boot.o: x86_64/stage2size.h
 
 x86_64/boot: x86_64/boot.o x86_64/boot.ld
@@ -54,11 +41,8 @@ STAGE2OBJS := \
 x86_64/stage2: $(STAGE2OBJS) x86_64/stage2.ld
 	$(LD) $(LDFLAGS) -N -T x86_64/stage2.ld -o x86_64/stage2 $(STAGE2OBJS)
 
-ivec.S: ivec.rb
-	ruby ivec.rb > ivec.S
-
 -include *.d
 
 .PHONY: clean
 clean:
-	rm -rf x86_64/boot x86_64/stage2 kernel ivec.S x86_64/stage2size.* *.img *.o *.d $(ARCH)/*.o $(ARCH)/*.d task1 task1.h
+	rm -rf x86_64/boot x86_64/stage2 kernel x86_64/ivec.S x86_64/stage2size.* *.img *.o *.d $(ARCH)/*.o $(ARCH)/*.d x86_64/task1 x86_64/task1.h

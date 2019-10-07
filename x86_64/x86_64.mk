@@ -16,9 +16,6 @@ Q35_QEMUOPTS := -monitor stdio \
 
 OBJS += \
 	entry.o\
-	trap.o\
-	ivec.o\
-	alltraps.o\
 	pic.o\
 	kbd.o\
 	swtch.o\
@@ -32,10 +29,28 @@ OBJS += \
 	syscallasm.o\
 	x86_64/vgacons.o\
 	x86_64/cpu.o\
-
+	x86_64/trap.o\
+	x86_64/ivec.o\
+	x86_64/alltraps.o\
 
 .PHONY: default
 default: kernel.img
+
+x86_64/ivec.S: x86_64/ivec.rb
+	ruby x86_64/ivec.rb > x86_64/ivec.S
+
+main.c: task1.h
+
+LIBCOBJS := \
+	   klibc.o\
+	   libc.o\
+	   libcasm.o\
+
+task1: task1.o $(LIBCOBJS)
+	$(LD) $(LDFLAGS) -e main -Ttext=0 -o task1 $^
+
+task1.h: task1
+	xxd -i task1 > task1.h
 
 kernel.img: x86_64/boot x86_64/stage2 x86_64/stage2size.txt kernel
 	dd bs=512 count=16384 if=/dev/zero of=kernel.img
