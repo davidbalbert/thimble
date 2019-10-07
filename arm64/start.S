@@ -92,13 +92,13 @@ boot_cpu0:
 
     isb
 
-    mrs x0, sctlr_el1
-    orr x0, x0, #(SCTLR_EL1_I)
-    orr x0, x0, #(SCTLR_EL1_C)
-    orr x0, x0, #(SCTLR_EL1_M)
-    msr sctlr_el1, x0
-    dsb sy
-    isb
+    //mrs x0, sctlr_el1
+    //orr x0, x0, #(SCTLR_EL1_I)
+    //orr x0, x0, #(SCTLR_EL1_C)
+    //orr x0, x0, #(SCTLR_EL1_M)
+    //msr sctlr_el1, x0
+    //dsb sy
+    //isb
 
     ldr x0, =STACKTOP
     mov sp, x0
