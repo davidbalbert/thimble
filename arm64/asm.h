@@ -26,3 +26,13 @@
 
 #define TCR_T0SZ_SHIFT 0
 #define TCR_T1SZ_SHIFT 16
+
+#define TCR_IRGN0_WB_WA (0b01 << 8)  // Inner cacheability - Write-Back Read-Allocate Write-Allocate cacheable
+#define TCR_ORGN0_WB_WA (0b01 << 10) // Outer cacheability - Write-Back Read-Allocate Write-Allocate cacheable
+#define TCR_SH0_INNER (0b11 << 12)   // inner sharable
+#define TCR_TG0_4KB (0 << 14)        // 4KB granules in TTBR0_EL1. don't actually need this, but it makes things clearer
+#define TCR_IRGN1_WB_WA (0b01 << 24)
+#define TCR_ORGN1_WB_WA (0b01 << 26)
+#define TCR_SH1_INNER (0b11 << 28)
+#define TCR_TG1_4KB (0b10 << 30)     // 4KB granules in TTBR1_EL1
+#define TCR_IPS_48BIT (0b101 << 32)  // 48 bit intermediate physical address size

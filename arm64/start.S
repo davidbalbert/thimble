@@ -1,4 +1,5 @@
 #include "asm.h"
+#include "mem.h"
 
 .global _start
 _start:
@@ -66,9 +67,26 @@ loop:
 
 boot_cpu0:
     // basic memory management
-    mov x0, #(16 << TCR_T0SZ_SHIFT)
+    mov x0, #(TCR_SH0_INNER | TCR_ORGN0_WB_WA | TCR_IRGN0_WB_WA | TCR_TG0_4KB | (16 << TCR_T0SZ_SHIFT))
     orr x0, x0, #(16 << TCR_T1SZ_SHIFT)
-    // TODO: continue mmu setup
+    orr x0, x0, #(TCR_IRGN1_WB_WA)
+    orr x0, x0, #(TCR_ORGN1_WB_WA)
+    orr x0, x0, #(TCR_SH1_INNER)
+    orr x0, x0, #(TCR_TG1_4KB)
+
+    mov x1, #(TCR_IPS_48BIT)
+    orr x0, x0, x1
+
+    msr tcr_el3, x0
+
+    // ATTR0 Device-nGnRnE
+    // ATTR1 Device.
+    // ATTR2 Normal Non-Cacheable.
+    // ATTR3 Normal Cacheable.
+    ldr x1, =0xFF440400
+    msr mair_el1, x1
+
+
 
     ldr x0, =STACKTOP
     mov sp, x0
@@ -77,3 +95,28 @@ boot_cpu0:
 halt:
     wfi
     b halt
+
+.macro pg_table_entry pa, attr
+    .quad \pa + PTE_TABLE
+.endm
+
+.macro pg_table_block pa, attr
+    .quad \pa | \attr | PTE_BLOCK
+.endm
+
+.align 12 // 4KB
+pgtable_0:
+pg_table_entry pgtable_1, 0
+
+// Boot page tables
+.align 12
+pgtable_1:
+pg_table_entry pgtable_2, 0
+
+.align 12
+pgtable_2:
+pg_table_block 0x000000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
+pg_table_block 0x200000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
+pg_table_block 0x400000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
+pg_table_block 0x600000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
+pg_table_block 0x800000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
