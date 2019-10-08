@@ -11,17 +11,23 @@
 //#include "task1.h"
 
 
-/*
-char uart_getc(void);
-*/
+void
+early_uart_console(void)
+{
+    uart_init();
+    cinit(uart_console);
+}
 
 int
 main(void)
 {
-    cinit(uart_console);
+    //uart_init();
+    //cinit(uart_console);
     cclear();
     cprintf("Hello, Thimble!\n");
     cprintf("Exception Level: EL%d\n", el());
+
+    asm volatile("mrs x0, elr_el3");
 
     for (;;) {
         cputc(uart_getc());

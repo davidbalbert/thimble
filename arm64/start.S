@@ -90,18 +90,24 @@ boot_cpu0:
     msr ttbr0_el1, x0
     msr ttbr1_el1, x0
 
-    isb
+    adr x2, vectors
+    msr vbar_el1, x2
 
-    //mrs x0, sctlr_el1
-    //orr x0, x0, #(SCTLR_EL1_I)
-    //orr x0, x0, #(SCTLR_EL1_C)
-    //orr x0, x0, #(SCTLR_EL1_M)
-    //msr sctlr_el1, x0
-    //dsb sy
-    //isb
+    isb
 
     ldr x0, =STACKTOP
     mov sp, x0
+
+    bl early_uart_console
+
+    mrs x0, sctlr_el1
+    orr x0, x0, #(SCTLR_EL1_I)
+    orr x0, x0, #(SCTLR_EL1_C)
+    orr x0, x0, #(SCTLR_EL1_M)
+    msr sctlr_el1, x0
+    dsb sy
+    isb
+
     bl main
 
 halt:

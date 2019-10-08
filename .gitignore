@@ -5,7 +5,7 @@ toolchain
 kernel
 boot
 stage2
-ivec.S
+x86_64/ivec.S
 stage2size.txt
 stage2size.h
 

@@ -10,6 +10,8 @@ OBJS += \
 	arm64/start.o\
 	arm64/cpu.o\
 	arm64/uart.o\
+	arm64/trap.o\
+	arm64/ivec.o\
 
 .PHONY: default
 default: kernel
