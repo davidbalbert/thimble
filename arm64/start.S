@@ -1,6 +1,8 @@
 #include "asm.h"
 #include "mem.h"
 
+.section ".text.boot"
+
 .global _start
 _start:
     mrs x0, CurrentEL
@@ -90,15 +92,15 @@ boot_cpu0:
     msr ttbr0_el1, x0
     msr ttbr1_el1, x0
 
-    adr x2, vectors
-    msr vbar_el1, x2
+    // TODO: set these in trapinit
+    // adr x2, vectors
+    // msr vbar_el1, x2
 
     isb
 
-    ldr x0, =STACKTOP
+    // TODO: move stack to upper half
+    adr x0, #(kstack + KSTACKSIZE)
     mov sp, x0
-
-    bl early_uart_console
 
     mrs x0, sctlr_el1
     orr x0, x0, #(SCTLR_EL1_I)
@@ -108,7 +110,8 @@ boot_cpu0:
     dsb sy
     isb
 
-    bl main
+    ldr x0, =main
+    blr x0
 
 halt:
     wfi
@@ -122,6 +125,8 @@ halt:
     .quad \pa | \attr | PTE_BLOCK
 .endm
 
+// Boot page tables. Enough to jump to main in the upper half.
+
 .align 12 // 4KB
 pgtable_0:
 pg_table_entry pgtable_1, 0
@@ -129,7 +134,6 @@ pg_table_entry pgtable_1, 0
 .quad 0
 .endr
 
-// Boot page tables
 .align 12
 pgtable_1:
 pg_table_entry pgtable_2, 0
@@ -139,11 +143,16 @@ pg_table_entry pgtable_2, 0
 
 .align 12
 pgtable_2:
-pg_table_block 0x000000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
-pg_table_block 0x200000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
-pg_table_block 0x400000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
-pg_table_block 0x600000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
-pg_table_block 0x800000, PTE_AF | PTE_ISH | PTE_U | PTE_CACHEABLE
+pg_table_block 0x000000, PTE_AF | PTE_ISH | PTE_CACHEABLE
+pg_table_block 0x200000, PTE_AF | PTE_ISH | PTE_CACHEABLE
+pg_table_block 0x400000, PTE_AF | PTE_ISH | PTE_CACHEABLE
+pg_table_block 0x600000, PTE_AF | PTE_ISH | PTE_CACHEABLE
+pg_table_block 0x800000, PTE_AF | PTE_ISH | PTE_CACHEABLE
 .rept 507
 .quad 0
 .endr
+
+.align 12
+
+kstack:
+.space KSTACKSIZE, 0

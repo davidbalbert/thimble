@@ -21,6 +21,7 @@ early_uart_console(void)
 int
 main(void)
 {
+    while (1);
     //uart_init();
     //cinit(uart_console);
     cclear();

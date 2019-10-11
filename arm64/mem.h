@@ -7,6 +7,8 @@
 
 #define PGSIZE 0x1000
 
+#define KSTACKSIZE PGSIZE
+
 #define V2P(x) (((uintptr)(x)) - KERNBASE)
 #define P2V(x) (((void *)(x)) + KERNBASE)
 
