@@ -16,6 +16,7 @@ Q35_QEMUOPTS := -monitor stdio \
 
 OBJS += \
 	x86_64/start.o\
+	x86_64/arch.o\
 	x86_64/pic.o\
 	x86_64/kbd.o\
 	x86_64/swtch.o\

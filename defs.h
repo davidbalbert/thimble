@@ -23,6 +23,11 @@ void cputc(uchar c);
 void cvprintf(char *fmt, va_list ap);
 void cwrite(char *buf, usize nbytes);
 
+// $(ARCH)/arch.c
+
+void archinit_console(void);
+void archmain(void);
+
 // $(ARCH)/cpu.c
 
 void halt(void) __attribute__((noreturn));
