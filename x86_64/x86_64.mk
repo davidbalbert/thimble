@@ -15,7 +15,7 @@ Q35_QEMUOPTS := -monitor stdio \
 	       -drive file=kernel.img,format=raw,if=none,id=hd0 \
 
 OBJS += \
-	x86_64/entry.o\
+	x86_64/start.o\
 	x86_64/pic.o\
 	x86_64/kbd.o\
 	x86_64/swtch.o\
