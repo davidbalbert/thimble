@@ -13,17 +13,11 @@
 int
 main(void)
 {
-    //uart_init();
-    //cinit(uart_console);
-    //cclear();
-    //cprintf("Hello, Thimble!\n");
-    //cprintf("Exception Level: EL%d\n", el());
-
-    //asm volatile("mrs x0, elr_el3");
-
-    //for (;;) {
-        //cputc(uart_getc());
-    //}
+    uart_init();
+    cinit(uart_console);
+    cclear();
+    cprintf("Hello, Thimble!\n");
+    cprintf("Exception Level: EL%d\n", el());
 
     /*
     schedinit();
@@ -45,6 +39,11 @@ main(void)
 
     scheduler();
     */
+
+    for (;;) {
+        cputc(uart_getc());
+    }
+
 
     for (;;) {
         halt();

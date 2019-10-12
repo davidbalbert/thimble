@@ -139,11 +139,19 @@ pg_table_entry pgtable_2, 0
 
 .align 12
 pgtable_2:
-pg_table_block 0x000000, PTE_AF | PTE_ISH | PTE_CACHEABLE
-pg_table_block 0x200000, PTE_AF | PTE_ISH | PTE_CACHEABLE
-pg_table_block 0x400000, PTE_AF | PTE_ISH | PTE_CACHEABLE
-pg_table_block 0x600000, PTE_AF | PTE_ISH | PTE_CACHEABLE
-pg_table_block 0x800000, PTE_AF | PTE_ISH | PTE_CACHEABLE
-.rept 507
+pg_table_block 0x00000000, PTE_AF | PTE_ISH | PTE_CACHEABLE
+pg_table_block 0x00200000, PTE_AF | PTE_ISH | PTE_CACHEABLE
+pg_table_block 0x00400000, PTE_AF | PTE_ISH | PTE_CACHEABLE
+pg_table_block 0x00600000, PTE_AF | PTE_ISH | PTE_CACHEABLE
+pg_table_block 0x00800000, PTE_AF | PTE_ISH | PTE_CACHEABLE
+.rept 499
 .quad 0
 .endr
+pg_table_block 0x3F000000, PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE
+pg_table_block 0x3F200000, PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE
+pg_table_block 0x3F400000, PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE
+pg_table_block 0x3F600000, PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE
+pg_table_block 0x3F800000, PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE
+pg_table_block 0x3FA00000, PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE
+pg_table_block 0x3FC00000, PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE
+pg_table_block 0x3FE00000, PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE
