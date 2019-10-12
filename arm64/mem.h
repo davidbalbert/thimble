@@ -30,3 +30,7 @@
 
 #define PTE_PXN (1 << 53) // priveledged execute-never
 #define PTE_UXN (1 << 54) // user execute-never
+
+#define KB 1024l
+#define MB (1024l*1024)
+#define GB (1024l*1024*1024)

@@ -15,18 +15,18 @@ Q35_QEMUOPTS := -monitor stdio \
 	       -drive file=kernel.img,format=raw,if=none,id=hd0 \
 
 OBJS += \
-	entry.o\
-	pic.o\
-	kbd.o\
-	swtch.o\
-	lock.o\
+	x86_64/entry.o\
+	x86_64/pic.o\
+	x86_64/kbd.o\
+	x86_64/swtch.o\
+	x86_64/lock.o\
 	proc.o\
 	kalloc.o\
 	file.o\
 	syscall.o\
-	timer.o\
-	vm.o\
-	syscallasm.o\
+	x86_64/timer.o\
+	x86_64/vm.o\
+	x86_64/syscallasm.o\
 	x86_64/vgacons.o\
 	x86_64/cpu.o\
 	x86_64/trap.o\
