@@ -99,7 +99,8 @@ boot_cpu0:
     isb
 
     // TODO: move stack to upper half
-    adr x0, #(kstack + KSTACKSIZE)
+    ldr x0, =bootkstack
+    add x0, x0, KSTACKSIZE
     mov sp, x0
 
     mrs x0, sctlr_el1
@@ -151,8 +152,3 @@ pg_table_block 0x800000, PTE_AF | PTE_ISH | PTE_CACHEABLE
 .rept 507
 .quad 0
 .endr
-
-.align 12
-
-kstack:
-.space KSTACKSIZE, 0
