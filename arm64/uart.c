@@ -1,8 +1,9 @@
 #include "u.h"
 
 #include "console.h"
+#include "mem.h"
 
-#define MMIO_BASE 0x3F000000
+#define MMIO_BASE P2V(0x3F000000)
 
 // rpi4?
 //#define MMIO_BASE 0xFE000000
