@@ -3,6 +3,8 @@
 #include "arm64.h"
 #include "defs.h"
 
+extern u8 vectors[];
+
 void
 trap(u64 type, u64 esr, u64 elr, u64 spsr, unsigned long far)
 {
@@ -58,5 +60,5 @@ trap(u64 type, u64 esr, u64 elr, u64 spsr, unsigned long far)
 void
 trapinit(void)
 {
-
+    st_vbar_el1(vectors);
 }

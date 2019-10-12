@@ -12,3 +12,9 @@ el(void)
 
     return (res >> 2) & 0x3;
 }
+
+static inline void
+st_vbar_el1(void *p)
+{
+    asm volatile("msr vbar_el1, %[p]" : : [p] "r" (p));
+}

@@ -3,7 +3,7 @@
 #include "arm64.h"
 #include "mem.h"
 
-char bootkstack[KSTACKSIZE] __attribute__ ((aligned (PGSIZE)));
+u8 bootkstack[KSTACKSIZE] __attribute__ ((aligned (PGSIZE)));
 
 void
 halt(void)

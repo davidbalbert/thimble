@@ -10,29 +10,20 @@
 
 //#include "task1.h"
 
-
-void
-early_uart_console(void)
-{
-    uart_init();
-    cinit(uart_console);
-}
-
 int
 main(void)
 {
-    while (1);
     //uart_init();
     //cinit(uart_console);
-    cclear();
-    cprintf("Hello, Thimble!\n");
-    cprintf("Exception Level: EL%d\n", el());
+    //cclear();
+    //cprintf("Hello, Thimble!\n");
+    //cprintf("Exception Level: EL%d\n", el());
 
-    asm volatile("mrs x0, elr_el3");
+    //asm volatile("mrs x0, elr_el3");
 
-    for (;;) {
-        cputc(uart_getc());
-    }
+    //for (;;) {
+        //cputc(uart_getc());
+    //}
 
     /*
     schedinit();
@@ -41,7 +32,9 @@ main(void)
     initmem1(end, p2v(16*MB));
     kvmalloc();
     seginit();
+    */
     trapinit();
+    /*
     sysinit();
     picinit();
     timerinit();

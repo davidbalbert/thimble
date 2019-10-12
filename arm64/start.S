@@ -92,16 +92,7 @@ boot_cpu0:
     msr ttbr0_el1, x0
     msr ttbr1_el1, x0
 
-    // TODO: set these in trapinit
-    // adr x2, vectors
-    // msr vbar_el1, x2
-
     isb
-
-    // TODO: move stack to upper half
-    ldr x0, =bootkstack
-    add x0, x0, KSTACKSIZE
-    mov sp, x0
 
     mrs x0, sctlr_el1
     orr x0, x0, #(SCTLR_EL1_I)
@@ -110,6 +101,10 @@ boot_cpu0:
     msr sctlr_el1, x0
     dsb sy
     isb
+
+    ldr x0, =bootkstack
+    add x0, x0, KSTACKSIZE
+    mov sp, x0
 
     ldr x0, =main
     blr x0
