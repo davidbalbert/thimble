@@ -17,7 +17,7 @@
 #define PTE_BLOCK 0x1
 
 #define PTE_DEVICE_nGnRnE (0 << 2) // ATTR0
-#define PTE_DEVICE        (1 << 2) // ATTR1
+#define PTE_DEVICE_GRE    (1 << 2) // ATTR1
 #define PTE_NON_CACHEABLE (2 << 2) // ATTR2
 #define PTE_CACHEABLE     (3 << 2) // ATTR3
 

@@ -13,6 +13,7 @@ OBJS += \
 	arm64/uart.o\
 	arm64/trap.o\
 	arm64/ivec.o\
+	arm64/lock.o\
 
 .PHONY: default
 default: kernel
