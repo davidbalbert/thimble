@@ -21,7 +21,7 @@ OBJS += \
 	x86_64/kbd.o\
 	x86_64/swtch.o\
 	x86_64/lock.o\
-	proc.o\
+	x86_64/proc.o\
 	kalloc.o\
 	file.o\
 	syscall.o\

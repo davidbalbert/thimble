@@ -45,4 +45,4 @@ x86_64/stage2: $(STAGE2OBJS) x86_64/stage2.ld
 
 .PHONY: clean
 clean:
-	rm -rf x86_64/boot x86_64/stage2 kernel x86_64/ivec.S x86_64/stage2size.* *.img *.o *.d $(ARCH)/*.o $(ARCH)/*.d x86_64/task1 x86_64/task1.h
+	rm -rf x86_64/boot x86_64/stage2 kernel x86_64/ivec.S x86_64/stage2size.* *.img *.o *.d x86_64/*.o x86_64/*.d arm64/*.o arm64/*.d x86_64/task1 x86_64/task1.h

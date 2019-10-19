@@ -53,3 +53,24 @@ stlr(uint *p, uint v)
 {
     asm volatile("stlr %[v], [%[p]]" : : [v] "r" (v), [p] "r" (p) : "memory");
 }
+
+static inline u64
+readdaif(void)
+{
+    u64 res;
+    asm volatile("mrs %[res], DAIF" : [res] "=r" (res));
+
+    return res;
+}
+
+static inline void
+cli(void)
+{
+    asm volatile("msr DAIFSet, #15");
+}
+
+static inline void
+sti(void)
+{
+    asm volatile("msr DAIFClr, #15");
+}
