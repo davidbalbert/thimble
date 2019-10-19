@@ -137,6 +137,7 @@ pg_table_entry boot_pgtable_2, 0
 .quad 0
 .endr
 
+// Map 16 MB of memory, as well as enough device space to use uart1
 .align 12
 boot_pgtable_2:
 pg_table_block 0x00000000, PTE_AF | PTE_ISH | PTE_CACHEABLE
@@ -144,7 +145,11 @@ pg_table_block 0x00200000, PTE_AF | PTE_ISH | PTE_CACHEABLE
 pg_table_block 0x00400000, PTE_AF | PTE_ISH | PTE_CACHEABLE
 pg_table_block 0x00600000, PTE_AF | PTE_ISH | PTE_CACHEABLE
 pg_table_block 0x00800000, PTE_AF | PTE_ISH | PTE_CACHEABLE
-.rept 499
+pg_table_block 0x00A00000, PTE_AF | PTE_ISH | PTE_CACHEABLE
+pg_table_block 0x00C00000, PTE_AF | PTE_ISH | PTE_CACHEABLE
+pg_table_block 0x00E00000, PTE_AF | PTE_ISH | PTE_CACHEABLE
+pg_table_block 0x01000000, PTE_AF | PTE_ISH | PTE_CACHEABLE
+.rept 495
 .quad 0
 .endr
 pg_table_block 0x3F000000, PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE

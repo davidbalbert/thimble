@@ -18,6 +18,9 @@ SECTIONS
     }
 
     .rodata : { *(.rodata) }
+
+    PROVIDE(data = .);
+
     .data   : { *(.data) }
     .bss    : { *(.bss COMMON) }
 

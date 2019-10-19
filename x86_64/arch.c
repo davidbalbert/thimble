@@ -14,10 +14,6 @@ archinit_console(void)
 void
 archmain(void)
 {
-    schedinit();
-    // TODO: allocate fewer things (files, etc.) statically in the
-    // kernel so we need to map less memory initially
-    initmem1(end, p2v(16*MB));
     kvmalloc();
     seginit();
     trapinit();

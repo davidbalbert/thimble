@@ -2,7 +2,7 @@ OBJS := \
        main.o\
        console.o\
        klibc.o\
-       #kalloc.o\
+       kalloc.o\
        #syscall.o\
        #file.o\
 

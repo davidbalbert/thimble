@@ -4,6 +4,7 @@
 #define KERNLINK (KERNBASE+KERNPHYS)		// Kernel linked here
 
 #define USERTOP  0x0001000000000000     // Top of user address space
+#define PHYSTOP  0x40000000             // Top of physical memory (1 GiB for Raspi3). TODO: autodetect this.
 
 #define PGSIZE 0x1000
 
@@ -34,3 +35,10 @@
 #define KB 1024l
 #define MB (1024l*1024)
 #define GB (1024l*1024*1024)
+
+#ifndef __ASSEMBLER__
+
+extern char end[];  // End of kernel, provided by linker
+extern char data[]; // Start of kernel data section, provided by linker
+
+#endif

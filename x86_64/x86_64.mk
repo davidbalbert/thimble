@@ -22,7 +22,6 @@ OBJS += \
 	x86_64/swtch.o\
 	x86_64/lock.o\
 	x86_64/proc.o\
-	kalloc.o\
 	file.o\
 	syscall.o\
 	x86_64/timer.o\
