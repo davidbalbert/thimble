@@ -1,6 +1,6 @@
 TOOLCHAIN := x86_64-elf
 
-CFLAGS := -m64 -O0 -MD -fno-builtin -Wall -Werror -mcmodel=large -g -I. -Ix86_64
+CFLAGS := -m64 -O0 -MD -ffreestanding -Wall -Werror -mno-red-zone -mcmodel=large -g -I. -Ix86_64
 ASFLAGS := -m64 -MD -g -I. -Ix86_64 -Wa,-divide
 LDFLAGS := -static -nostdlib -N
 

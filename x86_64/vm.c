@@ -213,7 +213,7 @@ mappages(Pml4e *pgmap, void *va, usize size, uintptr pa, int perm)
         if (pte == nil)
             return -1;
         if (*pte & PTE_P)
-            panic("remap");
+            panic("remap, va: 0x%x, pa: 0x%x", va, pa);
 
         *pte = pa | perm | PTE_P;
 
@@ -260,9 +260,10 @@ setupkvm(void)
 
     memzero(pgmap, PGSIZE);
 
-    for (k = kmap; k < &kmap[nelem(kmap)]; k++)
+    for (k = kmap; k < &kmap[nelem(kmap)]; k++) {
         if (mappages(pgmap, k->addr, k->phys_end-k->phys_start, k->phys_start, k->perm) < 0)
             return nil;
+    }
 
     return pgmap;
 }

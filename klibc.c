@@ -1,6 +1,5 @@
 // libc routines shared between kernel space and userspace
 #include "u.h"
-//#include "x86.h"
 
 void *
 memmove(void *dst, void *src, usize n)
@@ -22,21 +21,13 @@ memmove(void *dst, void *src, usize n)
     return dst;
 }
 
-/*
-void *
-memset(void *p, int c, usize n)
-{
-    stosb(p, c, n);
-    return p;
-}
-*/
-
 void *
 memset(void *p, int c, usize n)
 {
     uchar *cp = p;
+    usize i;
 
-    for (usize i = 0; i < n; i++) {
+    for (i = 0; i < n; i++) {
         cp[i] = (uchar)c;
     }
 
