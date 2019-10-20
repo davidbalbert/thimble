@@ -1,6 +1,3 @@
-typedef unsigned long  Pml4e;
-typedef unsigned long  Pdpe;
-typedef unsigned long  Pde;
 typedef unsigned long  Pte;
 
 typedef struct SpinLock SpinLock;
@@ -98,14 +95,14 @@ void handletimer(void);
 void trapinit(void);
 
 // vm.c
-usize allocuvm(Pml4e *pgmap, usize oldsz, usize newsz);
-void clearpteu(Pml4e *pgmap, void *addr);
-Pml4e* copyuvm(Pml4e *oldmap, usize sz);
-void freeuvm(Pml4e *pgmap);
+usize allocuvm(Pte *pgmap, usize oldsz, usize newsz);
+void clearpteu(Pte *pgmap, void *addr);
+Pte* copyuvm(Pte *oldmap, usize sz);
+void freeuvm(Pte *pgmap);
 void kvmalloc(void);
-void loaduvm(Pml4e *pgmap, char *addr, uchar *data, usize sz);
+void loaduvm(Pte *pgmap, char *addr, uchar *data, usize sz);
 void seginit(void);
-Pml4e *setupkvm(void);
+Pte *setupkvm(void);
 void switchkvm();
 void switchuvm(Proc *p);
-void *uva2ka(Pml4e *pgmap, void *addr);
+void *uva2ka(Pte *pgmap, void *addr);

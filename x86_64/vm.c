@@ -5,7 +5,7 @@
 #include "proc.h"
 #include "x86.h"
 
-static Pml4e *kpgmap;
+static Pte *kpgmap;
 
 // Makes a 64 bit code segment descriptor for the given dpl
 static void
@@ -133,10 +133,10 @@ pgmapget(ulong *table, int offset, int alloc)
 }
 
 static Pte *
-walkpgmap(Pml4e *pgmap, void *va, int alloc)
+walkpgmap(Pte *pgmap, void *va, int alloc)
 {
-    Pdpe *pdirpt;
-    Pde *pgdir;
+    Pte *pdirpt;
+    Pte *pgdir;
     Pte *pgtab;
 
     pdirpt = pgmapget(pgmap, pmx(va), alloc);
@@ -159,7 +159,7 @@ walkpgmap(Pml4e *pgmap, void *va, int alloc)
 
 // user virtual address to kernel address
 void *
-uva2ka(Pml4e *pgmap, void *addr)
+uva2ka(Pte *pgmap, void *addr)
 {
     Pte *pte = walkpgmap(pgmap, addr, 0);
 
@@ -177,7 +177,7 @@ uva2ka(Pml4e *pgmap, void *addr)
 }
 
 void
-clearpteu(Pml4e *pgmap, void *addr)
+clearpteu(Pte *pgmap, void *addr)
 {
     Pte *pte = walkpgmap(pgmap, addr, 0);
     if (pte == nil)
@@ -196,7 +196,7 @@ checkalign(void *a, int alignment, char *msg)
 }
 
 static int
-mappages(Pml4e *pgmap, void *va, usize size, uintptr pa, int perm)
+mappages(Pte *pgmap, void *va, usize size, uintptr pa, int perm)
 {
     char *a, *last;
     Pte *pte;
@@ -248,10 +248,10 @@ static struct Kmap {
 };
 
 
-Pml4e *
+Pte *
 setupkvm(void)
 {
-    Pml4e *pgmap = kalloc();
+    Pte *pgmap = kalloc();
     Kmap *k;
 
     if (pgmap == nil)
@@ -268,7 +268,7 @@ setupkvm(void)
 }
 
 void
-switchkvm()
+switchkvm(void)
 {
     lcr3(v2p(kpgmap));
 }
@@ -283,7 +283,7 @@ kvmalloc(void)
 }
 
 usize
-allocuvm(Pml4e *pgmap, usize oldsz, usize newsz)
+allocuvm(Pte *pgmap, usize oldsz, usize newsz)
 {
     void *mem;
     usize a;
@@ -315,7 +315,7 @@ allocuvm(Pml4e *pgmap, usize oldsz, usize newsz)
 }
 
 void
-loaduvm(Pml4e *pgmap, char *addr, uchar *data, ulong sz)
+loaduvm(Pte *pgmap, char *addr, uchar *data, ulong sz)
 {
     Pte *pte;
     ulong i;
@@ -361,11 +361,11 @@ switchuvm(Proc *p)
     popcli();
 }
 
-Pml4e *
-copyuvm(Pml4e *oldmap, usize sz)
+Pte *
+copyuvm(Pte *oldmap, usize sz)
 {
     uintptr a;
-    Pml4e *newmap;
+    Pte *newmap;
     Pte *pte;
     uchar *oldmem, *newmem;
     uint flags;
@@ -402,7 +402,7 @@ bad:
 }
 
 void
-freeuvm(Pml4e *pgmap)
+freeuvm(Pte *pgmap)
 {
     cprintf("freeuvm not implemented yet!\n");
     // todo

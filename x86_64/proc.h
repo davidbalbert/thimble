@@ -108,7 +108,7 @@ struct Proc {
     SyscallFrame *sf;
     int pid;
     uchar *kstack;      // base of the kernel stack
-    Pml4e *pgmap;
+    Pte *pgmap;
     usize sz;           // total size in memory
     char errstr[ERRMAX];
     File *files[NFD];
