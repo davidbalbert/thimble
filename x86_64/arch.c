@@ -14,7 +14,6 @@ archinit_console(void)
 void
 archmain(void)
 {
-    kvmalloc();
     seginit();
     trapinit();
     sysinit();

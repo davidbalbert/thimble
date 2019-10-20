@@ -114,11 +114,11 @@ halt:
     b halt
 
 .macro pg_table_entry pa, attr
-    .quad \pa + PTE_TABLE
+    .quad \pa + (PTE_TABLE | PTE_P)
 .endm
 
 .macro pg_table_block pa, attr
-    .quad \pa | \attr | PTE_BLOCK
+    .quad \pa | \attr | PTE_BLOCK | PTE_P
 .endm
 
 // Boot page tables. Enough to jump to main in the upper half.

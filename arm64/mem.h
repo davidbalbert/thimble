@@ -4,7 +4,9 @@
 #define KERNLINK (KERNBASE+KERNPHYS)		// Kernel linked here
 
 #define USERTOP  0x0001000000000000     // Top of user address space
-#define PHYSTOP  0x40000000             // Top of physical memory (1 GiB for Raspi3). TODO: autodetect this.
+#define PHYSTOP  0x3F000000             // Top of physical memory. Raspi 3 has 1 GiB, but it seems like only 1023 MiB are mapped in (https://www.raspberrypi.org/forums/viewtopic.php?t=186090). TODO: autodetect this.
+#define DEVSPACE 0x3F000000             // MMIO peripherals (Raspi3)
+#define DEVTOP   0x40000000             // Peripheral space ends at 1 GiB
 
 #define PGSIZE 0x1000
 
@@ -13,9 +15,11 @@
 #define V2P(x) (((uintptr)(x)) - KERNBASE)
 #define P2V(x) (((void *)(x)) + KERNBASE)
 
-#define PTE_TABLE 0x3
-#define PTE_PAGE  0x3
-#define PTE_BLOCK 0x1
+#define PTE_P     (1 << 0)
+#define PTE_TABLE (1 << 1)
+#define PTE_PAGE  (1 << 1)
+#define PTE_BLOCK (0 << 1)
+
 
 #define PTE_DEVICE_nGnRnE (0 << 2) // ATTR0
 #define PTE_DEVICE_GRE    (1 << 2) // ATTR1
@@ -24,6 +28,7 @@
 
 #define PTE_U   (1 << 6)  // user access
 #define PTE_RO  (1 << 7)  // read-only
+#define PTE_W   (0 << 7)  // read/write
 
 #define PTE_ISH (3 << 8)  // inner sharable
 

@@ -15,6 +15,7 @@ OBJS += \
 	arm64/ivec.o\
 	arm64/lock.o\
 	arm64/proc.o\
+	arm64/vm.o\
 
 .PHONY: default
 default: kernel
