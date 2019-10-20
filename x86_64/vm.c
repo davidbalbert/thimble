@@ -132,6 +132,31 @@ pgmapget(ulong *table, int offset, int alloc)
     return innertab;
 }
 
+static Pte *
+walkpgmap(Pml4e *pgmap, void *va, int alloc)
+{
+    Pdpe *pdirpt;
+    Pde *pgdir;
+    Pte *pgtab;
+
+    pdirpt = pgmapget(pgmap, pmx(va), alloc);
+
+    if (pdirpt == nil)
+        return nil;
+
+    pgdir = pgmapget(pdirpt, pdpx(va), alloc);
+
+    if (pgdir == nil)
+        return nil;
+
+    pgtab = pgmapget(pgdir, pdx(va), alloc);
+
+    if (pgtab == nil)
+        return nil;
+
+    return &pgtab[ptx(va)];
+}
+
 // user virtual address to kernel address
 void *
 uva2ka(Pml4e *pgmap, void *addr)
@@ -159,32 +184,6 @@ clearpteu(Pml4e *pgmap, void *addr)
         panic("clearpteu");
 
     *pte &= ~PTE_U;
-}
-
-
-Pte *
-walkpgmap(Pml4e *pgmap, void *va, int alloc)
-{
-    Pdpe *pdirpt;
-    Pde *pgdir;
-    Pte *pgtab;
-
-    pdirpt = pgmapget(pgmap, pmx(va), alloc);
-
-    if (pdirpt == nil)
-        return nil;
-
-    pgdir = pgmapget(pdirpt, pdpx(va), alloc);
-
-    if (pgdir == nil)
-        return nil;
-
-    pgtab = pgmapget(pgdir, pdx(va), alloc);
-
-    if (pgtab == nil)
-        return nil;
-
-    return &pgtab[ptx(va)];
 }
 
 static void

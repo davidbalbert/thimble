@@ -109,4 +109,3 @@ Pml4e *setupkvm(void);
 void switchkvm();
 void switchuvm(Proc *p);
 void *uva2ka(Pml4e *pgmap, void *addr);
-Pte *walkpgmap(Pml4e *pgmap, void *va, int alloc);
