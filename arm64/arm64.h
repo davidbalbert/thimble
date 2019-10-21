@@ -74,3 +74,33 @@ sti(void)
 {
     asm volatile("msr DAIFClr, #15");
 }
+
+static inline void
+lttbr0(uintptr pgmap)
+{
+    asm volatile("msr ttbr0_el1, %[pgmap]" : : [pgmap] "r" (pgmap));
+}
+
+static inline void
+lttbr1(uintptr pgmap)
+{
+    asm volatile("msr ttbr1_el1, %[pgmap]" : : [pgmap] "r" (pgmap));
+}
+
+static inline void
+dsbsy(void)
+{
+    asm volatile("dsb sy");
+}
+
+static inline void
+isb(void)
+{
+    asm volatile("isb");
+}
+
+static inline void
+tlbi(void)
+{
+    asm volatile("tlbi ALLE1IS");
+}

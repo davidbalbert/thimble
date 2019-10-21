@@ -12,7 +12,9 @@ typedef ushort u16;
 typedef uint   u32;
 typedef ulong  u64;
 
-typedef unsigned long  uintptr;
-typedef unsigned long  usize;
+typedef unsigned long uintptr;
+typedef unsigned long usize;
+
+typedef unsigned long Pte;
 
 #define nelem(x) (sizeof(x)/sizeof((x)[0]))

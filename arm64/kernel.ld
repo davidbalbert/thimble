@@ -19,6 +19,8 @@ SECTIONS
 
     .rodata : { *(.rodata) }
 
+    . = ALIGN(0x1000);
+
     PROVIDE(data = .);
 
     .data   : { *(.data) }

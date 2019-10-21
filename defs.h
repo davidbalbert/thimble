@@ -1,5 +1,3 @@
-typedef unsigned long  Pte;
-
 typedef struct SpinLock SpinLock;
 typedef struct Registers Registers;
 typedef struct Proc Proc;
@@ -69,6 +67,7 @@ void picenable(uchar irq);
 
 // proc.c
 void panic(char *fmt, ...) __attribute__((noreturn));
+void vpanic(char *fmt, va_list ap) __attribute__((noreturn));
 void schedinit(void);
 void scheduler(void) __attribute__((noreturn));
 void mkproc(uchar *data);
