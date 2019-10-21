@@ -225,14 +225,13 @@ printattrs(Pte entry)
 void
 printmap0(Pte *pgdir, int level)
 {
-    Pte entry, *innerdir;
+    Pte *entry = pgdir, *end = pgdir + 512, *innerdir;
     usize mapsz = 4096l << (9 * (level-1));
     int i, j;
 
-    for (i = 0; i < 512; i++) {
-        entry = pgdir[i];
-
-        if (!(entry & PTE_P)) {
+    while (entry < end) {
+        if (!(*entry & PTE_P)) {
+            entry++;
             continue;
         }
 
@@ -240,21 +239,33 @@ printmap0(Pte *pgdir, int level)
             cprintf("  ");
         }
 
+        i = (uintptr)(entry-pgdir);
         cprintf("[0x%p-0x%p] ", p2v(i*mapsz), p2v((i+1) * mapsz - 1));
 
-        if (level == 1 && (entry & PTE_PAGE)) {
+        if (level == 1 && (*entry & PTE_PAGE)) {
+            cprintf("PTL%d[%3d] ", level, i);
             cprintf("PAGE ");
-            printattrs(entry);
-            cprintf("0x%x\n", pte_addr(entry));
-        } else if (entry & PTE_TABLE) {
+
+            printattrs(*entry);
+            cprintf("0x%x\n", pte_addr(*entry));
+
+            entry++;
+        } else if (*entry & PTE_TABLE) {
+            cprintf("PTL%d[%03d] ", level, i);
             cprintf("TABLE\n");
 
-            innerdir = p2v(pte_addr(entry));
+            innerdir = p2v(pte_addr(*entry));
             printmap0(innerdir, level-1);
+
+            entry++;
         } else {
+            cprintf("PTL%d[%03d] ", level, i);
             cprintf("BLOCK ");
-            printattrs(entry);
-            cprintf("0x%x\n", pte_addr(entry));
+
+            printattrs(*entry);
+            cprintf("0x%x\n", pte_addr(*entry));
+
+            entry++;
         }
     }
 }
@@ -282,8 +293,10 @@ printmaps(void)
     cprintf("current:\n");
     printmap(current);
 
+    /*
     cprintf("\n\nkpgmap:\n");
     printmap(kpgmap);
+    */
 }
 
 void
