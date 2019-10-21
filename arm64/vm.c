@@ -261,7 +261,12 @@ printmap0(Pte *pgdir, int level)
         j = (uintptr)(lastinrange-pgdir);
 
         cprintf("[0x%p-0x%p] ", p2v(i*mapsz), p2v((j+1) * mapsz - 1));
-        cprintf("PTL%d[%03d-%03d] ", level, i, j);
+
+        if (i == j) {
+            cprintf("PTL%d[%03d] ", level, i);
+        } else {
+            cprintf("PTL%d[%03d-%03d] ", level, i, j);
+        }
 
         if (level == 1 && (*entry & PTE_PAGE)) {
             cprintf("PAGE ");
@@ -307,10 +312,8 @@ printmaps(void)
     cprintf("current:\n");
     printmap(current);
 
-    /*
     cprintf("\n\nkpgmap:\n");
     printmap(kpgmap);
-    */
 }
 
 void
