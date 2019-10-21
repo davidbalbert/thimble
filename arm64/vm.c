@@ -222,10 +222,26 @@ printattrs(Pte entry)
     }
 }
 
+Pte *
+coalesce(Pte *entry, Pte *end, int level)
+{
+    Pte *p;
+
+    // never coalesce something with children
+    if (level > 1 && *entry & PTE_TABLE) {
+        return entry;
+    }
+
+    for (p = entry; (*p & 0xFFF) == (*entry & 0xFFF) && p < end; p++)
+        ;
+
+    return p-1;
+}
+
 void
 printmap0(Pte *pgdir, int level)
 {
-    Pte *entry = pgdir, *end = pgdir + 512, *innerdir;
+    Pte *entry = pgdir, *end = pgdir + 512, *innerdir, *lastinrange;
     usize mapsz = 4096l << (9 * (level-1));
     int i, j;
 
@@ -239,34 +255,32 @@ printmap0(Pte *pgdir, int level)
             cprintf("  ");
         }
 
+        lastinrange = coalesce(entry, end, level);
+
         i = (uintptr)(entry-pgdir);
-        cprintf("[0x%p-0x%p] ", p2v(i*mapsz), p2v((i+1) * mapsz - 1));
+        j = (uintptr)(lastinrange-pgdir);
+
+        cprintf("[0x%p-0x%p] ", p2v(i*mapsz), p2v((j+1) * mapsz - 1));
+        cprintf("PTL%d[%03d-%03d] ", level, i, j);
 
         if (level == 1 && (*entry & PTE_PAGE)) {
-            cprintf("PTL%d[%3d] ", level, i);
             cprintf("PAGE ");
 
             printattrs(*entry);
             cprintf("0x%x\n", pte_addr(*entry));
-
-            entry++;
         } else if (*entry & PTE_TABLE) {
-            cprintf("PTL%d[%03d] ", level, i);
             cprintf("TABLE\n");
 
             innerdir = p2v(pte_addr(*entry));
             printmap0(innerdir, level-1);
-
-            entry++;
         } else {
-            cprintf("PTL%d[%03d] ", level, i);
             cprintf("BLOCK ");
 
             printattrs(*entry);
             cprintf("0x%x\n", pte_addr(*entry));
-
-            entry++;
         }
+
+        entry = lastinrange + 1;
     }
 }
 
