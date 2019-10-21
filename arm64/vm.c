@@ -239,7 +239,7 @@ coalesce(Pte *entry, Pte *end, int level)
 }
 
 void
-printmap0(Pte *pgdir, int level)
+printmap0(Pte *pgdir, char *va, int level)
 {
     Pte *entry = pgdir, *end = pgdir + 512, *innerdir, *lastinrange;
     usize mapsz = 4096l << (9 * (level-1));
@@ -247,6 +247,7 @@ printmap0(Pte *pgdir, int level)
 
     while (entry < end) {
         if (!(*entry & PTE_P)) {
+            va += mapsz;
             entry++;
             continue;
         }
@@ -260,7 +261,7 @@ printmap0(Pte *pgdir, int level)
         i = (uintptr)(entry-pgdir);
         j = (uintptr)(lastinrange-pgdir);
 
-        cprintf("[0x%p-0x%p] ", p2v(i*mapsz), p2v((j+1) * mapsz - 1));
+        cprintf("[0x%p-0x%p] ", va, va + (j-i+1) * mapsz - 1);
 
         if (i == j) {
             cprintf("PTL%d[%03d] ", level, i);
@@ -277,7 +278,7 @@ printmap0(Pte *pgdir, int level)
             cprintf("TABLE\n");
 
             innerdir = p2v(pte_addr(*entry));
-            printmap0(innerdir, level-1);
+            printmap0(innerdir, va, level-1);
         } else {
             cprintf("BLOCK ");
 
@@ -285,6 +286,7 @@ printmap0(Pte *pgdir, int level)
             cprintf("0x%x\n", pte_addr(*entry));
         }
 
+        va += (j-i+1) * mapsz;
         entry = lastinrange + 1;
     }
 }
@@ -292,7 +294,7 @@ printmap0(Pte *pgdir, int level)
 void
 printmap(Pte *pgdir)
 {
-    printmap0(pgdir, 4);
+    printmap0(pgdir, p2v(0), 4);
 }
 
 void
