@@ -105,3 +105,6 @@ Pte *setupkvm(void);
 void switchkvm();
 void switchuvm(Proc *p);
 void *uva2ka(Pte *pgmap, void *addr);
+
+// vmdbg.c
+void printmap(Pte *pgdir);
