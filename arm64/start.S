@@ -88,7 +88,7 @@ boot_cpu0:
     ldr x1, =0xFF440400
     msr mair_el1, x1
 
-    adr x0, boot_pgtable_0
+    adr x0, bpgmap
     msr ttbr0_el1, x0
     msr ttbr1_el1, x0
 
@@ -124,22 +124,22 @@ halt:
 // Boot page tables. Enough to jump to main in the upper half.
 
 .align 12 // 4KB
-boot_pgtable_0:
-pg_table_entry boot_pgtable_1, 0
+bpgmap:
+pg_table_entry bpgmap1, 0
 .rept 511
 .quad 0
 .endr
 
 .align 12
-boot_pgtable_1:
-pg_table_entry boot_pgtable_2, 0
+bpgmap1:
+pg_table_entry bpgmap2, 0
 .rept 511
 .quad 0
 .endr
 
 // Map 16 MB of memory, as well as enough device space to use uart1
 .align 12
-boot_pgtable_2:
+bpgmap2:
 pg_table_block 0x00000000, PTE_AF | PTE_ISH | PTE_CACHEABLE
 pg_table_block 0x00200000, PTE_AF | PTE_ISH | PTE_CACHEABLE
 pg_table_block 0x00400000, PTE_AF | PTE_ISH | PTE_CACHEABLE

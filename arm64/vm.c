@@ -80,8 +80,6 @@ mappages(Pte *pgmap, void *va, usize size, uintptr pa, int perm)
     char *a, *last;
     Pte *pte;
 
-    cprintf("mappages(pgmap, va=0x%p, size=0x%x, pa=0x%x, perm)\n", va, size, pa);
-
     checkalign((void *)pa, PGSIZE, "mappages - physical addr not page aligned: pa = 0x%p", pa);
 
     a = pgfloor(va);
@@ -97,8 +95,6 @@ mappages(Pte *pgmap, void *va, usize size, uintptr pa, int perm)
 
         *pte = pa | perm | PTE_PAGE | PTE_P;
 
-        //cprintf("%l *walkpgmap(pgmap, 0x%p, 1) -> 0x%p\n", pgcount++, a, *pte);
-
         if (a == last)
             break;
         a += PGSIZE;
@@ -110,7 +106,6 @@ mappages(Pte *pgmap, void *va, usize size, uintptr pa, int perm)
 
 
 
-/*
 typedef struct Kmap Kmap;
 static struct Kmap {
     void *addr;
@@ -121,18 +116,6 @@ static struct Kmap {
     {(void *)KERNBASE,            0,         V2P(data), PTE_AF | PTE_ISH | PTE_CACHEABLE},    // kernel text and read only data
     {(void *)data,                V2P(data), PHYSTOP,   PTE_AF | PTE_ISH | PTE_CACHEABLE},     // kernel data + physical pages
     {(void *)(KERNBASE+DEVSPACE), DEVSPACE,  DEVTOP,    PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE} // MMIO peripherals
-};
-*/
-
-typedef struct Kmap Kmap;
-static struct Kmap {
-    void *addr;
-    uintptr phys_start;
-    uintptr phys_end;
-    int perm;
-} kmap[] = {
-    {(void *)KERNBASE,            0,         18*MB,     PTE_AF | PTE_ISH | PTE_CACHEABLE},
-    {(void *)(KERNBASE+DEVSPACE), DEVSPACE,  DEVTOP,    PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE}
 };
 
 Pte *
@@ -158,35 +141,14 @@ void
 switchkvm(void)
 {
     lttbr1(v2p(kpgmap));
-    //lttbr0(v2p(emptymap));
+    lttbr0(v2p(emptymap));
 
-    dsbsy(); // probably could be dsb ish, but I need to learn more about how inner/outer sharable work first.
+    dsb(); // Make sure page-table updates are done
 
     tlbi();
 
-    dsbsy(); // ditto
+    dsb(); // make sure tlb invalidation is done
     isb();
-}
-
-void
-printmaps(void)
-{
-    uintptr pcurrent;
-    Pte *current;//, *entry;
-    asm volatile("mrs %[pcurrent], ttbr1_el1" : [pcurrent] "=r" (pcurrent));
-
-    current = p2v(pcurrent);
-
-    cprintf("ttbr1_el1=0x%p\n", current);
-    cprintf("kpgmap=   0x%p\n", kpgmap);
-    cprintf("emptymap= 0x%p\n", emptymap);
-    cprintf("\n\n");
-
-    cprintf("current:\n");
-    printmap(current);
-
-    cprintf("\n\nkpgmap:\n");
-    printmap(kpgmap);
 }
 
 void
@@ -199,9 +161,7 @@ kvmalloc(void)
     if ((emptymap = kalloc()) == nil) {
         panic("kvmalloc - emptymap");
     }
-
     memzero(emptymap, PGSIZE);
 
-    printmaps();
-    //switchkvm();
+    switchkvm();
 }

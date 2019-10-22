@@ -88,9 +88,9 @@ lttbr1(uintptr pgmap)
 }
 
 static inline void
-dsbsy(void)
+dsb(void)
 {
-    asm volatile("dsb sy");
+    asm volatile("dsb ish");
 }
 
 static inline void
@@ -102,5 +102,5 @@ isb(void)
 static inline void
 tlbi(void)
 {
-    asm volatile("tlbi ALLE1IS");
+    asm volatile("tlbi vmalle1is");
 }
