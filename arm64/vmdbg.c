@@ -43,26 +43,29 @@ printattrs(Pte entry)
     }
 }
 
+// skips all PTEs with the same attributes as entry. Returns the first PTE with
+// different attributes.
 static Pte *
 coalesce(Pte *entry, Pte *end, int level)
 {
     Pte *p;
 
-    // never coalesce something with children
+    // Never coalesce something with children. PTE_TABLE and PTE_PAGE are the
+    // same value, so we have to check level as well.
     if (level > 1 && *entry & PTE_TABLE) {
-        return entry;
+        return entry+1;
     }
 
     for (p = entry; (*p & 0xFFF) == (*entry & 0xFFF) && p < end; p++)
         ;
 
-    return p-1;
+    return p;
 }
 
 static void
 printmap0(Pte *pgdir, char *va, int level)
 {
-    Pte *entry = pgdir, *end = pgdir + 512, *innerdir, *lastinrange;
+    Pte *entry = pgdir, *end = pgdir + 512, *innerdir, *next;
     usize mapsz = 4096l << (9 * (level-1));
     int i, j;
 
@@ -77,17 +80,17 @@ printmap0(Pte *pgdir, char *va, int level)
             cprintf("  ");
         }
 
-        lastinrange = coalesce(entry, end, level);
+        next = coalesce(entry, end, level);
 
         i = (uintptr)(entry-pgdir);
-        j = (uintptr)(lastinrange-pgdir);
+        j = (uintptr)(next-pgdir);
 
-        cprintf("[0x%p-0x%p] ", va, va + (j-i+1) * mapsz - 1);
+        cprintf("[0x%p-0x%p] ", va, va + (j-i) * mapsz - 1);
 
-        if (i == j) {
+        if (i == j - 1) {
             cprintf("PTL%d[%03d] ", level, i);
         } else {
-            cprintf("PTL%d[%03d-%03d] ", level, i, j);
+            cprintf("PTL%d[%03d-%03d] ", level, i, j - 1);
         }
 
         if (level == 1 && (*entry & PTE_PAGE)) {
@@ -107,8 +110,8 @@ printmap0(Pte *pgdir, char *va, int level)
             cprintf("0x%x\n", pte_addr(*entry));
         }
 
-        va += (j-i+1) * mapsz;
-        entry = lastinrange + 1;
+        va += (j-i) * mapsz;
+        entry = next;
     }
 }
 
