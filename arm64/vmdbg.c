@@ -43,6 +43,48 @@ printattrs(Pte entry)
     }
 }
 
+// page table level -> # of bytes mapped by an entry at that level
+static usize
+mapsz(int level)
+{
+    return 4096l << (9 * (level-1));
+}
+
+// returns the first PTE that doesn't map a physical address contiguous to the
+// physical address mapped by entry
+static Pte *
+coalesceaddr(Pte *entry, Pte *end, int level)
+{
+    Pte *p;
+    usize sz = mapsz(level);
+
+    for (p = entry+1; pte_addr(*(p-1)) + sz == pte_addr(*p) && p < end; p++)
+        ;
+
+    return p;
+}
+
+
+static void
+printaddrs(Pte *entry, Pte *end, int level)
+{
+    Pte *next, *last;
+    usize sz = mapsz(level);
+
+    while (entry < end) {
+        next = coalesceaddr(entry, end, level);
+
+        if (entry + 1 == next) {
+            cprintf("0x%x ", pte_addr(*entry));
+        } else {
+            last = next-1;
+            cprintf("0x%x-0x%x ", pte_addr(*entry), pte_addr(*last) + sz - 1);
+        }
+
+        entry = next;
+    }
+}
+
 // skips all PTEs with the same attributes as entry. Returns the first PTE with
 // different attributes.
 static Pte *
@@ -66,12 +108,12 @@ static void
 printmap0(Pte *pgdir, char *va, int level)
 {
     Pte *entry = pgdir, *end = pgdir + 512, *innerdir, *next;
-    usize mapsz = 4096l << (9 * (level-1));
+    usize sz = mapsz(level);
     int i, j;
 
     while (entry < end) {
         if (!(*entry & PTE_P)) {
-            va += mapsz;
+            va += sz;
             entry++;
             continue;
         }
@@ -85,7 +127,7 @@ printmap0(Pte *pgdir, char *va, int level)
         i = (uintptr)(entry-pgdir);
         j = (uintptr)(next-pgdir);
 
-        cprintf("[0x%p-0x%p] ", va, va + (j-i) * mapsz - 1);
+        cprintf("[0x%p-0x%p] ", va, va + (j-i) * sz - 1);
 
         if (i == j - 1) {
             cprintf("PTL%d[%03d] ", level, i);
@@ -97,7 +139,8 @@ printmap0(Pte *pgdir, char *va, int level)
             cprintf("PAGE ");
 
             printattrs(*entry);
-            cprintf("0x%x\n", pte_addr(*entry));
+            printaddrs(entry, next, level);
+            cprintf("\n");
         } else if (*entry & PTE_TABLE) {
             cprintf("TABLE\n");
 
@@ -107,10 +150,11 @@ printmap0(Pte *pgdir, char *va, int level)
             cprintf("BLOCK ");
 
             printattrs(*entry);
-            cprintf("0x%x\n", pte_addr(*entry));
+            printaddrs(entry, next, level);
+            cprintf("\n");
         }
 
-        va += (j-i) * mapsz;
+        va += (j-i) * sz;
         entry = next;
     }
 }
