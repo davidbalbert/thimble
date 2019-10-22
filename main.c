@@ -16,6 +16,7 @@ main(void)
     // kernel so we need to map less memory initially
     initmem1(end, p2v(16*MB));
     kvmalloc();
+    trapinit();
 
     archmain();
 

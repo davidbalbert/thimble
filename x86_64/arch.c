@@ -15,7 +15,6 @@ void
 archmain(void)
 {
     seginit();
-    trapinit();
     sysinit();
     picinit();
     timerinit();
