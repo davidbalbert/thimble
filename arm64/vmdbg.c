@@ -74,12 +74,8 @@ printaddrs(Pte *entry, Pte *end, int level)
     while (entry < end) {
         next = coalesceaddr(entry, end, level);
 
-        if (entry + 1 == next) {
-            cprintf("0x%x ", pte_addr(*entry));
-        } else {
-            last = next-1;
-            cprintf("0x%x-0x%x ", pte_addr(*entry), pte_addr(*last) + sz - 1);
-        }
+        last = next-1;
+        cprintf("0x%x-0x%x ", pte_addr(*entry), pte_addr(*last) + sz - 1);
 
         entry = next;
     }
