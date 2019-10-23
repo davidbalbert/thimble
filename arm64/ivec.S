@@ -6,37 +6,23 @@ vectors:
 .rept 4
     // synchronous
     .align  7
-    mov     x0, #0
-    mrs     x1, esr_el1
-    mrs     x2, elr_el1
-    mrs     x3, spsr_el1
-    mrs     x4, far_el1
-    b       trap
+    // We push x30 directly in the vector to keep stack alignment at 16 bytes.
+    // The rest of the registers are pushed in alltraps.
+    stp #0, x30, [sp, #-16]!
+    b alltraps
 
     // IRQ
     .align  7
-    mov     x0, #1
-    mrs     x1, esr_el1
-    mrs     x2, elr_el1
-    mrs     x3, spsr_el1
-    mrs     x4, far_el1
-    b       trap
+    stp #1, x30, [sp, #-16]!
+    b alltraps
 
     // FIQ
     .align  7
-    mov     x0, #2
-    mrs     x1, esr_el1
-    mrs     x2, elr_el1
-    mrs     x3, spsr_el1
-    mrs     x4, far_el1
-    b       trap
+    stp #2, x30, [sp, #-16]!
+    b alltraps
 
     // SError
     .align  7
-    mov     x0, #3
-    mrs     x1, esr_el1
-    mrs     x2, elr_el1
-    mrs     x3, spsr_el1
-    mrs     x4, far_el1
-    b       trap
+    stp #3, x30, [sp, #-16]!
+    b alltraps
 .endr
