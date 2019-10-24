@@ -18,8 +18,6 @@ main(void)
     kvmalloc();
     trapinit();
 
-    asm volatile("mrs x0, elr_el3");
-
     archmain();
 
     for (;;) {

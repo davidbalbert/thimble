@@ -25,7 +25,7 @@ alltraps:
     mrs x2, far_el1
     stp x1, x2, [sp, #-16]!
 
-    mov sp, x0 // put a pointer to the TrapFrame as the argument to trap
+    mov x0, sp // put a pointer to the TrapFrame as the argument to trap
 
     bl trap
 

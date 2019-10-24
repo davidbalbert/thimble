@@ -9,7 +9,7 @@ vectors:
     // We push x30 directly in the vector to keep stack alignment at 16 bytes.
     // The rest of the registers are pushed in alltraps. We have to do some
     // juggling to get the interrupt type, and x30 on the stack in the right
-    // order without wiping out the content of any registers
+    // order without wiping out the content of x30 (or other registers).
     stp x30, xzr, [sp, #-16]!
     mov x30, #0 // now that x30 is saved, put the interrupt type on the stack
     str x30, [sp, #8]
