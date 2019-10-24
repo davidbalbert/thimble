@@ -3,13 +3,55 @@
 #include "arm64.h"
 #include "defs.h"
 
+struct TrapFrame {
+    u64 spsr;
+    u64 far;
+    u64 esr;
+    u64 elr;
+
+    u64 x0;
+    u64 x1;
+    u64 x2;
+    u64 x3;
+    u64 x4;
+    u64 x5;
+    u64 x6;
+    u64 x7;
+    u64 x8;
+    u64 x9;
+    u64 x10;
+    u64 x11;
+    u64 x12;
+    u64 x13;
+    u64 x14;
+    u64 x15;
+    u64 x16;
+    u64 x17;
+    u64 x18;
+    u64 x19;
+    u64 x20;
+    u64 x21;
+    u64 x22;
+    u64 x23;
+    u64 x24;
+    u64 x25;
+    u64 x26;
+    u64 x27;
+    u64 x28;
+    u64 x29;
+    u64 x30;
+
+    u64 type;
+};
+typedef struct TrapFrame TrapFrame;
+
 extern u8 vectors[];
 
 void
-trap(u64 type, u64 esr, u64 elr, u64 spsr, unsigned long far)
+trap(TrapFrame *tf)
 {
     // print out interruption type
-    switch(type) {
+    switch(tf->type) {
         case 0: cprintf("Synchronous"); break;
         case 1: cprintf("IRQ"); break;
         case 2: cprintf("FIQ"); break;
@@ -17,7 +59,7 @@ trap(u64 type, u64 esr, u64 elr, u64 spsr, unsigned long far)
     }
     cprintf(": ");
     // decode exception type (some, not all. See ARM DDI0487B_b chapter D10.2.28)
-    switch(esr>>26) {
+    switch(tf->esr>>26) {
         case 0b000000: cprintf("Unknown"); break;
         case 0b000001: cprintf("Trapped WFI/WFE"); break;
         case 0b001110: cprintf("Illegal execution"); break;
@@ -32,15 +74,15 @@ trap(u64 type, u64 esr, u64 elr, u64 spsr, unsigned long far)
         default: cprintf("Unknown"); break;
     }
     // decode data abort cause
-    if(esr>>26==0b100100 || esr>>26==0b100101) {
+    if(tf->esr>>26==0b100100 || tf->esr>>26==0b100101) {
         cprintf(", ");
-        switch((esr>>2)&0x3) {
+        switch((tf->esr>>2)&0x3) {
             case 0: cprintf("Address size fault"); break;
             case 1: cprintf("Translation fault"); break;
             case 2: cprintf("Access flag fault"); break;
             case 3: cprintf("Permission fault"); break;
         }
-        switch(esr&0x3) {
+        switch(tf->esr&0x3) {
             case 0: cprintf(" at level 0"); break;
             case 1: cprintf(" at level 1"); break;
             case 2: cprintf(" at level 2"); break;
@@ -48,10 +90,10 @@ trap(u64 type, u64 esr, u64 elr, u64 spsr, unsigned long far)
         }
     }
     // dump registers
-    cprintf(":\n  ESR_EL1 0x%x", esr);
-    cprintf(" ELR_EL1 0x%x", elr);
-    cprintf("\n SPSR_EL1 0x%x", spsr);
-    cprintf(" FAR_EL1 0x%x", far);
+    cprintf(":\n  ESR_EL1 0x%x", tf->esr);
+    cprintf(" ELR_EL1 0x%x", tf->elr);
+    cprintf("\n SPSR_EL1 0x%x", tf->spsr);
+    cprintf(" FAR_EL1 0x%x", tf->far);
     cprintf("\n");
     // no return from exception for now
     while(1);

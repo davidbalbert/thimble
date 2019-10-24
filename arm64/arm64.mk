@@ -12,6 +12,7 @@ OBJS += \
 	arm64/cpu.o\
 	arm64/uart.o\
 	arm64/trap.o\
+	arm64/alltraps.o\
 	arm64/ivec.o\
 	arm64/lock.o\
 	arm64/proc.o\
