@@ -124,5 +124,5 @@ handlekbd(void)
 void
 kbdinit(void)
 {
-    picenable(IRQ_KBD);
+    intenable(IRQ_KBD);
 }

@@ -16,7 +16,7 @@ archmain(void)
 {
     seginit();
     sysinit();
-    picinit();
+    intinit();
     timerinit();
     kbdinit();
     fileinit();

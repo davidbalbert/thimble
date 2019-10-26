@@ -33,5 +33,5 @@ timerinit(void)
     outb(TIMER_CMD, TIMER_SEL0 | TIMER_LOHI | TIMER_FREQDIV);
     outb(TIMER_CHAN0, TIMER_RELOAD(50) & 0xFF);
     outb(TIMER_CHAN0, TIMER_RELOAD(50) >> 8);
-    picenable(IRQ_TIMER);
+    intenable(IRQ_TIMER);
 }

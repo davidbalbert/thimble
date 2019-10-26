@@ -61,9 +61,9 @@ void unlock(SpinLock *l);
 void pushcli(void);
 void popcli(void);
 
-// pic.c
-void picinit(void);
-void picenable(uchar irq);
+// pic.c/bcmint.c
+void intinit(void);
+void intenable(uchar irq);
 
 // proc.c
 void panic(char *fmt, ...) __attribute__((noreturn));

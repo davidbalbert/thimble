@@ -22,13 +22,13 @@ setmask(ushort mask)
 }
 
 void
-picenable(uchar irq)
+intenable(uchar irq)
 {
     setmask(irqmask & ~(1 << irq));
 }
 
 void
-picinit(void)
+intinit(void)
 {
     // mask all interrupts
     outb(PIC1_DATA, 0xFF);

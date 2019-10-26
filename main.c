@@ -17,6 +17,8 @@ main(void)
     initmem1(end, p2v(16*MB));
     kvmalloc();
     trapinit();
+    intinit();
+    timerinit();
 
     archmain();
 
