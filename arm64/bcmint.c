@@ -3,7 +3,7 @@
 #include "u.h"
 
 void
-intinit(voi)
+intinit(void)
 {
-    
+
 }
