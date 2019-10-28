@@ -64,6 +64,7 @@ void popcli(void);
 // pic.c/bcmint.c
 void intinit(void);
 void intenable(uchar irq);
+uchar readirq(void);
 
 // proc.c
 void panic(char *fmt, ...) __attribute__((noreturn));

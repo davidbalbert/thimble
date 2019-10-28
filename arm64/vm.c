@@ -113,9 +113,10 @@ static struct Kmap {
     uintptr phys_end;
     int perm;
 } kmap[] = {
-    {(void *)KERNBASE,            0,         V2P(data), PTE_AF | PTE_ISH | PTE_CACHEABLE},    // kernel text and read only data
-    {(void *)data,                V2P(data), PHYSTOP,   PTE_AF | PTE_ISH | PTE_CACHEABLE},     // kernel data + physical pages
-    {(void *)(KERNBASE+DEVSPACE), DEVSPACE,  DEVTOP,    PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE} // MMIO peripherals
+    {(void *)KERNBASE,            0,         V2P(data), PTE_AF | PTE_ISH | PTE_CACHEABLE | PTE_RO},     // kernel text and read only data
+    {(void *)data,                V2P(data), PHYSTOP,   PTE_AF | PTE_ISH | PTE_CACHEABLE},              // kernel data + physical pages
+    {(void *)(KERNBASE+DEVSPACE), DEVSPACE,  DEVTOP,    PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE},          // SoC peripherals
+    {(void *)(KERNBASE+LSPACE),   LSPACE,    LTOP,      PTE_AF | PTE_ISH | PTE_DEVICE_nGnRnE}           // Local peripherals
 };
 
 Pte *

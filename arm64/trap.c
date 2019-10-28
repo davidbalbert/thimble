@@ -2,6 +2,7 @@
 
 #include "arm64.h"
 #include "defs.h"
+#include "irq.h"
 
 struct TrapFrame {
     u64 spsr;
@@ -47,9 +48,10 @@ typedef struct TrapFrame TrapFrame;
 
 extern u8 vectors[];
 
-void
-trap(TrapFrame *tf)
+static void
+othertrap(TrapFrame *tf)
 {
+    cprintf("TrapFrame: 0x%p\n", tf);
     // print out interruption type
     switch(tf->type) {
         case 0: cprintf("Synchronous"); break;
@@ -95,8 +97,32 @@ trap(TrapFrame *tf)
     cprintf("\n SPSR_EL1 0x%x", tf->spsr);
     cprintf(" FAR_EL1 0x%x", tf->far);
     cprintf("\n");
-    // no return from exception for now
-    while(1);
+
+    for (;;) {
+        halt();
+    }
+}
+
+void
+trap(TrapFrame *tf)
+{
+    uchar trapno = readirq();
+
+    if (tf->type != 1) {
+        othertrap(tf); // doesn't return
+    }
+
+    switch (trapno) {
+        case TIMER_IRQ_CTL_nCNTPNSIRQ:
+            handletimer();
+            break;
+        default:
+            cprintf("trap: %u\n", trapno);
+            //dumpregs(tf);
+            for (;;) {
+                halt();
+            }
+    }
 }
 
 void

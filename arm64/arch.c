@@ -17,8 +17,7 @@ archmain(void)
 {
     cprintf("Exception Level: EL%d\n", el());
 
-    intinit();
-    timerinit();
+    sti();
 
     for (;;) {
         cputc(uart_getc());

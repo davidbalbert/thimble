@@ -66,13 +66,13 @@ readdaif(void)
 static inline void
 cli(void)
 {
-    asm volatile("msr DAIFSet, #15");
+    asm volatile("msr DAIFSet, #2");
 }
 
 static inline void
 sti(void)
 {
-    asm volatile("msr DAIFClr, #15");
+    asm volatile("msr DAIFClr, #2");
 }
 
 static inline void
@@ -94,6 +94,12 @@ dsb(void)
 }
 
 static inline void
+dmb(void)
+{
+    asm volatile("dmb ish");
+}
+
+static inline void
 isb(void)
 {
     asm volatile("isb");
@@ -103,4 +109,57 @@ static inline void
 tlbi(void)
 {
     asm volatile("tlbi vmalle1is");
+}
+
+// count leading zeroes
+static inline u8
+clz(u64 n)
+{
+    u64 res;
+    asm volatile("clz %[res], %[n]" : [res] "=r" (res) : [n] "r" (n));
+
+    return res;
+}
+
+// read the frequency of the system counter
+static inline u64
+cntfrq(void)
+{
+    u64 res;
+    asm volatile("mrs %0, cntfrq_el0" : "=r" (res));
+
+    return res;
+}
+
+// current system count value
+static inline u64
+cntct(void)
+{
+    u64 res;
+    asm volatile("mrs %0, cntpct_el0" : "=r" (res));
+
+    return res;
+}
+
+// value of CNTP_CTL_EL0, the physical timer control register.
+static inline u64
+cntpctl(void)
+{
+    u64 res;
+    asm volatile("mrs %0, cntp_ctl_el0" : "=r" (res));
+
+    return res;
+}
+
+// set CNTP_CT_EL0, the physical timer control register
+static inline void
+st_cntpctl(u64 val)
+{
+    asm volatile("msr cntp_ctl_el0, %0" :: "r" (val));
+}
+
+static inline void
+st_cntptval(u64 val)
+{
+    asm volatile("msr cntp_tval_el0, %0" :: "r" (val));
 }

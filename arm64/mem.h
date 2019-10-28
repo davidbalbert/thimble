@@ -5,8 +5,10 @@
 
 #define USERTOP  0x0001000000000000     // Top of user address space
 #define PHYSTOP  0x3F000000             // Top of physical memory. Raspi 3 has 1 GiB, but it seems like only 1023 MiB are mapped in (https://www.raspberrypi.org/forums/viewtopic.php?t=186090). TODO: autodetect this.
-#define DEVSPACE 0x3F000000             // MMIO peripherals (Raspi3)
-#define DEVTOP   0x40000000             // Peripheral space ends at 1 GiB
+#define DEVSPACE 0x3F000000             // SoC peripherals (Raspi3)
+#define DEVTOP   0x40000000             // SoC Peripheral space ends at 1 GiB
+#define LSPACE   0x40000000             // Local peripherals (Raspi3)
+#define LTOP     0x40020000             // End of local peripherals
 
 #define PGSIZE 0x1000
 

@@ -1,0 +1,5 @@
+// rpi4?
+//#define PBASE P2V(0xFE000000)
+
+#define PBASE P2V(0x3F000000)
+#define LOCAL_PBASE P2V(0x40000000)
