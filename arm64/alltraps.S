@@ -46,7 +46,6 @@ alltraps:
     ldp x24, x25, [sp], #16
     ldp x26, x27, [sp], #16
     ldp x28, x29, [sp], #16
-    ldp x28, x29, [sp], #16
     ldp x30, xzr, [sp], #16
 
     eret

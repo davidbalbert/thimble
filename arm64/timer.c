@@ -28,8 +28,7 @@ static u64 interval;
 void
 handletimer(void)
 {
-    cprintf("timer!\n");
-    st_cntptval(interval*100);
+    st_cntptval(interval);
 }
 
 void
@@ -41,7 +40,7 @@ timerinit(void)
     // scale the timer by 1: 2^31 = 0x80000000, therefore timer_freq = input_freq
     *TIMER_PRESCALE = 0x80000000;
 
-    st_cntptval(interval*100);
+    st_cntptval(interval);
     st_cntpctl(CNTP_CTL_EL0_ENABLE);
     *TIMER_IRQ_CTL0 = TIMER_IRQ_CTL_nCNTPNSIRQ;
 

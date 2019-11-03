@@ -25,7 +25,7 @@ void archmain(void);
 
 // $(ARCH)/cpu.c
 
-void halt(void) __attribute__((noreturn));
+void halt(void);
 
 // file.c
 void fileinit(void);

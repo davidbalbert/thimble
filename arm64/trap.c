@@ -51,7 +51,6 @@ extern u8 vectors[];
 static void
 othertrap(TrapFrame *tf)
 {
-    cprintf("TrapFrame: 0x%p\n", tf);
     // print out interruption type
     switch(tf->type) {
         case 0: cprintf("Synchronous"); break;

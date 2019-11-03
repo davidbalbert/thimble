@@ -8,5 +8,5 @@ u8 bootkstack[KSTACKSIZE] __attribute__ ((aligned (PGSIZE)));
 void
 halt(void)
 {
-      wfi();
+    wfi();
 }

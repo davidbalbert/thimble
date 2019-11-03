@@ -163,3 +163,21 @@ st_cntptval(u64 val)
 {
     asm volatile("msr cntp_tval_el0, %0" :: "r" (val));
 }
+
+static inline u64
+spsel(void)
+{
+    u64 res;
+    asm volatile("mrs %0, spsel" : "=r" (res));
+
+    return res;
+}
+
+static inline u64
+sp(void)
+{
+    u64 res;
+    asm volatile("mov %0, sp" : "=r" (res));
+
+    return res;
+}
