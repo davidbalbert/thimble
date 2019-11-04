@@ -121,6 +121,13 @@ clz(u64 n)
     return res;
 }
 
+// count trailing zeroes
+static inline u8
+ctz(u64 n)
+{
+    return 64 - clz(n) - 1;
+}
+
 // read the frequency of the system counter
 static inline u64
 cntfrq(void)

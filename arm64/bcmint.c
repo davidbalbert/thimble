@@ -25,6 +25,12 @@
 #define LOCAL_IRQ_PENDING ((volatile u32 *)(LOCAL_PBASE+0x60))
 #define TIMER_IRQ_CTL0 ((volatile u32 *)(LOCAL_PBASE+0x40))
 
+#define IRQ_LOCAL_GPU 8 // IRQ 8 in the local domain means a GPU interrupt is pending
+
+// 8 or 9 in the BASIC_PENDING register means you have to check the other registers
+#define IRQ_BASIC_PENDING1 8
+#define IRQ_BASIC_PENDING2 9
+
 u32
 readirq(void)
 {
@@ -33,17 +39,67 @@ readirq(void)
     // In intenable, we go from IRQ number to the relevant bit in the pending
     // registers by left shifting by the IRQ number. To go in reverse, from a
     // bit to an interrupt number, we calculate the number of trailing zeroes
-    // after the first set bit. A64 doesn't have a count trailing zeroes
-    // instruction, but we can build one from the CLZ (count leading zeroes)
-    // instruction
+    // after the first set bit.
     //
     // If multiple bits are set, readirq returns trapno corresponding to the the
     // top bit.
-    //
-    // clz takes a u64, so we subtract clz from 64 instead of 32.
-    u32 hwirq = 64 - clz(pending) - 1;
+    u32 hwirq = ctz(pending);
 
-    return IRQ_DOMAIN_LOCAL | hwirq;
+    if (hwirq != IRQ_LOCAL_GPU) {
+        return IRQ_DOMAIN_LOCAL | hwirq;
+    }
+
+    pending = *IRQ_BASIC_PENDING;
+    hwirq = ctz(pending);
+
+    if (hwirq < IRQ_BASIC_PENDING1) {
+        return IRQ_DOMAIN_ARM | hwirq;
+    }
+
+    if (hwirq > IRQ_BASIC_PENDING2) {
+        switch (hwirq) {
+            case 10:
+                return IRQ_DOMAIN_GPU | 7;
+            case 11:
+                return IRQ_DOMAIN_GPU | 9;
+            case 12:
+                return IRQ_DOMAIN_GPU | 10;
+            case 13:
+                return IRQ_DOMAIN_GPU | 18;
+            case 14:
+                return IRQ_DOMAIN_GPU | 19;
+            case 15:
+                return IRQ_DOMAIN_GPU | 53;
+            case 16:
+                return IRQ_DOMAIN_GPU | 54;
+            case 17:
+                return IRQ_DOMAIN_GPU | 55;
+            case 18:
+                return IRQ_DOMAIN_GPU | 56;
+            case 19:
+                return IRQ_DOMAIN_GPU | 57;
+            case 20:
+                return IRQ_DOMAIN_GPU | 62;
+            default:
+                panic("readirq - unexpected irq in basic pending register %d", hwirq);
+        }
+    }
+
+    if (hwirq == IRQ_BASIC_PENDING1) {
+        pending = *IRQ_PENDING1;
+        hwirq = ctz(pending);
+
+        return IRQ_DOMAIN_GPU | hwirq;
+    }
+
+    if (hwirq == IRQ_BASIC_PENDING2) {
+        pending = *IRQ_PENDING2;
+        hwirq = ctz(pending) + 32; // IRQ_PENDING2 maps to hwirq 32-63
+
+        return IRQ_DOMAIN_GPU | hwirq;
+    }
+
+    panic("readirq - reached end without finding irq");
 }
 
 static void
