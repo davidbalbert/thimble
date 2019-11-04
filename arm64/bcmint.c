@@ -23,48 +23,64 @@
 #define IRQ_BASIC_DISABLE ((volatile u32 *)(IRQ_BASE+0x224))
 
 #define LOCAL_IRQ_PENDING ((volatile u32 *)(LOCAL_PBASE+0x60))
+#define TIMER_IRQ_CTL0 ((volatile u32 *)(LOCAL_PBASE+0x40))
 
-uchar
+u32
 readirq(void)
 {
-    // TODO: GPU interrupts!
-    //u32 pending = *IRQ_BASIC_PENDING;
-
-    //cprintf("LOCAL_IRQ_PENDING: 0x%x\n", *LOCAL_IRQ_PENDING);
-    //cprintf("IRQ_BASIC_PENDING: 0x%x\n", *IRQ_BASIC_PENDING);
-    //cprintf("IRQ_PENDING1: 0x%x\n", *IRQ_PENDING1);
-    //cprintf("IRQ_PENDING2: 0x%x\n", *IRQ_PENDING2);
+    u32 pending = *LOCAL_IRQ_PENDING;
 
     // In intenable, we go from IRQ number to the relevant bit in the pending
     // registers by left shifting by the IRQ number. To go in reverse, from a
     // bit to an interrupt number, we calculate the number of trailing zeroes
-    // after the first set bit.
+    // after the first set bit. A64 doesn't have a count trailing zeroes
+    // instruction, but we can build one from the CLZ (count leading zeroes)
+    // instruction
     //
-    // If multiple bits are set, readirq returns the top bit.
-    //uchar trapno = 64 - clz(pending) - 1;
+    // If multiple bits are set, readirq returns trapno corresponding to the the
+    // top bit.
+    //
+    // clz takes a u64, so we subtract clz from 64 instead of 32.
+    u32 hwirq = 64 - clz(pending) - 1;
 
-    //cprintf("pending: %d\n", pending);
-    //cprintf("trapno: %d\n", trapno);
-    //cprintf("IRQ_ARM | trapno: %d\n", IRQ_ARM | trapno);
+    return IRQ_DOMAIN_LOCAL | hwirq;
+}
 
-    //return IRQ_ARM | trapno;
-
-    return *LOCAL_IRQ_PENDING;
+static void
+enablelocal(u32 hwirq)
+{
+    if (hwirq >= 0 && hwirq <= 3) {
+        // TODO: multicore
+        *TIMER_IRQ_CTL0 = (1 << hwirq);
+    } else {
+        panic("enablelocal - unknown local IRQ %d", hwirq);
+    }
 }
 
 void
-intenable(uchar irq)
+intenable(u32 irq)
 {
-    int arm = irq & IRQ_ARM;
-    uchar irq_noflag = irq & 0x3F;
+    int domain = irq & IRQ_DOMAIN;
+    int hwirq = irq & IRQ_NUM;
 
-    if (arm) {
-        *IRQ_BASIC_ENABLE = (1 << irq_noflag);
-    } else if (irq <= 31) {
-        *IRQ_ENABLE1 = (1 << irq_noflag);
-    } else {
-        irq_noflag &= 0x1F; // mask out the top bit
-        *IRQ_ENABLE2 = (1 << irq_noflag);
+    switch (domain) {
+        case IRQ_DOMAIN_LOCAL:
+            enablelocal(hwirq);
+            break;
+        case IRQ_DOMAIN_ARM:
+            *IRQ_BASIC_ENABLE = (1 << hwirq);
+            break;
+        case IRQ_DOMAIN_GPU:
+            if (irq <= 31) {
+                *IRQ_ENABLE1 = (1 << hwirq);
+            } else {
+                hwirq &= 0x1F; // mask out the top bit
+                *IRQ_ENABLE2 = (1 << hwirq);
+            }
+            break;
+        default:
+            panic("unknown IRQ domain %d", domain);
+            break;
     }
 }
 

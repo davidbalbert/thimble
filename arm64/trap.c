@@ -105,14 +105,14 @@ othertrap(TrapFrame *tf)
 void
 trap(TrapFrame *tf)
 {
-    uchar trapno = readirq();
+    u32 trapno = readirq();
 
     if (tf->type != 1) {
         othertrap(tf); // doesn't return
     }
 
     switch (trapno) {
-        case TIMER_IRQ_CTL_nCNTPNSIRQ:
+        case IRQ_TIMER:
             handletimer();
             break;
         default:

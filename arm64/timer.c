@@ -13,14 +13,6 @@
 // I believe the input frequency is the value in CNTFRQ_EL0
 #define TIMER_PRESCALE ((volatile u32 *)(LOCAL_PBASE+0x08))
 
-#define TIMER_LO       ((volatile u32 *)(LOCAL_PBASE+0x1C))
-#define TIMER_HI       ((volatile u32 *)(LOCAL_PBASE+0x20))
-
-#define TIMER_IRQ_CTL0 ((volatile u32 *)(LOCAL_PBASE+0x40)) // core 0
-#define TIMER_IRQ_CTL1 ((volatile u32 *)(LOCAL_PBASE+0x44)) // core 1
-#define TIMER_IRQ_CTL2 ((volatile u32 *)(LOCAL_PBASE+0x48)) // core 2
-#define TIMER_IRQ_CTL3 ((volatile u32 *)(LOCAL_PBASE+0x4C)) // core 3
-
 #define CNTP_CTL_EL0_ENABLE (1 << 0) // enable physical timer
 
 static u64 interval;
@@ -28,6 +20,7 @@ static u64 interval;
 void
 handletimer(void)
 {
+    cprintf("timer!\n");
     st_cntptval(interval);
 }
 
@@ -42,9 +35,8 @@ timerinit(void)
 
     st_cntptval(interval);
     st_cntpctl(CNTP_CTL_EL0_ENABLE);
-    *TIMER_IRQ_CTL0 = TIMER_IRQ_CTL_nCNTPNSIRQ;
 
     // TODO: configure CNTKCTL_EL1 to disable timer access in EL0
 
-    //intenable(IRQ_TIMER);
+    intenable(IRQ_TIMER);
 }

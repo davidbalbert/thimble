@@ -22,7 +22,7 @@ setmask(ushort mask)
 }
 
 void
-intenable(uchar irq)
+intenable(u32 irq)
 {
     setmask(irqmask & ~(1 << irq));
 }
