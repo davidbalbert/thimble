@@ -20,6 +20,8 @@ main(void)
     intinit();
     timerinit();
 
+    initmem2(p2v(16*MB), p2v(PHYSTOP));
+
     archmain();
 
     for (;;) {
