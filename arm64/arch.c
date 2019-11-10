@@ -20,6 +20,6 @@ archmain(void)
     sti();
 
     for (;;) {
-      cputc(uart_getc());
+      halt();
     }
 }

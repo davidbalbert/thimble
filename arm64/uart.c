@@ -1,6 +1,8 @@
 #include "u.h"
 
+#include "defs.h"
 #include "console.h"
+#include "irq.h"
 #include "mem.h"
 
 #include "bcm2837.h"
@@ -43,6 +45,7 @@
 
 #define IIR_RX_FIFO_CLEAR (1 << 2)
 #define IIR_TX_FIFO_CLEAR (1 << 1)
+#define IIR_RX_READY      (2 << 1)
 
 #define CNTL_RX_ENABLE 1
 #define CNTL_TX_ENABLE (1 << 1)
@@ -50,42 +53,11 @@
 #define LSR_CAN_TX (1 << 5)
 #define LSR_CAN_RX 1
 
+#define IER_RX_INT 0b11111101; // enable receive interrupt
+#define IER_TX_INT 0b11111110; // enable transmit interrupt
+
 // TODO: add write barriers. See "1.3 Peripheral access precautions for correct
 // memory ordering" in "BCM2837 ARM Peripherals"
-
-/**
- * Set baud rate and characteristics (115200 8N1) and map to GPIO
- */
-void
-uart_init(void)
-{
-    u32 r;
-
-    /* initialize UART */
-    *AUX_ENABLE |= AUX_ENABLE_UART;
-    *AUX_MU_CNTL = 0;
-    *AUX_MU_LCR = LCR_8_BIT;
-    //*AUX_MU_MCR = 0;
-    *AUX_MU_IER = 0;
-    *AUX_MU_IIR |= IIR_RX_FIFO_CLEAR | IIR_TX_FIFO_CLEAR;
-    *AUX_MU_BAUD = 270; // 115200 baud
-
-    /* map UART1 to GPIO pins */
-    r=*GPFSEL1;
-    r&=~((7<<12)|(7<<15)); // gpio14, gpio15
-    r|=(2<<12)|(2<<15);    // alt5
-    *GPFSEL1 = r;
-
-    *GPPUD = 0;            // enable pins 14 and 15
-
-    r=150; while(r--) { asm volatile("nop"); }
-    *GPPUDCLK0 = (1<<14)|(1<<15);
-    r=150; while(r--) { asm volatile("nop"); }
-
-    *GPPUDCLK0 = 0; // flush GPIO setup
-
-    *AUX_MU_CNTL = CNTL_TX_ENABLE | CNTL_RX_ENABLE;
-}
 
 /**
  * Send a character
@@ -140,6 +112,51 @@ uart_puts(char *s) {
 static void
 uart_clear(void)
 {
+}
+
+void
+handleuart(void)
+{
+    while (*AUX_MU_IIR & IIR_RX_READY) {
+        uart_putc(uart_getc());
+    }
+}
+
+/**
+ * Set baud rate and characteristics (115200 8N1) and map to GPIO
+ */
+void
+uart_init(void)
+{
+    u32 r;
+
+    /* initialize UART */
+    *AUX_ENABLE |= AUX_ENABLE_UART;
+    //*AUX_MU_IER = 0;
+    *AUX_MU_CNTL = 0;
+    *AUX_MU_LCR = LCR_8_BIT;
+    //*AUX_MU_MCR = 0;
+    *AUX_MU_IER = IER_RX_INT;
+    *AUX_MU_IIR |= IIR_RX_FIFO_CLEAR | IIR_TX_FIFO_CLEAR;
+    *AUX_MU_BAUD = 270; // 115200 baud
+
+    /* map UART1 to GPIO pins */
+    r=*GPFSEL1;
+    r&=~((7<<12)|(7<<15)); // gpio14, gpio15
+    r|=(2<<12)|(2<<15);    // alt5
+    *GPFSEL1 = r;
+
+    *GPPUD = 0;            // enable pins 14 and 15
+
+    r=150; while(r--) { asm volatile("nop"); }
+    *GPPUDCLK0 = (1<<14)|(1<<15);
+    r=150; while(r--) { asm volatile("nop"); }
+
+    *GPPUDCLK0 = 0; // flush GPIO setup
+
+    *AUX_MU_CNTL = CNTL_TX_ENABLE | CNTL_RX_ENABLE;
+
+    intenable(IRQ_AUX);
 }
 
 static Console uart_console0 = {

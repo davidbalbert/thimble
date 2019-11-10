@@ -115,6 +115,9 @@ trap(TrapFrame *tf)
         case IRQ_TIMER:
             handletimer();
             break;
+        case IRQ_UART:
+            handleuart();
+            break;
         default:
             cprintf("trap: %u\n", trapno);
             //dumpregs(tf);

@@ -20,7 +20,6 @@ static u64 interval;
 void
 handletimer(void)
 {
-    cprintf("timer!\n");
     st_cntptval(interval);
 }
 

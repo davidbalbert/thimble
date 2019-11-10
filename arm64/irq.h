@@ -9,5 +9,8 @@
 #define IRQ_DOMAIN_LOCAL (1 << 8)
 #define IRQ_DOMAIN_ARM   (2 << 8)
 #define IRQ_DOMAIN_GPU   (3 << 8)
+#define IRQ_DOMAIN_AUX   (4 << 8)
 
 #define IRQ_TIMER (IRQ_DOMAIN_LOCAL | 1)
+#define IRQ_AUX   (IRQ_DOMAIN_GPU   | 29)
+#define IRQ_UART  (IRQ_DOMAIN_AUX   | 0)

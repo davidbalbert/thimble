@@ -94,6 +94,9 @@ void handletimer(void);
 // trap.c
 void trapinit(void);
 
+// uart.c
+void handleuart(void);
+
 // vm.c
 usize allocuvm(Pte *pgmap, usize oldsz, usize newsz);
 void clearpteu(Pte *pgmap, void *addr);

@@ -22,6 +22,8 @@
 #define IRQ_DISABLE2      ((volatile u32 *)(IRQ_BASE+0x220))
 #define IRQ_BASIC_DISABLE ((volatile u32 *)(IRQ_BASE+0x224))
 
+#define AUX_IRQ           ((volatile u32 *)(PBASE+0x215000))
+
 #define LOCAL_IRQ_PENDING ((volatile u32 *)(LOCAL_PBASE+0x60))
 #define TIMER_IRQ_CTL0 ((volatile u32 *)(LOCAL_PBASE+0x40))
 
@@ -89,7 +91,16 @@ readirq(void)
         pending = *IRQ_PENDING1;
         hwirq = ctz(pending);
 
-        return IRQ_DOMAIN_GPU | hwirq;
+        u32 irq = IRQ_DOMAIN_GPU | hwirq;
+
+        if (irq != IRQ_AUX) {
+            return irq;
+        } else {
+            pending = *AUX_IRQ;
+            hwirq = ctz(pending);
+
+            return IRQ_DOMAIN_AUX | hwirq;
+        }
     }
 
     if (hwirq == IRQ_BASIC_PENDING2) {
@@ -127,7 +138,7 @@ intenable(u32 irq)
             *IRQ_BASIC_ENABLE = (1 << hwirq);
             break;
         case IRQ_DOMAIN_GPU:
-            if (irq <= 31) {
+            if (hwirq <= 31) {
                 *IRQ_ENABLE1 = (1 << hwirq);
             } else {
                 hwirq &= 0x1F; // mask out the top bit
