@@ -5,7 +5,7 @@
 #include "uart.h"
 
 void
-archinit_console(void)
+archinit_early(void)
 {
     uart_init();
     cinit(uart_console);
@@ -13,7 +13,7 @@ archinit_console(void)
 
 
 void
-archmain(void)
+archinit(void)
 {
     cprintf("Exception Level: EL%d\n", el());
 

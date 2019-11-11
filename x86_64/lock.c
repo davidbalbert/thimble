@@ -1,5 +1,6 @@
 #include "u.h"
 
+#include "archdefs.h"
 #include "cpu.h"
 #include "defs.h"
 #include "lock.h"

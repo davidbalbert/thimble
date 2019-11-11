@@ -19,8 +19,8 @@ void cwrite(char *buf, usize nbytes);
 
 // $(ARCH)/arch.c
 
-void archinit_console(void);
-void archmain(void);
+void archinit_early(void);
+void archinit(void);
 
 // $(ARCH)/cpu.c
 

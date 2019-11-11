@@ -6,7 +6,7 @@
 int
 main(void)
 {
-    archinit_console();
+    archinit_early();
 
     cclear();
     cprintf("Hello, Thimble!\n");
@@ -22,9 +22,7 @@ main(void)
 
     initmem2(p2v(16*MB), p2v(PHYSTOP));
 
-    archmain();
+    archinit();
 
-    for (;;) {
-        halt();
-    }
+    scheduler();
 }

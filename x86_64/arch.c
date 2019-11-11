@@ -7,13 +7,13 @@
 #include "task1.h"
 
 void
-archinit_console(void)
+archinit_early(void)
 {
     cinit(vga_console);
 }
 
 void
-archmain(void)
+archinit(void)
 {
     seginit();
     sysinit();
@@ -21,6 +21,4 @@ archmain(void)
     fileinit();
 
     mkproc(task1);
-
-    scheduler();
 }

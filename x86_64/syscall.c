@@ -1,5 +1,6 @@
 #include "u.h"
 
+#include "archdefs.h"
 #include "defs.h"
 #include "file.h"
 #include "mem.h"
