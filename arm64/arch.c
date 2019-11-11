@@ -19,6 +19,8 @@ archmain(void)
 
     sti();
 
+    asm volatile("svc #0");
+
     for (;;) {
       halt();
     }

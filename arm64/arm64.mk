@@ -20,6 +20,7 @@ OBJS += \
 	arm64/vmdbg.o\
 	arm64/timer.o\
 	arm64/bcmint.o\
+	arm64/syscall.o\
 
 .PHONY: default
 default: kernel

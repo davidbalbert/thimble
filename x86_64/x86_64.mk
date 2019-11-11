@@ -23,7 +23,7 @@ OBJS += \
 	x86_64/lock.o\
 	x86_64/proc.o\
 	file.o\
-	syscall.o\
+	x86_64/syscall.o\
 	x86_64/timer.o\
 	x86_64/vm.o\
 	x86_64/syscallasm.o\

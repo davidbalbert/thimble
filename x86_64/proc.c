@@ -1,6 +1,7 @@
 #include "u.h"
 
 #include "cpu.h"
+#include "archdefs.h"
 #include "defs.h"
 #include "elf.h"
 #include "lib.h"

@@ -1,7 +1,6 @@
 typedef struct SpinLock SpinLock;
 typedef struct Registers Registers;
 typedef struct Proc Proc;
-typedef struct SyscallFrame SyscallFrame;
 
 // console.c
 
@@ -76,16 +75,6 @@ void yield(void);
 
 // switch.S
 void swtch(Registers **from, Registers *to);
-
-// syscall.c
-long argfd(SyscallFrame *f, int n, int *fd);
-long argint(SyscallFrame *f, int n, int *ip);
-long arglong(SyscallFrame *f, int n, long *lp);
-long argptr(SyscallFrame *f, int n, uintptr *p, usize size);
-long argstr(SyscallFrame *f, int n, char **pp);
-
-// syscallasm.S
-void sysinit(void);
 
 // timer.c
 void timerinit(void);

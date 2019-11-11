@@ -3,7 +3,6 @@ OBJS := \
        console.o\
        klibc.o\
        kalloc.o\
-       #syscall.o\
        #file.o\
 
 include $(ARCH)/$(ARCH).mk
