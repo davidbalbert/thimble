@@ -29,7 +29,15 @@ alltraps:
 
     bl trap
 
-    add sp, sp, #32 // esr, elr, spsr, far
+.global trapret
+trapret:
+    ldp x1, x2, [sp], #16
+    msr spsr_el1, x1
+    msr far_el1, x2
+
+    ldp x1, x2, [sp], #16
+    msr esr_el1, x1
+    msr elr_el1, x2
 
     ldp x0, x1, [sp], #16
     ldp x2, x3, [sp], #16

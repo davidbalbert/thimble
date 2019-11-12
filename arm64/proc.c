@@ -1,5 +1,6 @@
 #include "u.h"
 
+#include "asm.h"
 #include "arm64.h"
 #include "defs.h"
 #include "lock.h"
@@ -79,6 +80,8 @@ procbegin(void)
     // returns to the process entry point. See mkproc's first arg.
 }
 
+void trapret(void);
+
 void
 mkproc(void (*f)(void))
 {
@@ -107,11 +110,19 @@ found:
 
     sp = p->kstack + KSTACKSIZE;
 
+    sp -= sizeof(TrapFrame);
+    p->tf = (TrapFrame *)sp;
+    memzero(sp, sizeof(TrapFrame));
+
+    // trapret returns to f
+    p->tf->elr = (u64)f;
+    p->tf->spsr = SPSR_EL1_D | SPSR_EL1_A | SPSR_EL1_F | SPSR_EL1_M_EL1H;
+
     // LR (x30)
     // FP (x29) <- SP
     sp -= 16; // LR and FP
-    // procbegin returns to f
-    *(u64 *)(sp + 8) = (u64)f;
+    // procbegin returns to trapret
+    *(u64 *)(sp + 8) = (u64)trapret;
     *(u64 *)sp = 0;
 
     sp -= sizeof(Registers);

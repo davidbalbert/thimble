@@ -38,6 +38,7 @@ struct Proc {
     usize sz; // total size in memory
     Proc *parent;
     int pid;
+    TrapFrame *tf;
 };
 typedef struct Proc Proc;
 
