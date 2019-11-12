@@ -41,7 +41,7 @@ rfork(int flags)
 }
 
 int
-printhello(void)
+printint(int i)
 {
-    return syscall(SYS_PRINTHELLO);
+    return syscall(SYS_PRINTINT, i);
 }

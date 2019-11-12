@@ -12,11 +12,10 @@ wastetime(void)
 void
 main(void)
 {
-    //int i = 0;
+    int i = 0;
 
     for(;;) {
-        //printint(i++);
-        printhello();
+        printint(i++);
         wastetime();
     }
 }

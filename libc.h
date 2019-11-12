@@ -13,7 +13,7 @@ int close(int fd);
 long read(int fd, void *buf, usize nbytes);
 long write(int fd, void *buf, usize nbytes);
 
-int printhello(void);
+int printint(int i);
 
 #define RFPROC   (1<<0)  // new proc
 #define RFNOWAIT (1<<1)  // dissasociate child from parent (no Waitmsg for parent)

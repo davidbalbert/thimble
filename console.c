@@ -73,11 +73,11 @@ cvprintf(char *fmt, va_list ap)
     char *s;
 
     if (fmt == nil) {
+        // equivalent of panic("null fmt");
         cputs("panic: null fmt");
         for (;;) {
             halt();
         }
-        //panic("null fmt");
     }
 
     for (; (c = *fmt); fmt++) {
