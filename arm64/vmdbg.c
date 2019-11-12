@@ -123,7 +123,7 @@ printmap0(Pte *pgdir, char *va, int level)
         i = (uintptr)(entry-pgdir);
         j = (uintptr)(next-pgdir);
 
-        cprintf("[0x%p-0x%p] ", va, va + (j-i) * sz - 1);
+        cprintf("[0x%016p-0x%016p] ", va, va + (j-i) * sz - 1);
 
         if (i == j - 1) {
             cprintf("PTL%d[%03d] ", level, i);
@@ -156,7 +156,13 @@ printmap0(Pte *pgdir, char *va, int level)
 }
 
 void
-printmap(Pte *pgdir)
+kprintmap(Pte *pgdir)
 {
     printmap0(pgdir, p2v(0), 4);
+}
+
+void
+uprintmap(Pte *pgdir)
+{
+    printmap0(pgdir, 0, 4);
 }

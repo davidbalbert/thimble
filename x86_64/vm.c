@@ -323,7 +323,7 @@ loaduvm(Pte *pgmap, char *addr, uchar *data, ulong sz)
     usize n;
     char *pg;
 
-    checkalign(addr, 4096, "loaduvm - addr not page aligned");
+    checkalign(addr, PGSIZE, "loaduvm - addr not page aligned");
 
     for (i = 0; i < sz; i+= PGSIZE) {
         pte = walkpgmap(pgmap, addr+i, 0);

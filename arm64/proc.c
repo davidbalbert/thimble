@@ -3,6 +3,7 @@
 #include "asm.h"
 #include "arm64.h"
 #include "defs.h"
+#include "elf.h"
 #include "lock.h"
 #include "mem.h"
 #include "proc.h"
@@ -58,7 +59,9 @@ scheduler(void)
             p->state = RUNNING;
             proc = p;
 
+            switchuvm(proc);
             swtch(&cpu->scheduler, p->regs);
+            switchkvm();
 
             proc = nil;
         }
@@ -76,8 +79,8 @@ procbegin(void)
 
 void trapret(void);
 
-void
-mkproc(void (*f)(void))
+static Proc *
+allocproc(void)
 {
     Proc *p;
     u8 *sp;
@@ -89,7 +92,7 @@ mkproc(void (*f)(void))
             goto found;
 
     unlock(&ptable.lock);
-    return;
+    return nil;
 
 found:
     p->state = EMBRYO;
@@ -99,7 +102,7 @@ found:
 
     if ((p->kstack = kalloc()) == nil) {
         p->state = UNUSED;
-        return;
+        return nil;
     }
 
     sp = p->kstack + KSTACKSIZE;
@@ -108,9 +111,7 @@ found:
     p->tf = (TrapFrame *)sp;
     memzero(sp, sizeof(TrapFrame));
 
-    // trapret returns to f
-    p->tf->elr = (u64)f;
-    p->tf->spsr = SPSR_EL1_D | SPSR_EL1_A | SPSR_EL1_F | SPSR_EL1_M_EL1H;
+    p->tf->spsr = SPSR_EL1_D | SPSR_EL1_A | SPSR_EL1_F | SPSR_EL1_M_EL0T;
 
     // LR (x30)
     // FP (x29) <- SP
@@ -124,16 +125,72 @@ found:
     p->regs = (Registers *)sp;
     memzero(p->regs, sizeof(Registers));
 
-    // Swtch returns to procbegin. Becase the first two instructions (4 bytes
-    // per instruction) push LR and FP onto the stack, we want to skip them.
+    // Swtch returns to procbegin. Skip the first two instructions (4 bytes per
+    // instruction) that push LR and FP onto the stack. We've already done it.
     p->regs->x30 = (u64)procbegin+8;
-    p->state = READY;
+
+    return p;
 }
 
 void
-start(void (*f)(void))
+mkproc(uchar *data)
 {
-    mkproc(f);
+    Proc *p;
+    uchar *usp;     // user virtual address of user stack pointer
+    ElfHeader *elf;
+    ElfProgHeader *ph, *eph;
+
+    p = allocproc();
+    if (p == nil)
+        panic("mkproc - allocproc");
+
+    p->pgmap = kalloc();
+    if (p->pgmap == nil) {
+        panic("mkproc - pgmap");
+    }
+
+    memzero(p->pgmap, PGSIZE);
+
+    //memzero(p->errstr, ERRMAX);
+    //p->nextfd = 0;
+    p->sz = 0;
+
+    elf = (ElfHeader *)data;
+
+    if (elf->magic != ELF_MAGIC)
+        panic("mkproc - elf magic");
+
+    ph = (ElfProgHeader *)(data + elf->phoff);
+    eph = ph + elf->phnum;
+
+    for (; ph < eph; ph++) {
+        if (ph->type != ELF_PROG_LOAD)
+            continue;
+        if (ph->filesz > ph->memsz)
+            panic("mkproc - filesz");
+        if (ph->vaddr % PGSIZE != 0)
+            panic("mkproc - align");
+        if ((p->sz = allocuvm(p->pgmap, p->sz, p->sz + ph->memsz)) == 0)
+            panic("mkproc - allocuvm");
+
+        loaduvm(p->pgmap, (void *)ph->vaddr, data + ph->offset, ph->filesz);
+    }
+
+    // allocate stack. lower page is a guard
+    p->sz = (usize)pgceil((void *)p->sz);
+    if ((p->sz = allocuvm(p->pgmap, p->sz, p->sz + 2*PGSIZE)) == 0)
+        panic("mkproc - alloc stack");
+    clearpteu(p->pgmap, (void *)(p->sz - 2*PGSIZE));
+
+    // get user stack pointer
+    usp = (uchar *)p->sz;
+
+    p->tf->sp_el0 = (u64)usp;
+    p->tf->elr = elf->entry;
+
+    lock(&ptable.lock);
+    p->state = READY;
+    unlock(&ptable.lock);
 }
 
 void

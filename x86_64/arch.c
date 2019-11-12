@@ -20,5 +20,5 @@ archinit(void)
     kbdinit();
     fileinit();
 
-    mkproc(task1);
+    mkproc(x86_64_task1);
 }

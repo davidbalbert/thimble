@@ -23,7 +23,7 @@
 #define SPSR_EL1_A  (1 << 8)     // SError mask
 #define SPSR_EL1_I  (1 << 7)     // IRQ mask
 #define SPSR_EL1_F  (1 << 6)     // FIQ mask
-#define SPSR_EL1_M_EL1H 0b0101   // return to EL1h mode
+#define SPSR_EL1_M_EL0T 0        // return to EL0t mode
 
 
 #define CPACR_EL1_FPEN_NOTRAP (0b11 << 20) // don't trap accesses to FP, SIMD in EL0 and EL1

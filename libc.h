@@ -9,8 +9,11 @@
 
 int open(char *file, int omode);
 int close(int fd);
+// TODO: long -> usize
 long read(int fd, void *buf, usize nbytes);
 long write(int fd, void *buf, usize nbytes);
+
+int printhello(void);
 
 #define RFPROC   (1<<0)  // new proc
 #define RFNOWAIT (1<<1)  // dissasociate child from parent (no Waitmsg for parent)

@@ -25,12 +25,18 @@ alltraps:
     mrs x2, far_el1
     stp x1, x2, [sp, #-16]!
 
+    mrs x1, sp_el0
+    stp xzr, x1, [sp, #-16]!
+
     mov x0, sp // put a pointer to the TrapFrame as the argument to trap
 
     bl trap
 
 .global trapret
 trapret:
+    ldp xzr, x1, [sp], #16
+    msr sp_el0, x1
+
     ldp x1, x2, [sp], #16
     msr spsr_el1, x1
     msr far_el1, x2

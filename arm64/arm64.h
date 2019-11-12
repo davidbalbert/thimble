@@ -190,6 +190,9 @@ sp(void)
 }
 
 struct TrapFrame {
+    u64 sp_el1;
+    u64 sp_el0;
+
     u64 spsr;
     u64 far;
     u64 esr;

@@ -39,3 +39,9 @@ rfork(int flags)
 {
     return syscall(SYS_RFORK, flags);
 }
+
+int
+printhello(void)
+{
+    return syscall(SYS_PRINTHELLO);
+}

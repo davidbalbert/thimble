@@ -3,6 +3,7 @@
 #include "arm64.h"
 #include "defs.h"
 #include "mem.h"
+#include "proc.h"
 
 static Pte *kpgmap;
 static Pte *emptymap; // used unmap all userspace addresses when we're in the scheduler.
@@ -153,6 +154,23 @@ switchkvm(void)
 }
 
 void
+switchuvm(Proc *p)
+{
+    pushcli();
+
+    lttbr1(v2p(kpgmap));
+    lttbr0(v2p(p->pgmap));
+
+    dsb();
+    tlbi();
+
+    dsb();
+    isb();
+
+    popcli();
+}
+
+void
 kvmalloc(void)
 {
     if ((kpgmap = setupkvm()) == nil) {
@@ -165,4 +183,72 @@ kvmalloc(void)
     memzero(emptymap, PGSIZE);
 
     switchkvm();
+}
+
+usize
+allocuvm(Pte *pgmap, usize oldsz, usize newsz)
+{
+    void *mem;
+    usize a;
+
+    if (newsz >= USERTOP)
+        return 0;
+    if (newsz < oldsz)
+        return oldsz;
+
+    a = (usize)pgceil((void *)oldsz);
+
+    for (; a < newsz; a += PGSIZE) {
+        mem = kalloc();
+        if (mem == nil) {
+            cprintf("allocuvm -- oom (should dealloc here)\n");
+            return 0;
+        }
+
+        memzero(mem, PGSIZE);
+
+        if (mappages(pgmap, (char *)a, PGSIZE, v2p(mem), PTE_AF | PTE_ISH | PTE_CACHEABLE | PTE_W | PTE_U) < 0) {
+            cprintf("allocuvm -- oom 2 (should dealloc here)\n");
+            kfree(mem);
+            return 0;
+        }
+    }
+
+    return newsz;
+}
+
+void
+loaduvm(Pte *pgmap, char *addr, uchar *data, ulong sz)
+{
+    Pte *pte;
+    ulong i;
+    usize n;
+    char *pg;
+
+    checkalign(addr, PGSIZE, "loaduvm - addr not page aligned");
+
+    for (i = 0; i < sz; i+= PGSIZE) {
+        pte = walkpgmap(pgmap, addr+i, 0);
+        if (pte == nil)
+            panic("loaduvm - addr not mapped");
+
+        pg = p2v(pte_addr(*pte));
+
+        if (sz - i < PGSIZE)
+            n = sz - i;
+        else
+            n = PGSIZE;
+
+        memmove(pg, data + i, n);
+    }
+}
+
+void
+clearpteu(Pte *pgmap, void *addr)
+{
+    Pte *pte = walkpgmap(pgmap, addr, 0);
+    if (pte == nil)
+        panic("clearpteu");
+
+    *pte &= ~PTE_U;
 }
