@@ -6,6 +6,7 @@
 #include "defs.h"
 #include "irq.h"
 #include "mem.h"
+#include "proc.h"
 
 #include "bcm2837.h"
 
@@ -21,6 +22,9 @@ void
 handletimer(void)
 {
     st_cntptval(interval);
+
+    if (proc && proc->state == RUNNING)
+        yield();
 }
 
 void

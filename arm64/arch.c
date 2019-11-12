@@ -20,7 +20,6 @@ task1(void)
     for(;;) {
         cprintf("task1: %d\n", i++);
         wastetime();
-        yield();
     }
 }
 
@@ -32,7 +31,6 @@ task2(void)
     for(;;) {
         cprintf("task2: %d\n", i++);
         wastetime();
-        yield();
     }
 }
 

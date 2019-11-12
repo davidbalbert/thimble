@@ -66,8 +66,6 @@ othertrap(TrapFrame *tf)
 void
 trap(TrapFrame *tf)
 {
-    u32 trapno = readirq();
-
     if (tf->type == 0 && (tf->esr >> 26) == ESR_SYSCALL) {
         syscall(tf);
         return;
@@ -76,6 +74,8 @@ trap(TrapFrame *tf)
     if (tf->type != 1) {
         othertrap(tf); // doesn't return
     }
+
+    u32 trapno = readirq();
 
     switch (trapno) {
         case IRQ_TIMER:
