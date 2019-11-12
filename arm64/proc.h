@@ -2,6 +2,7 @@ struct Cpu {
     int id;                         // cpu id number
     int ncli;                       // number of times pushcli has been called.
     int intena;                     // whether interrupts were enabled before pushcli
+    Registers *scheduler;
 };
 typedef struct Cpu Cpu;
 
@@ -16,6 +17,8 @@ struct Registers {
     u64 x26;
     u64 x27;
     u64 x28;
+    u64 x29; // FP
+    u64 x30; // LR
 };
 typedef struct Registers Registers;
 
@@ -34,7 +37,9 @@ struct Proc {
     u8 *kstack; // base of the kernel stack
     usize sz; // total size in memory
     Proc *parent;
+    int pid;
 };
 typedef struct Proc Proc;
 
 extern Cpu  *cpu;   // current cpu
+extern Proc *proc;  // current proc

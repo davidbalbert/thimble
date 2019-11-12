@@ -41,7 +41,6 @@
 #define SCTLR_EL1_C (1 << 2)  // data cache enable
 #define SCTLR_EL1_I (1 << 12) // instruction cache enable
 
-// for use with DAIF
 #define DAIF_D (1 << 9)
 #define DAIF_A (1 << 8)
 #define DAIF_I (1 << 7)

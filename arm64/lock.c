@@ -45,7 +45,7 @@ pushcli(void)
     cli();
 
     if (cpu->ncli++ == 0) {
-        cpu->intena = (daif & DAIF_ALL) == 0;
+        cpu->intena = (daif & DAIF_I) == 0;
     }
 }
 

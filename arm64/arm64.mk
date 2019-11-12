@@ -21,6 +21,7 @@ OBJS += \
 	arm64/timer.o\
 	arm64/bcmint.o\
 	arm64/syscall.o\
+	arm64/swtch.o\
 
 .PHONY: default
 default: kernel

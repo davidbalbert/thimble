@@ -70,7 +70,10 @@ void panic(char *fmt, ...) __attribute__((noreturn));
 void vpanic(char *fmt, va_list ap) __attribute__((noreturn));
 void schedinit(void);
 void scheduler(void) __attribute__((noreturn));
-void mkproc(uchar *data);
+//void mkproc(uchar *data);
+void mkproc(void (*f)(void));
+void start(void (*f)(void));
+
 void yield(void);
 
 // switch.S
