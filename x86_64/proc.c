@@ -253,7 +253,7 @@ sys_rfork(SyscallFrame *f)
 {
     int flags;
 
-    if (argint(f, 0, &flags) < 0) {
+    if (argint(0, &flags) < 0) {
         // todo errstr
         return -1;
     }

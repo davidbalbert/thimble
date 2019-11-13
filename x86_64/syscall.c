@@ -7,13 +7,13 @@
 #include "proc.h"
 #include "syscall.h"
 
-long sys_open(SyscallFrame *);
-long sys_close(SyscallFrame *);
-long sys_read(SyscallFrame *);
-long sys_write(SyscallFrame *);
-long sys_rfork(SyscallFrame *);
+long sys_open(void);
+long sys_close(void);
+long sys_read(void);
+long sys_write(void);
+long sys_rfork(void);
 
-static long (*syscalls[])(SyscallFrame *) = {
+static long (*syscalls[])(void) = {
     [SYS_OPEN] sys_open,
     [SYS_CLOSE] sys_close,
     [SYS_READ] sys_read,
@@ -35,20 +35,24 @@ kstacktop(void)
 
 // Fetch the nth syscall argument. N starts at 0.
 long
-arglong(SyscallFrame *f, int n, long *lp)
+arglong(int n, long *lp)
 {
-    if (n > 5)
+    if (n < 0 || n > 5)
         panic("arglong");
 
-    *lp = f->args[n];
+    *lp = proc->sf->args[n];
     return 0;
 }
 
 long
-argint(SyscallFrame *f, int n, int *ip)
+argint(int n, int *ip)
 {
     long l;
-    if (arglong(f, n, &l) < 0)
+
+    if (n < 0 || n > 5)
+        panic("argint");
+
+    if (arglong(n, &l) < 0)
         return -1;
 
     *ip = (int)l;
@@ -56,14 +60,14 @@ argint(SyscallFrame *f, int n, int *ip)
 }
 
 long
-argptr(SyscallFrame *f, int n, uintptr *p, usize size)
+argptr(int n, uintptr *p, usize size)
 {
     long l;
 
-    if (n > 5)
+    if (n < 0 || n > 5)
         panic("argptr");
 
-    if (arglong(f, n, &l) < 0)
+    if (arglong(n, &l) < 0)
         return -1;
     if ((uintptr)l >= proc->sz || (uintptr)l+size > proc->sz)
         return -1;
@@ -75,16 +79,18 @@ argptr(SyscallFrame *f, int n, uintptr *p, usize size)
 
 // returns length of string, not including null
 long
-argstr(SyscallFrame *f, int n, char **pp)
+argstr(int n, char **pp)
 {
     long l;
     uintptr addr;
     char *p;
 
-    if (n > 5)
+    if (n < 0 || n > 5)
         panic("argstr");
 
-    arglong(f, n, &l);
+    if (arglong(n, &l) < 0)
+        return -1;
+
     addr = (uintptr)l;
 
     if (addr >= proc->sz)
@@ -99,18 +105,15 @@ argstr(SyscallFrame *f, int n, char **pp)
 }
 
 long
-argfd(SyscallFrame *f, int n, int *fd)
+argfd(int n, int *fd)
 {
-    long l;
     int i;
 
-
-    if (n > 5)
+    if (n < 0 || n > 5)
         panic("argfd");
 
-    if (arglong(f, n, &l) < 0)
+    if (argint(n, &i) < 0)
         return -1;
-    i = (int)l;
 
     if (i >= proc->nextfd || proc->files[i] == nil) {
         // todo errstr
@@ -130,7 +133,7 @@ syscall(SyscallFrame *f)
 {
     if (f->num > 0 && f->num < nelem(syscalls) && syscalls[f->num]) {
         proc->sf = f;
-        f->rax = syscalls[f->num](f);
+        f->rax = syscalls[f->num]();
     } else {
         cprintf("unknown syscall: %d\n", f->num);
         f->rax = -1;

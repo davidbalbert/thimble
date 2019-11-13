@@ -38,8 +38,6 @@ default: kernel.img
 x86_64/ivec.S: x86_64/ivec.rb
 	ruby x86_64/ivec.rb > x86_64/ivec.S
 
-x86_64/arch.c: x86_64/task1.h
-
 LIBCOBJS += \
 	   x86_64/libcasm.o\
 
