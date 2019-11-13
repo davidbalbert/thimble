@@ -1,6 +1,7 @@
 typedef struct SpinLock SpinLock;
 typedef struct Registers Registers;
 typedef struct Proc Proc;
+typedef struct File File;
 
 // console.c
 

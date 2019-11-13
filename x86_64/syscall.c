@@ -106,7 +106,7 @@ argfd(SyscallFrame *f, int n, int *fd)
 
 
     if (n > 5)
-        panic("argstr");
+        panic("argfd");
 
     if (arglong(f, n, &l) < 0)
         return -1;

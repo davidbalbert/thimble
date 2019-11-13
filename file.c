@@ -156,17 +156,17 @@ canwrite(char *fname)
 }
 
 int
-sys_open(SyscallFrame *f)
+sys_open(void)
 {
     char *fname;
     long l;
     int omode, fd;
     File *file;
 
-    if (argstr(f, 0, &fname) < 0)
+    if (argstr(0, &fname) < 0)
         return -1;
 
-    if (arglong(f, 1, &l) < 0)
+    if (arglong(1, &l) < 0)
         return -1;
 
     omode = (long)l;
@@ -199,12 +199,12 @@ sys_open(SyscallFrame *f)
 }
 
 long
-sys_close(SyscallFrame *f)
+sys_close(void)
 {
     int fd;
     File *file;
 
-    if (argfd(f, 0, &fd)) {
+    if (argfd(0, &fd)) {
         // todo errstr
         return -1;
     }
@@ -218,7 +218,7 @@ sys_close(SyscallFrame *f)
 }
 
 long
-sys_read(SyscallFrame *f)
+sys_read(void)
 {
     int fd;
     long l;
@@ -227,18 +227,18 @@ sys_read(SyscallFrame *f)
     File *file;
 
     // fd
-    if (argfd(f, 0, &fd) < 0)
+    if (argfd(0, &fd) < 0)
         return -1;
 
     // nbytes (needed for argptr)
-    if (arglong(f, 2, &l) < 0) {
+    if (arglong(2, &l) < 0) {
         // todo errstr
         return -1;
     }
     nbytes = (usize)l;
 
     // buf
-    if (argptr(f, 1, &buf, nbytes) < 0) {
+    if (argptr(1, &buf, nbytes) < 0) {
         // todo errstr
         return -1;
     }
@@ -254,7 +254,7 @@ sys_read(SyscallFrame *f)
 }
 
 long
-sys_write(SyscallFrame *f)
+sys_write(void)
 {
     int fd;
     long l;
@@ -263,18 +263,18 @@ sys_write(SyscallFrame *f)
     File *file;
 
     // fd
-    if (argfd(f, 0, &fd) < 0)
+    if (argfd(0, &fd) < 0)
         return -1;
 
     // nbytes (needed for argptr)
-    if (arglong(f, 2, &l) < 0) {
+    if (arglong(2, &l) < 0) {
         // todo errstr
         return -1;
     }
     nbytes = (usize)l;
 
     // buf
-    if (argptr(f, 1, &buf, nbytes) < 0) {
+    if (argptr(1, &buf, nbytes) < 0) {
         // todo errstr
         return -1;
     }

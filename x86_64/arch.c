@@ -4,8 +4,6 @@
 #include "defs.h"
 #include "mem.h"
 
-#include "task1.h"
-
 void
 archinit_early(void)
 {
@@ -18,7 +16,4 @@ archinit(void)
     seginit();
     sysinit();
     kbdinit();
-    fileinit();
-
-    mkproc(x86_64_task1);
 }

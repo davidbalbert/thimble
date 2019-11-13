@@ -25,7 +25,13 @@ checkalign(void *a, int alignment, char *msg, ...)
 uintptr
 pte_addr(Pte entry)
 {
-    return entry & 0xFFFFFFFFF000;
+    return entry & 0x0000FFFFFFFFF000;
+}
+
+static int
+pte_flags(Pte entry)
+{
+    return entry & 0xFFFF000000000FFF;
 }
 
 static Pte *
@@ -168,6 +174,55 @@ switchuvm(Proc *p)
     isb();
 
     popcli();
+}
+
+Pte *
+copyuvm(Pte *oldmap, usize sz)
+{
+    uintptr a;
+    Pte *newmap;
+    Pte *pte;
+    uchar *oldmem, *newmem;
+    uint flags;
+
+    newmap = kalloc();
+    if (newmap == nil)
+        return nil;
+
+    memzero(newmap, PGSIZE);
+
+    for (a = 0; a < sz; a += PGSIZE) {
+        pte = walkpgmap(oldmap, (void *)a, 0);
+        if (pte == nil)
+            panic("copyuvm - nil pte");
+        if (!*pte & PTE_P)
+            panic("copyuvm - page not present");
+
+        oldmem = p2v(pte_addr(*pte));
+        flags = pte_flags(*pte);
+
+        newmem = kalloc();
+        if (newmem == nil)
+            goto bad;
+
+        memmove(newmem, oldmem, PGSIZE);
+
+        if (mappages(newmap, (void *)a, PGSIZE, v2p(newmem), flags) < 0)
+            goto bad;
+    }
+
+    return newmap;
+
+bad:
+    freeuvm(newmap);
+    return nil;
+}
+
+void
+freeuvm(Pte *pgmap)
+{
+    cprintf("freeuvm not implemented yet!\n");
+    // todo
 }
 
 void

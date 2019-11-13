@@ -22,7 +22,6 @@ OBJS += \
 	x86_64/swtch.o\
 	x86_64/lock.o\
 	x86_64/proc.o\
-	file.o\
 	x86_64/syscall.o\
 	x86_64/timer.o\
 	x86_64/vm.o\
@@ -41,16 +40,8 @@ x86_64/ivec.S: x86_64/ivec.rb
 
 x86_64/arch.c: x86_64/task1.h
 
-LIBCOBJS := \
-	   klibc.o\
-	   libc.o\
+LIBCOBJS += \
 	   x86_64/libcasm.o\
-
-x86_64/task1: x86_64/task1.o $(LIBCOBJS)
-	$(LD) $(LDFLAGS) -e main -Ttext=0 -o x86_64/task1 $^
-
-x86_64/task1.h: x86_64/task1
-	xxd -i x86_64/task1 > x86_64/task1.h
 
 kernel.img: x86_64/boot x86_64/stage2 x86_64/stage2size.txt kernel
 	dd bs=512 count=16384 if=/dev/zero of=kernel.img

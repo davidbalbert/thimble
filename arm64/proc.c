@@ -1,9 +1,11 @@
 #include "u.h"
 
-#include "asm.h"
+#include "archdefs.h"
 #include "arm64.h"
+#include "asm.h"
 #include "defs.h"
 #include "elf.h"
+#include "lib.h"
 #include "lock.h"
 #include "mem.h"
 #include "proc.h"
@@ -132,6 +134,28 @@ found:
     return p;
 }
 
+static void
+freeproc(Proc *p)
+{
+    lock(&ptable.lock);
+
+    if (p->kstack) {
+        kfree(p->kstack);
+        p->kstack = nil;
+    }
+
+    if (p->pgmap) {
+        freeuvm(p->pgmap);
+        p->pgmap = nil;
+    }
+
+    p->state = UNUSED;
+
+    // TODO: close file references
+
+    unlock(&ptable.lock);
+}
+
 void
 mkproc(uchar *data)
 {
@@ -151,8 +175,8 @@ mkproc(uchar *data)
 
     memzero(p->pgmap, PGSIZE);
 
-    //memzero(p->errstr, ERRMAX);
-    //p->nextfd = 0;
+    memzero(p->errstr, ERRMAX);
+    p->nextfd = 0;
     p->sz = 0;
 
     elf = (ElfHeader *)data;
@@ -214,6 +238,57 @@ vpanic(char *fmt, va_list ap)
 
     for (;;)
         halt();
+}
+
+int
+rfork(int flags)
+{
+    Proc *newp;
+
+    if (!(flags & RFPROC))
+        return 0;
+
+    newp = allocproc();
+    if (newp == nil) {
+        // todo errstr
+        return -1;
+    }
+
+    newp->pgmap = copyuvm(proc->pgmap, proc->sz);
+    if (newp->pgmap == nil) {
+        freeproc(newp);
+        return -1;
+    }
+
+    newp->sz = proc->sz;
+    newp->parent = proc;
+
+    if (!(flags & RFFDG))
+        panic("rfork - cannot share fd table yet");
+    else
+        copyfds(proc, newp); // also copy nextfd here
+
+    *newp->tf = *proc->tf;
+    newp->tf->x0 = 0; // return 0 in child
+
+    lock(&ptable.lock);
+    newp->state = READY;
+    unlock(&ptable.lock);
+
+    return newp->pid;
+}
+
+long
+sys_rfork(void)
+{
+    int flags;
+
+    if (argint(0, &flags) < 0) {
+        // todo errstr
+        return -1;
+    }
+
+    return rfork(flags);
 }
 
 void

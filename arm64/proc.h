@@ -30,6 +30,9 @@ typedef enum {
     READY,
 } ProcState;
 
+#define ERRMAX 1024
+#define NFD    1024
+
 struct Proc {
     ProcState state;
     Registers *regs;
@@ -39,6 +42,9 @@ struct Proc {
     Proc *parent;
     int pid;
     TrapFrame *tf;
+    char errstr[ERRMAX];
+    File *files[NFD];
+    int nextfd;
 };
 typedef struct Proc Proc;
 

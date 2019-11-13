@@ -4,8 +4,6 @@
 #include "defs.h"
 #include "uart.h"
 
-#include "task1.h"
-
 void
 archinit_early(void)
 {
@@ -18,6 +16,4 @@ void
 archinit(void)
 {
     cprintf("Exception Level: EL%d\n", el());
-
-    mkproc(arm64_task1);
 }

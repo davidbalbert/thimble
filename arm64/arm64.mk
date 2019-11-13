@@ -26,18 +26,8 @@ OBJS += \
 .PHONY: default
 default: kernel
 
-LIBCOBJS := \
-	   klibc.o\
-	   libc.o\
+LIBCOBJS += \
 	   arm64/libcasm.o\
-
-arm64/arch.c: arm64/task1.h
-
-arm64/task1: arm64/task1.o $(LIBCOBJS)
-	$(LD) $(LDFLAGS) -e main -Ttext=0 -o arm64/task1 $^
-
-arm64/task1.h: arm64/task1
-	xxd -i arm64/task1 > arm64/task1.h
 
 .PHONY: qemu
 qemu: kernel

@@ -39,9 +39,3 @@ rfork(int flags)
 {
     return syscall(SYS_RFORK, flags);
 }
-
-int
-printint(int i)
-{
-    return syscall(SYS_PRINTINT, i);
-}

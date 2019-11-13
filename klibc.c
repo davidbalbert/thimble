@@ -21,6 +21,13 @@ memmove(void *dst, void *src, usize n)
     return dst;
 }
 
+// GCC wants memcpy for *foo = *bar. We'll just use memmove.
+void *
+memcpy(void *dst, void *src, usize n)
+{
+    return memmove(dst, src, n);
+}
+
 void *
 memset(void *p, int c, usize n)
 {

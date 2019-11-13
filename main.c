@@ -3,6 +3,8 @@
 #include "defs.h"
 #include "mem.h"
 
+#include "task1.h"
+
 int
 main(void)
 {
@@ -19,10 +21,13 @@ main(void)
     trapinit();
     intinit();
     timerinit();
+    fileinit();
 
     initmem2(p2v(16*MB), p2v(PHYSTOP));
 
     archinit();
+
+    mkproc(task1);
 
     scheduler();
 }
