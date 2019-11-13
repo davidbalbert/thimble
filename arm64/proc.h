@@ -33,6 +33,8 @@ typedef enum {
 #define ERRMAX 1024
 #define NFD    1024
 
+typedef struct TrapFrame TrapFrame;
+
 struct Proc {
     ProcState state;
     Registers *regs;

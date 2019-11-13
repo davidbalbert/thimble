@@ -78,6 +78,13 @@ void yield(void);
 // switch.S
 void swtch(Registers **from, Registers *to);
 
+// syscall.c
+int argfd(int n, int *fd);
+int argint(int n, int *ip);
+int arglong(int n, long *lp);
+int argptr(int n, uintptr *p, usize size);
+long argstr(int n, char **pp);
+
 // timer.c
 void timerinit(void);
 void handletimer(void);

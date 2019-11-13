@@ -101,6 +101,14 @@ typedef enum {
 
 typedef struct File File;
 
+struct SyscallFrame {
+    long rax;           // syscall return value
+    ulong rsp;          // user stack pointer
+    ulong num;
+    ulong args[6];
+};
+typedef struct SyscallFrame SyscallFrame;
+
 typedef struct Proc Proc;
 struct Proc {
     ProcState state;
@@ -115,14 +123,6 @@ struct Proc {
     int nextfd;
     Proc *parent;
 };
-
-struct SyscallFrame {
-    long rax;           // syscall return value
-    ulong rsp;          // user stack pointer
-    ulong num;
-    ulong args[6];
-};
-typedef struct SyscallFrame SyscallFrame;
 
 extern Cpu  *cpu;   // current cpu
 extern Proc *proc;  // current process

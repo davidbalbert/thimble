@@ -1,5 +1,6 @@
 OBJS := \
        main.o\
+			 syscall.o\
        console.o\
        klibc.o\
        kalloc.o\
