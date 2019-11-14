@@ -47,16 +47,13 @@ ulong v2p(void *vaddr);
 
 // klibc.c
 void *memmove(void *dst, void *src, usize n);
+void * memcpy(void *dst, void *src, usize n);
 void *memset(void *p, int c, usize n);
 void *memzero(void *p, usize n);
 int isdigit(int c);
 int strcmp(char *s1, char *s2);
 usize strlen(char *s);
 long strtol(char *s, char **endptr, int base);
-
-// kbd.c
-void kbdinit(void);
-void handlekbd(void);
 
 // lock.c
 void initlock(SpinLock *l);
@@ -68,7 +65,6 @@ void pop_off(void);
 // pic.c/bcmint.c
 void intinit(void);
 void intenable(u32 irq);
-u32 readirq(void);
 
 // proc.c
 void panic(char *fmt, ...) __attribute__((noreturn));
@@ -100,9 +96,6 @@ void handletimer(void);
 // trap.c
 void trapinit(void);
 
-// uart.c
-void handleuart(void);
-
 // vm.c
 usize allocuvm(Pte *pgmap, usize oldsz, usize newsz);
 void clearpteu(Pte *pgmap, void *addr);
@@ -121,7 +114,3 @@ int uvmperm(void);
 Pte *walkpgmap(Pte *pgmap, void *va, int alloc);
 int mappages(Pte *pgmap, void *va, usize size, uintptr pa, int perm);
 Pte *allocpgmap(void);
-
-// vmdbg.c
-void kprintmap(Pte *pgdir);
-void uprintmap(Pte *pgdir);

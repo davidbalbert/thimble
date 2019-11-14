@@ -11,9 +11,7 @@ archinit_early(void)
     cinit(uart_console);
 }
 
-
 void
 archinit(void)
 {
-    cprintf("Exception Level: EL%d\n", el());
 }
