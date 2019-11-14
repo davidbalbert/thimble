@@ -32,14 +32,15 @@ OBJS += \
 	x86_64/ivec.o\
 	x86_64/alltraps.o\
 
+LIBCOBJS += \
+	   x86_64/libcasm.o\
+
+
 .PHONY: default
 default: kernel.img
 
 x86_64/ivec.S: x86_64/ivec.rb
 	ruby x86_64/ivec.rb > x86_64/ivec.S
-
-LIBCOBJS += \
-	   x86_64/libcasm.o\
 
 kernel.img: x86_64/boot x86_64/stage2 x86_64/stage2size.txt kernel
 	dd bs=512 count=16384 if=/dev/zero of=kernel.img

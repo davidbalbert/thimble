@@ -23,11 +23,14 @@ OBJS += \
 	arm64/syscall.o\
 	arm64/swtch.o\
 
+LIBCOBJS += \
+	   arm64/libcasm.o\
+
 .PHONY: default
 default: kernel
 
-LIBCOBJS += \
-	   arm64/libcasm.o\
+sd.img:
+	./mkfs.sh sd.img
 
 .PHONY: qemu
 qemu: kernel
