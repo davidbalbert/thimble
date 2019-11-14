@@ -16,6 +16,8 @@ main(void)
     schedinit();
     // TODO: allocate fewer things (files, etc.) statically in the
     // kernel so we need to map less memory initially
+    //
+    // Allocate all pages mapped by boot page tables.
     initmem1(end, p2v(16*MB));
     kvmalloc();
     trapinit();
@@ -23,7 +25,7 @@ main(void)
     timerinit();
     fileinit();
 
-    initmem2(p2v(16*MB), p2v(PHYSTOP));
+    initmem2(p2v(PHYSTOP));
 
     archinit();
 

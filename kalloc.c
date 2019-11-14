@@ -13,6 +13,8 @@ static struct {
     SpinLock lock;
     FreeList *freelist;
     int uselock;
+    void *rest; // the rest of physical memory that's not yet managed by the free list
+    void *end; // the end of physical memory
 } kmem;
 
 
@@ -41,6 +43,45 @@ pgceil(void *addr)
     return (void *)((a+PGSIZE-1) & ~(PGSIZE-1));
 }
 
+static void
+kfree0(void *a, int uselock)
+{
+    FreeList *page;
+    char *p = (char *)a;
+
+    if ((u64)p % PGSIZE || p < end || v2p(p) >= PHYSTOP)
+        panic("kfree");
+
+    // invalidate old data
+    memset(p, 1, PGSIZE);
+
+    if (uselock)
+        lock(&kmem.lock);
+
+    page = (FreeList *)p;
+    page->next = kmem.freelist;
+    kmem.freelist = page;
+
+    if (uselock)
+        unlock(&kmem.lock);
+}
+
+void
+kfree(void *a)
+{
+    kfree0(a, kmem.uselock);
+}
+
+static void
+freemore(void)
+{
+    if (kmem.rest >= kmem.end)
+        return;
+
+    kfree0(kmem.rest, 0);
+    kmem.rest += PGSIZE;
+}
+
 // Allocate a page. Returns zero on failure.
 void *
 kalloc(void)
@@ -49,6 +90,9 @@ kalloc(void)
 
     if (kmem.uselock)
         lock(&kmem.lock);
+
+    if (!kmem.freelist)
+        freemore();
 
     if (!kmem.freelist)
         return nil;
@@ -62,56 +106,23 @@ kalloc(void)
     return (void *)page;
 }
 
-void
-kfree(void *a)
-{
-    FreeList *page;
-    char *p = (char *)a;
-
-    if ((u64)p % PGSIZE || p < end || v2p(p) >= PHYSTOP)
-        panic("kfree");
-
-    // invalidate old data
-    memset(p, 1, PGSIZE);
-
-    if (kmem.uselock)
-        lock(&kmem.lock);
-
-    page = (FreeList *)p;
-    page->next = kmem.freelist;
-    kmem.freelist = page;
-
-    if (kmem.uselock)
-        unlock(&kmem.lock);
-}
-
-static void
-freerange(void *start, void *end)
-{
-    char *p;
-
-    start = pgceil(start);
-    end = pgceil(end);
-
-    for (p = start; p < (char *)end; p += PGSIZE)
-        kfree(p);
-}
 
 void
 initmem1(void *start, void *end)
 {
     initlock(&kmem.lock);
-    kmem.freelist = 0;
+    kmem.freelist = nil;
 
     // interrupts aren't set up yet, so we can't call lock/unlock
     kmem.uselock = 0;
 
-    freerange(start, end);
+    kmem.rest = pgceil(start);
+    kmem.end = pgceil(end);
 }
 
 void
-initmem2(void *start, void *end)
+initmem2(void *end)
 {
-    freerange(start, end);
+    kmem.end = pgceil(end);
     kmem.uselock = 1;
 }

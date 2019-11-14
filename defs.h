@@ -37,7 +37,7 @@ void copyfds(Proc *oldp, Proc *newp);
 
 // kalloc.c
 void initmem1(void *start, void *end);
-void initmem2(void *start, void *end);
+void initmem2(void *end);
 void *kalloc(void);
 void kfree(void *a);
 void *pgfloor(void *addr);
