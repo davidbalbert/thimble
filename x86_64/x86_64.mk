@@ -47,6 +47,31 @@ kernel.img: x86_64/boot x86_64/stage2 x86_64/stage2size.txt kernel
 	dd bs=512 if=x86_64/stage2 of=kernel.img conv=notrunc seek=1
 	dd bs=512 if=kernel of=kernel.img conv=notrunc seek=$(shell expr $(shell cat x86_64/stage2size.txt) + 1)
 
+x86_64/boot.o: x86_64/stage2size.h
+
+x86_64/boot: x86_64/boot.o x86_64/boot.ld
+	$(LD) $(LDFLAGS) -N -T x86_64/boot.ld -o x86_64/boot x86_64/boot.o
+
+x86_64/stage2size.txt: x86_64/stage2
+	wc -c x86_64/stage2 | awk '{ print int(($$1 + 511) / 512) }' > x86_64/stage2size.txt
+
+x86_64/stage2size.h: x86_64/stage2size.txt
+	echo '#define STAGE2SIZE' $(shell cat x86_64/stage2size.txt) > x86_64/stage2size.h
+
+STAGE2OBJS := \
+	     x86_64/stage2asm.o\
+	     x86_64/stage2.o\
+	     x86_64/bootide.o\
+	     x86_64/pci.o\
+	     x86_64/ahci.o\
+			 x86_64/vgacons.o\
+			 x86_64/cpu.o\
+			 console.o\
+	     klibc.o\
+
+x86_64/stage2: $(STAGE2OBJS) x86_64/stage2.ld
+	$(LD) $(LDFLAGS) -N -T x86_64/stage2.ld -o x86_64/stage2 $(STAGE2OBJS)
+
 
 .PHONY: qemu
 qemu: kernel.img
