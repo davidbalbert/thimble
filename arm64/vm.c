@@ -6,7 +6,7 @@
 #include "proc.h"
 
 static Pte *kpgmap;
-static Pte *emptymap; // used unmap all userspace addresses when we're in the scheduler.
+static Pte *emptymap; // used to unmap all userspace addresses when we're in the scheduler.
 
 // paging structure entry -> physical address
 uintptr
