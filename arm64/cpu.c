@@ -10,3 +10,15 @@ halt(void)
 {
     wfi();
 }
+
+void
+intr_off(void)
+{
+    asm volatile("msr DAIFSet, #2");
+}
+
+void
+intr_on(void)
+{
+    asm volatile("msr DAIFClr, #2");
+}

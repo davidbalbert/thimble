@@ -5,18 +5,6 @@ hlt(void)
 }
 
 static inline void
-cli(void)
-{
-    asm volatile("cli");
-}
-
-static inline void
-sti(void)
-{
-    asm volatile("sti");
-}
-
-static inline void
 outb(ushort port, uchar data)
 {
     asm volatile("outb %0, %1" : : "a" (data), "d" (port));

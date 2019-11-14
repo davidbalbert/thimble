@@ -64,18 +64,6 @@ readdaif(void)
 }
 
 static inline void
-cli(void)
-{
-    asm volatile("msr DAIFSet, #2");
-}
-
-static inline void
-sti(void)
-{
-    asm volatile("msr DAIFClr, #2");
-}
-
-static inline void
 lttbr0(uintptr pgmap)
 {
     asm volatile("msr ttbr0_el1, %[pgmap]" : : [pgmap] "r" (pgmap));

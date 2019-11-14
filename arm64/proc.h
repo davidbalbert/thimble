@@ -1,7 +1,7 @@
 struct Cpu {
     int id;                         // cpu id number
-    int ncli;                       // number of times pushcli has been called.
-    int intena;                     // whether interrupts were enabled before pushcli
+    int noff;                       // number of times push_off has been called.
+    int intena;                     // whether interrupts were enabled before push_off
     Registers *scheduler;
 };
 typedef struct Cpu Cpu;

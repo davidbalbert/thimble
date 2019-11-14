@@ -18,6 +18,10 @@ void cputc(uchar c);
 void cvprintf(char *fmt, va_list ap);
 void cwrite(char *buf, usize nbytes);
 
+// $(ARCH)/cpu.c
+void intr_on(void);
+void intr_off(void);
+
 // $(ARCH)/arch.c
 
 void archinit_early(void);
@@ -58,8 +62,8 @@ void handlekbd(void);
 void initlock(SpinLock *l);
 void lock(SpinLock *l);
 void unlock(SpinLock *l);
-void pushcli(void);
-void popcli(void);
+void push_off(void);
+void pop_off(void);
 
 // pic.c/bcmint.c
 void intinit(void);
@@ -72,6 +76,10 @@ void vpanic(char *fmt, va_list ap) __attribute__((noreturn));
 void schedinit(void);
 void scheduler(void) __attribute__((noreturn));
 void mkproc(uchar *data);
+void procbegin(void);
+void initkstack(Proc *p);
+void initstack(Proc *p, u64 entry);
+void archrfork(Proc *old, Proc *new);
 
 void yield(void);
 

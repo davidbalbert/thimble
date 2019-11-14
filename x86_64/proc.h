@@ -83,8 +83,8 @@ struct Cpu {
     SegmentDescriptor gdt[NDESC];
     TaskState ts;                   // Used for interrupt stack switching
     int id;                         // cpu id number
-    int ncli;                       // number of times pushcli has been called.
-    int intena;                     // whether interrupts were enabled before pushcli
+    int noff;                       // number of times push_off has been called.
+    int intena;                     // whether interrupts were enabled before push_off
 };
 typedef struct Cpu Cpu;
 

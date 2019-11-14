@@ -15,7 +15,7 @@ initlock(SpinLock *l)
 void
 lock(SpinLock *l)
 {
-    pushcli();
+    push_off();
 
     while (1) {
         while (ldaxr(&l->locked)) {
@@ -34,29 +34,29 @@ void
 unlock(SpinLock *l)
 {
     stlr(&l->locked, 0);
-    popcli();
+    pop_off();
 }
 
 void
-pushcli(void)
+push_off(void)
 {
     u64 daif = readdaif();
 
-    cli();
+    intr_off();
 
-    if (cpu->ncli++ == 0) {
+    if (cpu->noff++ == 0) {
         cpu->intena = (daif & DAIF_I) == 0;
     }
 }
 
 void
-popcli(void)
+pop_off(void)
 {
-    if (--cpu->ncli < 0) {
-        panic("popcli");
+    if (--cpu->noff < 0) {
+        panic("pop_off");
     }
 
-    if (cpu->ncli == 0 && cpu->intena) {
-        sti();
+    if (cpu->noff == 0 && cpu->intena) {
+        intr_on();
     }
 }

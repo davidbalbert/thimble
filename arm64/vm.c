@@ -153,7 +153,7 @@ switchkvm(void)
 void
 switchuvm(Proc *p)
 {
-    pushcli();
+    push_off();
 
     lttbr1(v2p(kpgmap));
     lttbr0(v2p(p->pgmap));
@@ -164,7 +164,7 @@ switchuvm(Proc *p)
     dsb();
     isb();
 
-    popcli();
+    pop_off();
 }
 
 Pte *

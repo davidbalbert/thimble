@@ -6,6 +6,7 @@ OBJS := \
 		klibc.o\
 		kalloc.o\
 		file.o\
+		proc.o\
 
 LIBCOBJS := \
 	   klibc.o\

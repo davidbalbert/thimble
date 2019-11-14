@@ -291,7 +291,7 @@ switchuvm(Proc *p)
 {
     TaskStateDescriptor *d;
 
-    pushcli();
+    push_off();
 
     d = (TaskStateDescriptor *)&cpu->gdt[SEG_TSS];
     tsdesc(d, &cpu->ts, sizeof(cpu->ts));
@@ -303,7 +303,7 @@ switchuvm(Proc *p)
         panic("switchuvm - no pgmap");
     lcr3(v2p(p->pgmap));
 
-    popcli();
+    pop_off();
 }
 
 void
