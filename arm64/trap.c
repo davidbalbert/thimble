@@ -7,7 +7,7 @@
 
 #define ESR_SYSCALL 0b010101
 
-extern u8 vectors[];
+extern byte vectors[];
 
 static void
 othertrap(TrapFrame *tf)

@@ -26,8 +26,8 @@
 #define SHIFT   (LSHIFT | RSHIFT)
 #define META    (LMETA | RMETA)
 
-static uint skip = 0;
-static uint mods = 0; // bitmap for modifier keys
+static u32 skip = 0;
+static u32 mods = 0; // bitmap for modifier keys
 
 #define ESC 0
 #define CPSLK 0
@@ -35,7 +35,7 @@ static uint mods = 0; // bitmap for modifier keys
 #define NLK 0 // Number lock
 #define SLK 0 // Scroll lock
 
-static uchar charmap[256] = {
+static byte charmap[256] = {
     0  , ESC, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',
     '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\n',
     0, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '`',
@@ -44,7 +44,7 @@ static uchar charmap[256] = {
     '4', '5', '6', '1', '2', '3', '0', '.',
 };
 
-static uchar shiftmap[256] = {
+static byte shiftmap[256] = {
     0  , ESC, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b',
     '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n',
     0, 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '"', '~',
@@ -54,26 +54,26 @@ static uchar shiftmap[256] = {
 };
 
 /*
-static uchar e2map[256] = {
+static byte e2map[256] = {
 };
 */
 
 /*
-static uint togglemap[256] = {
+static u32 togglemap[256] = {
     [0x3A] CAPSLOCK,
     [0x45] NUMLOCK,
     [0x45] SCROLLLOCK,
 };
 */
 
-static uint modmap[256] = {
+static u32 modmap[256] = {
     [0x1D] LCTRL,
     [0x2A] LSHIFT,
     [0x36] RSHIFT,
     [0x38] LALT,
 };
 
-static uint e0modmap[256] = {
+static u32 e0modmap[256] = {
     [0x1D] RCTRL,
 };
 
@@ -81,8 +81,8 @@ static uint e0modmap[256] = {
 void
 handlekbd(void)
 {
-    uchar c;
-    uchar byte = inb(PS2_DATA);
+    byte c;
+    byte byte = inb(PS2_DATA);
 
     if (skip > 0) {
         skip--;

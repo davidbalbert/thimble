@@ -68,7 +68,7 @@ kfree(void *a)
     FreeList *page;
     char *p = (char *)a;
 
-    if ((ulong)p % PGSIZE || p < end || v2p(p) >= PHYSTOP)
+    if ((u64)p % PGSIZE || p < end || v2p(p) >= PHYSTOP)
         panic("kfree");
 
     // invalidate old data

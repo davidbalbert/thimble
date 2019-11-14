@@ -9,7 +9,7 @@ static Pte *kpgmap;
 
 // Makes a 64 bit code segment descriptor for the given dpl
 static void
-codedesc(SegmentDescriptor *d, uchar dpl)
+codedesc(SegmentDescriptor *d, byte dpl)
 {
     d->limit0_15 = 0;
     d->base0_15 = 0;
@@ -26,7 +26,7 @@ codedesc(SegmentDescriptor *d, uchar dpl)
 }
 
 static void
-datadesc(SegmentDescriptor *d, uchar dpl)
+datadesc(SegmentDescriptor *d, byte dpl)
 {
     d->limit0_15 = 0;
     d->base0_15 = 0;
@@ -43,10 +43,10 @@ datadesc(SegmentDescriptor *d, uchar dpl)
 }
 
 static void
-tsdesc(TaskStateDescriptor *d, TaskState *ts, uint size)
+tsdesc(TaskStateDescriptor *d, TaskState *ts, u32 size)
 {
-    ulong base = (ulong)ts;
-    uint limit = size - 1;      // limits in the CPU seem to be one less than the size
+    u64 base = (u64)ts;
+    u32 limit = size - 1;      // limits in the CPU seem to be one less than the size
 
     d->limit0_15 = limit;
     d->base0_15 = base;
@@ -116,14 +116,14 @@ uvmperm()
     return PTE_W | PTE_U;
 }
 
-static ulong *
-pgmapget(ulong *table, int offset, int alloc)
+static u64 *
+pgmapget(u64 *table, int offset, int alloc)
 {
-    ulong *innertab;
-    ulong *entry = &table[offset];
+    u64 *innertab;
+    u64 *entry = &table[offset];
 
     if (*entry & PTE_P) {
-        innertab = (ulong *)p2v(pte_addr(*entry));
+        innertab = (u64 *)p2v(pte_addr(*entry));
     } else {
         if (!alloc || (innertab = kalloc()) == nil)
             return nil;
@@ -295,7 +295,7 @@ switchuvm(Proc *p)
 
     d = (TaskStateDescriptor *)&cpu->gdt[SEG_TSS];
     tsdesc(d, &cpu->ts, sizeof(cpu->ts));
-    cpu->ts.rsp0 = (ulong)p->kstack + KSTACKSIZE;
+    cpu->ts.rsp0 = (u64)p->kstack + KSTACKSIZE;
     cpu->ts.iomapbase = 0xFFFF; // disable in/out in user space
 
     ltr(SEG_TSS << 3);

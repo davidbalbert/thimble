@@ -23,8 +23,8 @@ copyuvm(Pte *oldmap, usize sz)
     uintptr a;
     Pte *newmap;
     Pte *pte;
-    uchar *oldmem, *newmem;
-    uint flags;
+    byte *oldmem, *newmem;
+    u32 flags;
 
     newmap = allocpgmap();
     if (newmap == nil)
@@ -97,10 +97,10 @@ allocuvm(Pte *pgmap, usize oldsz, usize newsz)
 }
 
 void
-loaduvm(Pte *pgmap, char *addr, uchar *data, ulong sz)
+loaduvm(Pte *pgmap, char *addr, byte *data, u64 sz)
 {
     Pte *pte;
-    ulong i;
+    u64 i;
     usize n;
     char *pg;
 

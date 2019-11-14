@@ -13,7 +13,7 @@ void sysret(void);
 void
 initkstack(Proc *p)
 {
-    u8 *sp = p->kstack + KSTACKSIZE;
+    byte *sp = p->kstack + KSTACKSIZE;
 
     // This has to match the kernel stack structure in
     // syscallasm.S.
@@ -24,7 +24,7 @@ initkstack(Proc *p)
 
     // Procbegin returns to sysret
     sp -= 8;
-    *(ulong *)sp = (ulong)sysret;
+    *(u64 *)sp = (u64)sysret;
 
     sp -= sizeof(Registers);
 
@@ -32,18 +32,18 @@ initkstack(Proc *p)
     memzero(p->regs, sizeof(Registers));
 
     // Our first call to swtch will return to procbegin
-    p->regs->rip = (ulong)procbegin;
+    p->regs->rip = (u64)procbegin;
 
 }
 
 void
 initstack(Proc *p, u64 entry)
 {
-    u8 *usp;     // user virtual address of user stack pointer
-    u8 *ustack;  // kernel virtual address of user stack pointer
+    byte *usp;     // user virtual address of user stack pointer
+    byte *ustack;  // kernel virtual address of user stack pointer
 
     // get user stack pointer
-    usp = (uchar *)p->sz;
+    usp = (byte *)p->sz;
 
     // p->sz isn't mapped in (0 to p->sz - 1 is), so we can't just
     // ask uva2ka for the kernel address of p->sz
@@ -52,7 +52,7 @@ initstack(Proc *p, u64 entry)
     // fake return address
     ustack -= 8;
     usp -= 8;
-    *(ulong *)ustack = (ulong)-1;
+    *(u64 *)ustack = (u64)-1;
 
     // This has to mirror the user stack structure in
     // syscallasm.S.
@@ -64,14 +64,14 @@ initstack(Proc *p, u64 entry)
     // rflags
     ustack -= 8;
     usp -= 8;
-    *(ulong *)ustack = FL_IF;
+    *(u64 *)ustack = FL_IF;
 
     // entry point
     ustack -= 8;
     usp -= 8;
-    *(ulong *)ustack = entry; // text is loaded at zero
+    *(u64 *)ustack = entry; // text is loaded at zero
 
-    p->sf->rsp = (ulong)usp;
+    p->sf->rsp = (u64)usp;
 }
 
 void

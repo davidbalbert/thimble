@@ -4,7 +4,7 @@
 void
 wastetime(void)
 {
-    ulong j;
+    u64 j;
     for (j = 0; j < 100000000; j++)
         ;
 }
@@ -15,7 +15,7 @@ ltoa(long n, char *buf)
 {
     char *numbers = "0123456789";
     char tmp[21]; // max number of digits for a decimal long, optional sign, and null byte.
-    ulong n2;
+    u64 n2;
     int i, j;
 
     if (n < 0)

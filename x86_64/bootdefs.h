@@ -1,9 +1,9 @@
 // ahci.c
 int  ahcidetect(void);
-void ahciread(uchar *addr, ulong lba, ushort count);
+void ahciread(byte *addr, u64 lba, u16 count);
 
 // bootide.c
-void ideread(uchar *addr, uint lba, uchar count);
+void ideread(byte *addr, u32 lba, byte count);
 
 // console.c
 typedef struct Console Console;
@@ -15,7 +15,7 @@ void cinit(Console *c);
 void cprintf(char *fmt, ...);
 void cclear(void);
 void cputs(char *s);
-void cputc(uchar c);
+void cputc(byte c);
 void cvprintf(char *fmt, va_list ap);
 
 // klibc.c
@@ -28,9 +28,9 @@ long strtol(char *s, char **endptr, int base);
 typedef struct PciFunction PciFunction;
 typedef int (*pciiter)(PciFunction *f);
 
-char *pciclass(uchar code);
+char *pciclass(byte code);
 void pcieach(pciiter f);
-uint pcibar(PciFunction *f, uchar bar);
+u32 pcibar(PciFunction *f, byte bar);
 
 // stage2.c
 void panic(char *fmt, ...) __attribute__((noreturn));

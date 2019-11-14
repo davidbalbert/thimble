@@ -3,7 +3,7 @@ struct File {
     long (*read)(File *f, char *buf, usize nbytes);
     long (*write)(File *f, char *buf, usize nbytes);
 
-    uint ref;    // reference count
+    u32 ref;    // reference count
     char *data;
     usize sz;
     usize pos;

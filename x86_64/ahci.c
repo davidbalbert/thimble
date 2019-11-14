@@ -36,45 +36,45 @@
 #define PORT_IS_TFES (1 << 30) // interrupt due to task file error bit set
 
 struct Port {
-    uint clb;       // command list base address, 1K-byte aligned
-    uint clbu;      // command list base address upper 32 bits
-    uint fb;        // FIS base address, 256-byte aligned
-    uint fbu;       // FIS base address upper 32 bits
-    uint is;        // interrupt status
-    uint ie;        // interrupt enable
-    uint cmd;       // command and status
-    uint rsv0;      // Reserved
-    uint tfd;       // task file data
-    uint sig;       // signature
-    uint ssts;      // SATA status (SCR0:SStatus)
-    uint sctl;      // SATA control (SCR2:SControl)
-    uint serr;      // SATA error (SCR1:SError)
-    uint sact;      // SATA active (SCR3:SActive)
-    uint ci;        // command issue
-    uint sntf;      // SATA notification (SCR4:SNotification)
-    uint fbs;       // FIS-based switch control
-    uint rsv1[11];
-    uint vendor[4]; // vendor specific
+    u32 clb;       // command list base address, 1K-byte aligned
+    u32 clbu;      // command list base address upper 32 bits
+    u32 fb;        // FIS base address, 256-byte aligned
+    u32 fbu;       // FIS base address upper 32 bits
+    u32 is;        // interrupt status
+    u32 ie;        // interrupt enable
+    u32 cmd;       // command and status
+    u32 rsv0;      // Reserved
+    u32 tfd;       // task file data
+    u32 sig;       // signature
+    u32 ssts;      // SATA status (SCR0:SStatus)
+    u32 sctl;      // SATA control (SCR2:SControl)
+    u32 serr;      // SATA error (SCR1:SError)
+    u32 sact;      // SATA active (SCR3:SActive)
+    u32 ci;        // command issue
+    u32 sntf;      // SATA notification (SCR4:SNotification)
+    u32 fbs;       // FIS-based switch control
+    u32 rsv1[11];
+    u32 vendor[4]; // vendor specific
 };
 
 typedef volatile struct Port Port;
 
 struct HbaMemory {
-    uint cap;       // Host capability
-    uint ghc;       // Global host control
-    uint is;        // Interrupt status
-    uint pi;        // Port implemented
-    uint vs;        // Version
-    uint ccc_ctl;   // Command completion coalescing control
-    uint ccc_pts;   // Command completion coalescing ports
-    uint em_loc;    // Enclosure management location
-    uint em_ctl;    // Enclosure management control
-    uint cap2;      // Host capabilities extended
-    uint bohc;      // BIOS/OS handoff control and status
+    u32 cap;       // Host capability
+    u32 ghc;       // Global host control
+    u32 is;        // Interrupt status
+    u32 pi;        // Port implemented
+    u32 vs;        // Version
+    u32 ccc_ctl;   // Command completion coalescing control
+    u32 ccc_pts;   // Command completion coalescing ports
+    u32 em_loc;    // Enclosure management location
+    u32 em_ctl;    // Enclosure management control
+    u32 cap2;      // Host capabilities extended
+    u32 bohc;      // BIOS/OS handoff control and status
 
-    uchar rsv[116];
+    byte rsv[116];
 
-    uchar vendor[96];   // Vendor specific registers
+    byte vendor[96];   // Vendor specific registers
 
     Port ports[0];   // Between 1 and 32 ports
 };
@@ -82,24 +82,24 @@ struct HbaMemory {
 typedef volatile struct HbaMemory HbaMemory;
 
 struct CommandHeader {
-    uint cfl:5;     // Command FIS length
-    uint a:1;       // ATAPI
-    uint w:1;       // Write
-    uint p:1;       // Prefetchable
+    u32 cfl:5;     // Command FIS length
+    u32 a:1;       // ATAPI
+    u32 w:1;       // Write
+    u32 p:1;       // Prefetchable
 
-    uint r:1;       // Reset
-    uint b:1;       // BIST
-    uint c:1;       // Clear busy upon R_OK
-    uint rsv0:1;    // Reserved
-    uint pmp:4;     // Port multiplier port
+    u32 r:1;       // Reset
+    u32 b:1;       // BIST
+    u32 c:1;       // Clear busy upon R_OK
+    u32 rsv0:1;    // Reserved
+    u32 pmp:4;     // Port multiplier port
 
-    ushort prdtl;           // Physical region descriptor table length in entries
-    volatile uint prdbc;    // Physical region descriptor byte count transferred. Inititalize to 0.
+    u16 prdtl;           // Physical region descriptor table length in entries
+    volatile u32 prdbc;    // Physical region descriptor byte count transferred. Inititalize to 0.
 
-    uint ctba;      // Command table descriptor base address, 128-byte aligned
-    uint ctbau;     // Command table descriptor base address upper 32 bits
+    u32 ctba;      // Command table descriptor base address, 128-byte aligned
+    u32 ctbau;     // Command table descriptor base address upper 32 bits
 
-    uint rsv1[4];
+    u32 rsv1[4];
 };
 
 typedef struct CommandHeader CommandHeader;
@@ -109,13 +109,13 @@ typedef struct CommandHeader CommandHeader;
 
 struct PhysicalRegionDescriptor
 {
-    uint dba;       // Data base address
-    uint dbau;      // Data base address upper 32 bits
-    uint rsv0;      // Reserved
+    u32 dba;       // Data base address
+    u32 dbau;      // Data base address upper 32 bits
+    u32 rsv0;      // Reserved
 
-    uint dbc:22;    // Byte count, 4M max
-    uint rsv1:9;    // Reserved
-    uint i:1;       // Interrupt on completion
+    u32 dbc:22;    // Byte count, 4M max
+    u32 rsv1:9;    // Reserved
+    u32 i:1;       // Interrupt on completion
 };
 
 typedef struct PhysicalRegionDescriptor PhysicalRegionDescriptor;
@@ -125,9 +125,9 @@ typedef struct PhysicalRegionDescriptor PhysicalRegionDescriptor;
 
 struct CommandTable
 {
-    uchar cfis[64];    // Command FIS
-    uchar acmd[16];    // ATAPI command, 12 or 16 bytes
-    uchar rsv[48];
+    byte cfis[64];    // Command FIS
+    byte acmd[16];    // ATAPI command, 12 or 16 bytes
+    byte rsv[48];
 
     // WARING! ahciread relies on sizeof(CommandTable). If we ever
     // dynamically allocate Command Tables, we must change ahciread!
@@ -140,47 +140,47 @@ typedef struct CommandTable CommandTable;
 #define FIS_TYPE_REG_H2D 0x27
 
 struct FisRegisterH2D {
-    uchar type;
-    uint  rsv0:7;
-    uint  c:1;      // 1 - command block update, 0 = device control block update
-    uchar command;  // command register
-    uchar feat;     // feature register 7:0
-    uchar lba0;     // lba 7:0
-    uchar lba1;     // lba 15:8
-    uchar lba2;     // lba 23:16
-    uchar device;   // device register
-    uchar lba3;     // lba 31:24
-    uchar lba4;     // lba 39:32
-    uchar lba5;     // lba 47:40
-    uchar featexp;  // feature register 15:8
-    uchar count;    // sector count 7:0
-    uchar countexp; // sector count 15:8
-    uchar rsv1;
-    uchar control;  // control register
-    uint  rsv2;
+    byte type;
+    u32  rsv0:7;
+    u32  c:1;      // 1 - command block update, 0 = device control block update
+    byte command;  // command register
+    byte feat;     // feature register 7:0
+    byte lba0;     // lba 7:0
+    byte lba1;     // lba 15:8
+    byte lba2;     // lba 23:16
+    byte device;   // device register
+    byte lba3;     // lba 31:24
+    byte lba4;     // lba 39:32
+    byte lba5;     // lba 47:40
+    byte featexp;  // feature register 15:8
+    byte count;    // sector count 7:0
+    byte countexp; // sector count 15:8
+    byte rsv1;
+    byte control;  // control register
+    u32  rsv2;
 };
 
 typedef struct FisRegisterH2D FisRegisterH2D;
 
 
 struct ReceivedFisStorage {
-    uchar   dsfis[28];      // dma setup fis
-    uchar   pad0[4];
+    byte   dsfis[28];      // dma setup fis
+    byte   pad0[4];
 
-    uchar   psfis[20];      // pio setup (device to host) fis
-    uchar   pad1[12];
+    byte   psfis[20];      // pio setup (device to host) fis
+    byte   pad1[12];
 
-    uchar   rfis[20];       // device to host register fis
-    uchar   pad2[4];
+    byte   rfis[20];       // device to host register fis
+    byte   pad2[4];
 
-    uchar   sdbfis[8];      // set device bits fis
+    byte   sdbfis[8];      // set device bits fis
 
-    uchar   ufis[64];       // unknown fis
+    byte   ufis[64];       // unknown fis
 
     // the spec's diagram has 95 bytes, but osdev has
     // 96 and I'd rather waste a byte than have a random
     // byte somewhere else overwritten.
-    uchar   reserved[96];
+    byte   reserved[96];
 };
 
 typedef volatile struct ReceivedFisStorage ReceivedFisStorage;
@@ -229,7 +229,7 @@ checkalign(void *a, int alignment, char *msg)
 static int
 findslot(Port *port)
 {
-    uint slots;
+    u32 slots;
     int i;
 
     slots = port->sact | port->ci;
@@ -247,34 +247,34 @@ findslot(Port *port)
 static CommandHeader *
 getcmdlist(Port *port)
 {
-    return (CommandHeader *)(((ulong)port->clbu << 32) + port->clb);
+    return (CommandHeader *)(((u64)port->clbu << 32) + port->clb);
 }
 
 static CommandTable *
 getcmdtbl(CommandHeader *cmdhdr)
 {
-    return (CommandTable *)(((ulong)cmdhdr->ctbau << 32) + cmdhdr->ctba);
+    return (CommandTable *)(((u64)cmdhdr->ctbau << 32) + cmdhdr->ctba);
 }
 
 static void
-mkprd(PhysicalRegionDescriptor *prd, uintptr addr, uint bytes)
+mkprd(PhysicalRegionDescriptor *prd, uintptr addr, u32 bytes)
 {
     if (bytes > 4*MB)
         panic("mkprd");
 
-    prd->dba = (uint)addr;
+    prd->dba = (u32)addr;
     if (hba.dma64)
-        prd->dbau = (uint)(addr >> 32);
+        prd->dbau = (u32)(addr >> 32);
 
     prd->dbc = bytes - 1; // zero indexed
     prd->i = 1;
 }
 
 void
-ahciread(uchar *addr, ulong lba, ushort sectcount)
+ahciread(byte *addr, u64 lba, u16 sectcount)
 {
     int slot, i;
-    ushort sectleft;
+    u16 sectleft;
     uintptr addri;
     Port *port;
     CommandHeader *cmdhdr;
@@ -300,7 +300,7 @@ ahciread(uchar *addr, ulong lba, ushort sectcount)
     cmdhdr = &getcmdlist(port)[slot];
     cmdtbl = getcmdtbl(cmdhdr);
 
-    cmdhdr->cfl = sizeof(FisRegisterH2D)/sizeof(uint);
+    cmdhdr->cfl = sizeof(FisRegisterH2D)/sizeof(u32);
     cmdhdr->w = 0; // read
     cmdhdr->prdtl = (sectcount*ATA_SECTSIZE + PRDSIZE - 1) / PRDSIZE; // round up to the nearest 4MB
 
@@ -325,17 +325,17 @@ ahciread(uchar *addr, ulong lba, ushort sectcount)
     cmdfis->c = 1;
     cmdfis->command = ATA_CMD_READ_DMA_EXT;
 
-    cmdfis->lba0 = (uchar)lba;
-    cmdfis->lba1 = (uchar)(lba >> 8);
-    cmdfis->lba2 = (uchar)(lba >> 16);
+    cmdfis->lba0 = (byte)lba;
+    cmdfis->lba1 = (byte)(lba >> 8);
+    cmdfis->lba2 = (byte)(lba >> 16);
     cmdfis->device = ATA_LBA_MODE;
 
-    cmdfis->lba3 = (uchar)(lba >> 24);
-    cmdfis->lba4 = (uchar)(lba >> 32);
-    cmdfis->lba5 = (uchar)(lba >> 40);
+    cmdfis->lba3 = (byte)(lba >> 24);
+    cmdfis->lba4 = (byte)(lba >> 32);
+    cmdfis->lba5 = (byte)(lba >> 40);
 
-    cmdfis->count = (uchar)(sectcount);
-    cmdfis->countexp = (uchar)(sectcount >> 8);
+    cmdfis->count = (byte)(sectcount);
+    cmdfis->countexp = (byte)(sectcount >> 8);
 
     while (port->tfd & (ATA_STS_BSY | ATA_STS_DRQ))
         ;
@@ -362,12 +362,12 @@ ahciread(uchar *addr, ulong lba, ushort sectcount)
 static HbaMemory *
 abar(PciFunction *f)
 {
-    return (HbaMemory *)(ulong)(pcibar(f, 5) & 0xFFFFFFF0);
+    return (HbaMemory *)(u64)(pcibar(f, 5) & 0xFFFFFFF0);
 }
 
 /*
 static char *
-version(uint vs) {
+version(u32 vs) {
     switch (vs) {
         case 0x0905:
             return "0.95";
@@ -387,7 +387,7 @@ version(uint vs) {
 }
 
 static char *
-speed(uint cap)
+speed(u32 cap)
 {
     // speed is bytes 23:20
     switch ((cap >> 20) & 0xF) {
@@ -413,7 +413,7 @@ yn(char *feature, int present)
 */
 
 static int
-popcount(ulong x)
+popcount(u64 x)
 {
     int count;
     for (count = 0; x; count++) {
@@ -465,19 +465,19 @@ portinit(Port *port, CommandHeader *cl, CommandTable *ctlist, ReceivedFisStorage
 
     portstop(port);
 
-    port->clb = (uint)cll;
+    port->clb = (u32)cll;
     if (hba.dma64)
-        port->clbu = (uint)(cll >> 32);
+        port->clbu = (u32)(cll >> 32);
 
-    port->fb = (uint)fisbasel;
+    port->fb = (u32)fisbasel;
     if (hba.dma64)
-        port->fbu = (uint)(fisbasel >> 32);
+        port->fbu = (u32)(fisbasel >> 32);
 
     for (i = 0; i < NCMD; i++) {
         cl[i].prdtl = NPRD;
-        cl[i].ctba = (uint)ctlistl;
+        cl[i].ctba = (u32)ctlistl;
         if (hba.dma64)
-            cl[i].ctbau = (uint)(ctlistl >> 32);
+            cl[i].ctbau = (u32)(ctlistl >> 32);
     }
 
     portstart(port);

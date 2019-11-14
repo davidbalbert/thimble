@@ -26,10 +26,10 @@ st_vbar_el1(void *p)
 }
 
 // load-acquire exclusive
-static inline uint
-ldaxr(uint *p)
+static inline u32
+ldaxr(u32 *p)
 {
-    uint res;
+    u32 res;
 
     asm volatile("ldaxr %[res], [%[p]]" : [res] "=r" (res) : [p] "r" (p));
 
@@ -38,7 +38,7 @@ ldaxr(uint *p)
 
 // store exclusive
 static inline u32
-stxr(uint *p, uint v)
+stxr(u32 *p, u32 v)
 {
     u32 status;
 
@@ -49,7 +49,7 @@ stxr(uint *p, uint v)
 
 // store release
 static inline void
-stlr(uint *p, uint v)
+stlr(u32 *p, u32 v)
 {
     asm volatile("stlr %[v], [%[p]]" : : [v] "r" (v), [p] "r" (p) : "memory");
 }
@@ -100,7 +100,7 @@ tlbi(void)
 }
 
 // count leading zeroes
-static inline u8
+static inline byte
 clz(u64 n)
 {
     u64 res;
@@ -110,7 +110,7 @@ clz(u64 n)
 }
 
 // count trailing zeroes
-static inline u8
+static inline byte
 ctz(u64 n)
 {
     return 64 - clz(n) - 1;

@@ -3,31 +3,31 @@
 #define ELF_PROG_LOAD 1
 
 typedef struct {
-    uint magic;
-    uchar ident[12];
+    u32 magic;
+    byte ident[12];
 
-    ushort type;
-    ushort machine;
-    uint version;
-    ulong entry;
-    ulong phoff;
-    ulong shoff;
-    uint flags;
-    ushort ehsize;
-    ushort phentsize;
-    ushort phnum;
-    ushort shentsize;
-    ushort shnum;
-    ushort shstrndx;
+    u16 type;
+    u16 machine;
+    u32 version;
+    u64 entry;
+    u64 phoff;
+    u64 shoff;
+    u32 flags;
+    u16 ehsize;
+    u16 phentsize;
+    u16 phnum;
+    u16 shentsize;
+    u16 shnum;
+    u16 shstrndx;
 } ElfHeader;
 
 typedef struct {
-    uint type;
-    uint flags;
-    ulong offset;
-    ulong vaddr;
-    ulong paddr;
-    ulong filesz;
-    ulong memsz;
-    ulong align;
+    u32 type;
+    u32 flags;
+    u64 offset;
+    u64 vaddr;
+    u64 paddr;
+    u64 filesz;
+    u64 memsz;
+    u64 align;
 } ElfProgHeader;

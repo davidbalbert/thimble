@@ -44,15 +44,15 @@ static char *classes[] = {
 };
 
 char *
-pciclass(uchar code)
+pciclass(byte code)
 {
     return classes[code] ? classes[code] : "Reserved";
 }
 
-static uint
-pcireadl(uchar bus, uchar dev, uchar func, uchar offset)
+static u32
+pcireadl(byte bus, byte dev, byte func, byte offset)
 {
-    ulong addr;
+    u64 addr;
 
     addr = ENABLE | (bus << 16) | (dev << 11) | (func << 8) | (offset & 0xFC);
 
@@ -60,20 +60,20 @@ pcireadl(uchar bus, uchar dev, uchar func, uchar offset)
     return inl(DATA);
 }
 
-static ushort
-pcireadw(uchar bus, uchar dev, uchar func, uchar offset)
+static u16
+pcireadw(byte bus, byte dev, byte func, byte offset)
 {
-    uint data;
+    u32 data;
 
     data = pcireadl(bus, dev, func, offset);
 
     return offset % 4 == 0 ? data : data >> 16;
 }
 
-static uchar
-pcireadb(uchar bus, uchar dev, uchar func, uchar offset)
+static byte
+pcireadb(byte bus, byte dev, byte func, byte offset)
 {
-    uint data;
+    u32 data;
     int shift = 8 * (offset % 4);
 
     data = pcireadl(bus, dev, func, offset);
@@ -82,15 +82,15 @@ pcireadb(uchar bus, uchar dev, uchar func, uchar offset)
 }
 
 static int
-ismultifunc(ushort vendorid)
+ismultifunc(u16 vendorid)
 {
     return vendorid & MULTIFUNC;
 }
 
 static int
-checkdevice(uchar bus, uchar dev, int (*f)(PciFunction *))
+checkdevice(byte bus, byte dev, int (*f)(PciFunction *))
 {
-    ushort vendorid;
+    u16 vendorid;
     PciFunction func;
     int i;
 
@@ -147,8 +147,8 @@ pcieach(int (*f)(PciFunction *))
 }
 
 // Returns base address register bar for function f.
-uint
-pcibar(PciFunction *f, uchar bar)
+u32
+pcibar(PciFunction *f, byte bar)
 {
     return pcireadl(f->bus, f->dev, f->func, BAR0 + 4*bar);
 }

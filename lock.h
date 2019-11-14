@@ -1,5 +1,5 @@
 struct SpinLock {
-    uint locked;
+    u32 locked;
 };
 
 typedef struct SpinLock SpinLock;

@@ -31,11 +31,11 @@ memcpy(void *dst, void *src, usize n)
 void *
 memset(void *p, int c, usize n)
 {
-    uchar *cp = p;
+    byte *cp = p;
     usize i;
 
     for (i = 0; i < n; i++) {
-        cp[i] = (uchar)c;
+        cp[i] = (byte)c;
     }
 
     return p;

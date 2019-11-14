@@ -32,7 +32,7 @@ unlock(SpinLock *l)
 void
 push_off(void)
 {
-    ulong rflags = readrflags();
+    u64 rflags = readrflags();
 
     intr_off();
     if (cpu->noff++ == 0)

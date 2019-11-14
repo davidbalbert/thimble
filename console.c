@@ -20,7 +20,7 @@ cclear(void)
 }
 
 void
-cputc(uchar c)
+cputc(byte c)
 {
     console->putc(c);
 }
@@ -32,12 +32,12 @@ cputs(char *s)
 }
 
 static void
-printint(long n, uchar base, uchar sign, long npad, char padchar)
+printint(long n, byte base, byte sign, long npad, char padchar)
 {
     char *numbers = "0123456789abcdef";
     char buf[65]; // longest representation is binary. 64 chars + a null bite
     int i = 0;
-    ulong n2;
+    u64 n2;
 
     if (sign && (sign = n < 0))
         n2 = -n;

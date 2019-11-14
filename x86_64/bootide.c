@@ -12,7 +12,7 @@ waitdisk(void)
 }
 
 void
-ideread(uchar *addr, uint lba, uchar sectcount)
+ideread(byte *addr, u32 lba, byte sectcount)
 {
     if (lba > ATA_MAXLBA28)
         panic("ideread - maxlba");

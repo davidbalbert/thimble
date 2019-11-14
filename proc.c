@@ -129,7 +129,7 @@ freeproc(Proc *p)
 }
 
 void
-mkproc(uchar *data)
+mkproc(byte *data)
 {
     Proc *p;
     ElfHeader *elf;

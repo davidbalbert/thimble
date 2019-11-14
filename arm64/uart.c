@@ -63,7 +63,7 @@
  * Send a character
  */
 void
-uart_putc(uchar c) {
+uart_putc(byte c) {
     for (;;) {
         if (*AUX_MU_LSR & LSR_CAN_TX) {
             break;
@@ -78,7 +78,7 @@ uart_putc(uchar c) {
  */
 char
 uart_getc(void) {
-    uchar c;
+    byte c;
 
     for (;;) {
         if (*AUX_MU_LSR & LSR_CAN_RX) {
@@ -86,7 +86,7 @@ uart_getc(void) {
         }
     }
 
-    c = (uchar)(*AUX_MU_IO);
+    c = (byte)(*AUX_MU_IO);
 
     if (c == '\r') {
         c = '\n';

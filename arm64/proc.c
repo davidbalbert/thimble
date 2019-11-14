@@ -12,7 +12,7 @@ void trapret(void);
 void
 initkstack(Proc *p)
 {
-    u8 *sp = p->kstack + KSTACKSIZE;
+    byte *sp = p->kstack + KSTACKSIZE;
 
     sp -= sizeof(TrapFrame);
     p->tf = (TrapFrame *)sp;

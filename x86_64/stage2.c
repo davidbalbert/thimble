@@ -27,16 +27,16 @@ panic(char *fmt, ...)
         hlt();
 }
 
-void readbytes(uchar *addr, ulong count, ulong offset);
+void readbytes(byte *addr, u64 count, u64 offset);
 
 // koffset is the first byte of the kernel on disk
 void
-stage2main(ulong koffset)
+stage2main(u64 koffset)
 {
     ElfHeader *elf;
     ElfProgHeader *ph, *eph;
     void (*entry)(void);
-    uchar *pa;
+    byte *pa;
 
     cinit(vga_console);
 
@@ -45,7 +45,7 @@ stage2main(ulong koffset)
     has_ahci = ahcidetect();
 
     elf = (ElfHeader *)0x10000;
-    readbytes((uchar *)elf, PGSIZE, koffset);
+    readbytes((byte *)elf, PGSIZE, koffset);
 
     if (elf->magic != ELF_MAGIC)
         panic("stage2main - elf magic");
@@ -54,7 +54,7 @@ stage2main(ulong koffset)
     eph = ph + elf->phnum;
 
     for (; ph < eph; ph++) {
-        pa = (uchar *)ph->paddr;
+        pa = (byte *)ph->paddr;
         readbytes(pa, ph->filesz, koffset + ph->offset);
         if (ph->memsz > ph->filesz)
             stosb(pa + ph->filesz, 0, ph->memsz - ph->filesz);
@@ -68,10 +68,10 @@ stage2main(ulong koffset)
 // count - bytes to read
 // offset - start byte (offset from start of disk)
 void
-readbytes(uchar *addr, ulong count, ulong offset)
+readbytes(byte *addr, u64 count, u64 offset)
 {
-    uchar *eaddr;
-    uint lba;
+    byte *eaddr;
+    u32 lba;
 
     eaddr = addr + count;
 

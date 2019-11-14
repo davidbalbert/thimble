@@ -9,60 +9,60 @@
 #define NIDT 256
 
 struct TrapFrame {
-    ulong rax;
-    ulong rbx;
-    ulong rcx;
-    ulong rdx;
-    ulong rbp;
-    ulong rsi;
-    ulong rdi;
-    ulong r8;
-    ulong r9;
-    ulong r10;
-    ulong r11;
-    ulong r12;
-    ulong r13;
-    ulong r14;
-    ulong r15;
+    u64 rax;
+    u64 rbx;
+    u64 rcx;
+    u64 rdx;
+    u64 rbp;
+    u64 rsi;
+    u64 rdi;
+    u64 r8;
+    u64 r9;
+    u64 r10;
+    u64 r11;
+    u64 r12;
+    u64 r13;
+    u64 r14;
+    u64 r15;
 
-    ulong trapno;
-    ulong error;
+    u64 trapno;
+    u64 error;
 
     /* Pushed by hardware */
-    ulong rip;
-    ushort cs;
-    uchar padding1[6];
-    ulong rflags;
-    ulong rsp;
-    ushort ss;
-    uchar padding2[6];
+    u64 rip;
+    u16 cs;
+    byte padding1[6];
+    u64 rflags;
+    u64 rsp;
+    u16 ss;
+    byte padding2[6];
 };
 typedef struct TrapFrame TrapFrame;
 
 struct InterruptGate {
-    uint offlow:16;     // bottom 16 bits of segment offset
-    uint cs:16;         // code segment selector
-    uint ist:3;         // interrupt stack table
-    uint reserved1:5;   // all 0s.
-    uint type:4;
-    uint reserved2:1;   // 0
-    uint dpl:2;         // descriptor privelege level
-    uint p:1;           // present
-    uint offmid:16;     // bits 16 - 31 of segment offset
-    uint offhigh:32;    // bits 32 - 63 of segment offset
-    uint reserved3:32;  // all 0s.
+    u32 offlow:16;     // bottom 16 bits of segment offset
+    u32 cs:16;         // code segment selector
+    u32 ist:3;         // interrupt stack table
+    u32 reserved1:5;   // all 0s.
+    u32 type:4;
+    u32 reserved2:1;   // 0
+    u32 dpl:2;         // descriptor privelege level
+    u32 p:1;           // present
+    u32 offmid:16;     // bits 16 - 31 of segment offset
+    u32 offhigh:32;    // bits 32 - 63 of segment offset
+    u32 reserved3:32;  // all 0s.
 };
 typedef struct InterruptGate InterruptGate;
 
 
 static InterruptGate idt[NIDT] __attribute__((aligned(8)));
 
-extern ulong vectors[];
+extern u64 vectors[];
 
-ulong ticks;
+u64 ticks;
 
 static void
-mkgate(InterruptGate *gate, ulong offset, ushort selector)
+mkgate(InterruptGate *gate, u64 offset, u16 selector)
 {
     gate->offlow = offset & 0xFFFF;
     gate->cs = selector;

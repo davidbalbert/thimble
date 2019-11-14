@@ -32,8 +32,8 @@ long strtol(char *s, char **endptr, int base);
 
 // TODO: we should have a console lock
 
-static volatile ushort *vmem = (ushort *)P2V(0xB8000);
-static ushort pos = 0;
+static volatile u16 *vmem = (u16 *)P2V(0xB8000);
+static u16 pos = 0;
 
 static void
 updatecursor(void)
@@ -76,7 +76,7 @@ vcscroll(void)
 static void vcputs0(char *s);
 
 static void
-vcputc0(uchar c)
+vcputc0(byte c)
 {
     if (c == '\0') // todo: include all other non-printable characters
         return;
@@ -103,7 +103,7 @@ vcputc0(uchar c)
 }
 
 static void
-vcputc(uchar c)
+vcputc(byte c)
 {
     vcputc0(c);
     updatecursor();

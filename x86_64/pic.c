@@ -11,10 +11,10 @@
 #define PIC_EOI 0x20
 
 // Initial IRQ mask
-static ushort irqmask = 0xFFFF & ~(1<<IRQ_PIC2);
+static u16 irqmask = 0xFFFF & ~(1<<IRQ_PIC2);
 
 static void
-setmask(ushort mask)
+setmask(u16 mask)
 {
     irqmask = mask;
     outb(PIC1_DATA, mask);

@@ -1,10 +1,10 @@
 struct PciFunction {
-    ushort vendorid;
-    uchar bus;
-    uchar dev;
-    uchar func;
-    uchar class;
-    uchar subclass;
+    u16 vendorid;
+    byte bus;
+    byte dev;
+    byte func;
+    byte class;
+    byte subclass;
 };
 
 typedef struct PciFunction PciFunction;

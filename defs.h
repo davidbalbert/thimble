@@ -14,7 +14,7 @@ void cinit(Console *c);
 void cprintf(char *fmt, ...);
 void cclear(void);
 void cputs(char *s);
-void cputc(uchar c);
+void cputc(byte c);
 void cvprintf(char *fmt, va_list ap);
 void cwrite(char *buf, usize nbytes);
 
@@ -42,8 +42,8 @@ void *kalloc(void);
 void kfree(void *a);
 void *pgfloor(void *addr);
 void *pgceil(void *addr);
-void *p2v(ulong paddr);
-ulong v2p(void *vaddr);
+void *p2v(u64 paddr);
+u64 v2p(void *vaddr);
 
 // klibc.c
 void *memmove(void *dst, void *src, usize n);
@@ -71,7 +71,7 @@ void panic(char *fmt, ...) __attribute__((noreturn));
 void vpanic(char *fmt, va_list ap) __attribute__((noreturn));
 void schedinit(void);
 void scheduler(void) __attribute__((noreturn));
-void mkproc(uchar *data);
+void mkproc(byte *data);
 void procbegin(void);
 void initkstack(Proc *p);
 void initstack(Proc *p, u64 entry);
@@ -102,7 +102,7 @@ void clearpteu(Pte *pgmap, void *addr);
 Pte* copyuvm(Pte *oldmap, usize sz);
 void freeuvm(Pte *pgmap);
 void kvmalloc(void);
-void loaduvm(Pte *pgmap, char *addr, uchar *data, usize sz);
+void loaduvm(Pte *pgmap, char *addr, byte *data, usize sz);
 void seginit(void);
 Pte *setupkvm(void);
 void switchkvm();

@@ -34,7 +34,7 @@ pgmapget(Pte *table, int offset, int alloc)
     Pte *entry = &table[offset];
 
     if (*entry & PTE_P) {
-        innertab = (ulong *)p2v(pte_addr(*entry));
+        innertab = (u64 *)p2v(pte_addr(*entry));
     } else {
         if (!alloc || (innertab = kalloc()) == nil)
             return nil;

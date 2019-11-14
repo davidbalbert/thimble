@@ -9,7 +9,7 @@
 // Be careful. This is called in kernel mode but on the user's
 // stack. We use it to find out where the kernel stack is that we
 // should switch to.
-uchar *
+byte *
 kstacktop(void)
 {
     if (proc == nil)

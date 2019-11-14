@@ -1,57 +1,57 @@
 struct SegmentDescriptor {
-    uint limit0_15:16;  // bottom 16 bits of segment limit
-    uint base0_15:16;   // bottom 16 bits of segment base
-    uint base16_23:8;   // third byte of segment base
-    uint type:4;
-    uint s:1;           // descriptor type 0 = system, 1 = code or data
-    uint dpl:2;         // descriptor privlege level
-    uint p:1;           // segment present
-    uint limit16_19:4;  // bits 16 - 19 of the segment limit
-    uint avl:1;         // available for use by system software
-    uint l:1;           // 64 bit code segment
-    uint db:1;          // default operation size (16 bit/32 bit segment)
-    uint g:1;           // Granularity
-    uint base24_31:8;   // top byte of segment base;
+    u32 limit0_15:16;  // bottom 16 bits of segment limit
+    u32 base0_15:16;   // bottom 16 bits of segment base
+    u32 base16_23:8;   // third byte of segment base
+    u32 type:4;
+    u32 s:1;           // descriptor type 0 = system, 1 = code or data
+    u32 dpl:2;         // descriptor privlege level
+    u32 p:1;           // segment present
+    u32 limit16_19:4;  // bits 16 - 19 of the segment limit
+    u32 avl:1;         // available for use by system software
+    u32 l:1;           // 64 bit code segment
+    u32 db:1;          // default operation size (16 bit/32 bit segment)
+    u32 g:1;           // Granularity
+    u32 base24_31:8;   // top byte of segment base;
 };
 typedef struct SegmentDescriptor SegmentDescriptor;
 
 struct TaskStateDescriptor {
     // First 8 bytes are the same as SegmentDescriptor
-    uint limit0_15:16;  // bottom 16 bits of segment limit
-    uint base0_15:16;   // bottom 16 bits of base
-    uint base16_23:8;   // third byte of base
-    uint type:4;
-    uint s:1;           // descriptor type 0 = system, 1 = code or data
-    uint dpl:2;         // descriptor privlege level
-    uint p:1;           // segment present
-    uint limit16_19:4;  // bits 16 - 19 of the segment limit
-    uint avl:1;         // available for use by system software
-    uint l:1;           // 64 bit code segment
-    uint db:1;          // default operation size (16 bit/32 bit segment)
-    uint g:1;           // Granularity
-    uint base24_31:8;   // top byte of segment base;
+    u32 limit0_15:16;  // bottom 16 bits of segment limit
+    u32 base0_15:16;   // bottom 16 bits of base
+    u32 base16_23:8;   // third byte of base
+    u32 type:4;
+    u32 s:1;           // descriptor type 0 = system, 1 = code or data
+    u32 dpl:2;         // descriptor privlege level
+    u32 p:1;           // segment present
+    u32 limit16_19:4;  // bits 16 - 19 of the segment limit
+    u32 avl:1;         // available for use by system software
+    u32 l:1;           // 64 bit code segment
+    u32 db:1;          // default operation size (16 bit/32 bit segment)
+    u32 g:1;           // Granularity
+    u32 base24_31:8;   // top byte of segment base;
 
-    uint base32_63;     // top four bytes of base
-    uint reserved;      // bits 8-12 (type and S) must be zero so CPU doesn't get confused
+    u32 base32_63;     // top four bytes of base
+    u32 reserved;      // bits 8-12 (type and S) must be zero so CPU doesn't get confused
 };
 typedef struct TaskStateDescriptor TaskStateDescriptor;
 
 struct __attribute__((packed)) TaskState  {
-    uint reserved1;
-    ulong rsp0;         // stack pointers for each privilege level
-    ulong rsp1;
-    ulong rsp2;
-    ulong reserved2;
-    ulong ist1;         // interrupt stack table pointers
-    ulong ist2;
-    ulong ist3;
-    ulong ist4;
-    ulong ist5;
-    ulong ist6;
-    ulong ist7;
-    ulong reserved3;
-    ushort rserved4;
-    ushort iomapbase;   // offset from the TSS base to the I/O permission bit map from the
+    u32 reserved1;
+    u64 rsp0;         // stack pointers for each privilege level
+    u64 rsp1;
+    u64 rsp2;
+    u64 reserved2;
+    u64 ist1;         // interrupt stack table pointers
+    u64 ist2;
+    u64 ist3;
+    u64 ist4;
+    u64 ist5;
+    u64 ist6;
+    u64 ist7;
+    u64 reserved3;
+    u16 rserved4;
+    u16 iomapbase;   // offset from the TSS base to the I/O permission bit map from the
 };
 typedef struct TaskState TaskState;
 
@@ -62,13 +62,13 @@ typedef struct TaskState TaskState;
  * pushed onto the stack explicitly.
  */
 struct Registers {
-    ulong rbp;
-    ulong rbx;
-    ulong r12;
-    ulong r13;
-    ulong r14;
-    ulong r15;
-    ulong rip;
+    u64 rbp;
+    u64 rbx;
+    u64 r12;
+    u64 r13;
+    u64 r14;
+    u64 r15;
+    u64 rip;
 };
 typedef struct Registers Registers;
 
@@ -103,9 +103,9 @@ typedef struct File File;
 
 struct SyscallFrame {
     long rax;           // syscall return value
-    ulong rsp;          // user stack pointer
-    ulong num;
-    ulong args[6];
+    u64 rsp;          // user stack pointer
+    u64 num;
+    u64 args[6];
 };
 typedef struct SyscallFrame SyscallFrame;
 
@@ -115,7 +115,7 @@ struct Proc {
     Registers *regs;
     SyscallFrame *sf;
     int pid;
-    uchar *kstack;      // base of the kernel stack
+    byte *kstack;      // base of the kernel stack
     Pte *pgmap;
     usize sz;           // total size in memory
     char errstr[ERRMAX];

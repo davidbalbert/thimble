@@ -39,7 +39,7 @@ struct Proc {
     ProcState state;
     Registers *regs;
     Pte *pgmap;
-    u8 *kstack; // base of the kernel stack
+    byte *kstack; // base of the kernel stack
     usize sz; // total size in memory
     Proc *parent;
     int pid;
