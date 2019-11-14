@@ -196,18 +196,23 @@ void
 panic(char *fmt, ...)
 {
     va_list ap;
+    va_start(ap, fmt);
+    vpanic(fmt, ap);
+    va_end(ap);
+}
 
+void
+vpanic(char *fmt, va_list ap)
+{
     cli();
     cprintf("cpu%d: panic: ", cpu->id);
 
-    va_start(ap, fmt);
     cvprintf(fmt, ap);
-    va_end(ap);
 
     cputc('\n');
 
     for (;;)
-        hlt();
+        halt();
 }
 
 int

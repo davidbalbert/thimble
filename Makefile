@@ -1,10 +1,11 @@
 OBJS := \
-       main.o\
-			 syscall.o\
-       console.o\
-       klibc.o\
-       kalloc.o\
-       file.o\
+		main.o\
+		syscall.o\
+		vm.o\
+		console.o\
+		klibc.o\
+		kalloc.o\
+		file.o\
 
 LIBCOBJS := \
 	   klibc.o\

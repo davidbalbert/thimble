@@ -168,12 +168,10 @@ mkproc(uchar *data)
     if (p == nil)
         panic("mkproc - allocproc");
 
-    p->pgmap = kalloc();
+    p->pgmap = allocpgmap();
     if (p->pgmap == nil) {
         panic("mkproc - pgmap");
     }
-
-    memzero(p->pgmap, PGSIZE);
 
     memzero(p->errstr, ERRMAX);
     p->nextfd = 0;

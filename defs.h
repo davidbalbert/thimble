@@ -106,7 +106,13 @@ void seginit(void);
 Pte *setupkvm(void);
 void switchkvm();
 void switchuvm(Proc *p);
-void *uva2ka(Pte *pgmap, void *addr);
+void checkalign(void *a, int alignment, char *msg, ...);
+int pte_flags(Pte entry);
+uintptr pte_addr(Pte entry);
+int uvmperm(void);
+Pte *walkpgmap(Pte *pgmap, void *va, int alloc);
+int mappages(Pte *pgmap, void *va, usize size, uintptr pa, int perm);
+Pte *allocpgmap(void);
 
 // vmdbg.c
 void kprintmap(Pte *pgdir);
