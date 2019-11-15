@@ -15,7 +15,7 @@ typedef enum {
     GPIO_PULL_DOWN = 2,
 } GpioPull;
 
-void gpio_setfunc(u64 pin, GpioAlt alt);
+void gpio_setfunc(u64 pins, GpioAlt alt);
 void gpio_setpull(u64 pins, GpioPull pull);
 
 #define GPIO_0 (1 << 0)

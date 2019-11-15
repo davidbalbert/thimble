@@ -15,11 +15,9 @@
 #define GPPUDCLK0       ((volatile u32 *)(GPIO_BASE+0x98))
 #define GPPUDCLK1       ((volatile u32 *)(GPIO_BASE+0x9C))
 
-void
-gpio_setfunc(u64 pin, GpioAlt alt)
+static void
+gpio_setfunc0(u64 pin, GpioAlt alt)
 {
-    pin = ctz(pin); // switch from bitmask to pin number.
-
     if (pin < 0 || pin > 53)
         panic("gpiofsel - invalid pin");
 
@@ -35,6 +33,18 @@ gpio_setfunc(u64 pin, GpioAlt alt)
     r |= (alt << shift); // and set the new value
 
     *(GPFSEL0+offset) = r;
+}
+
+void
+gpio_setfunc(u64 pins, GpioAlt alt)
+{
+    int pin;
+
+    while (pins) {
+        pin = ctz(pins);
+        gpio_setfunc0(pin, alt);
+        pins &= ~(1 << pin);
+    }
 }
 
 void

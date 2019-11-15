@@ -121,9 +121,7 @@ uart_init(void)
     *AUX_MU_BAUD = 270; // 115200 baud
 
     // use gpio14 and gpio15 for UART1
-    gpio_setfunc(GPIO_14, GPIO_ALT5);
-    gpio_setfunc(GPIO_15, GPIO_ALT5);
-
+    gpio_setfunc(GPIO_14|GPIO_15, GPIO_ALT5);
     gpio_setpull(GPIO_14|GPIO_15, GPIO_PULL_NONE);
 
     intenable(IRQ_AUX);
