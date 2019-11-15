@@ -22,6 +22,7 @@ OBJS += \
 	arm64/bcmint.o\
 	arm64/syscall.o\
 	arm64/swtch.o\
+	arm64/gpio.o\
 
 LIBCOBJS += \
 	   arm64/libcasm.o\

@@ -1,10 +1,12 @@
 typedef struct TrapFrame TrapFrame;
-
-// arm64/syscall.c
-void syscall(TrapFrame *tf);
+typedef enum GpioAlt GpioAlt;
+typedef enum GpioMode GpioMode;
 
 // bcmint.c
 u32 readirq(void);
+
+// syscall.c
+void syscall(TrapFrame *tf);
 
 // uart.c
 void handleuart(void);

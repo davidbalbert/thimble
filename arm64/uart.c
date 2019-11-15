@@ -6,25 +6,7 @@
 #include "mem.h"
 
 #include "bcm2837.h"
-
-#define GPFSEL0         ((volatile u32 *)(PBASE+0x00200000))
-#define GPFSEL1         ((volatile u32 *)(PBASE+0x00200004))
-#define GPFSEL2         ((volatile u32 *)(PBASE+0x00200008))
-#define GPFSEL3         ((volatile u32 *)(PBASE+0x0020000C))
-#define GPFSEL4         ((volatile u32 *)(PBASE+0x00200010))
-#define GPFSEL5         ((volatile u32 *)(PBASE+0x00200014))
-#define GPSET0          ((volatile u32 *)(PBASE+0x0020001C))
-#define GPSET1          ((volatile u32 *)(PBASE+0x00200020))
-#define GPCLR0          ((volatile u32 *)(PBASE+0x00200028))
-#define GPLEV0          ((volatile u32 *)(PBASE+0x00200034))
-#define GPLEV1          ((volatile u32 *)(PBASE+0x00200038))
-#define GPEDS0          ((volatile u32 *)(PBASE+0x00200040))
-#define GPEDS1          ((volatile u32 *)(PBASE+0x00200044))
-#define GPHEN0          ((volatile u32 *)(PBASE+0x00200064))
-#define GPHEN1          ((volatile u32 *)(PBASE+0x00200068))
-#define GPPUD           ((volatile u32 *)(PBASE+0x00200094))
-#define GPPUDCLK0       ((volatile u32 *)(PBASE+0x00200098))
-#define GPPUDCLK1       ((volatile u32 *)(PBASE+0x0020009C))
+#include "gpio.h"
 
 /* Auxilary mini UART registers */
 #define AUX_ENABLE      ((volatile u32 *)(PBASE+0x00215004))
@@ -128,8 +110,6 @@ handleuart(void)
 void
 uart_init(void)
 {
-    u32 r;
-
     /* initialize UART */
     *AUX_ENABLE |= AUX_ENABLE_UART;
     //*AUX_MU_IER = 0;
@@ -140,21 +120,11 @@ uart_init(void)
     *AUX_MU_IIR |= IIR_RX_FIFO_CLEAR | IIR_TX_FIFO_CLEAR;
     *AUX_MU_BAUD = 270; // 115200 baud
 
-    /* map UART1 to GPIO pins */
-    r=*GPFSEL1;
-    r&=~((7<<12)|(7<<15)); // gpio14, gpio15
-    r|=(2<<12)|(2<<15);    // alt5
-    *GPFSEL1 = r;
+    // use gpio14 and gpio15 for UART1
+    gpio_setfunc(GPIO_14, GPIO_ALT5);
+    gpio_setfunc(GPIO_15, GPIO_ALT5);
 
-    *GPPUD = 0;            // enable pins 14 and 15
-
-    r=150; while(r--) { asm volatile("nop"); }
-    *GPPUDCLK0 = (1<<14)|(1<<15);
-    r=150; while(r--) { asm volatile("nop"); }
-
-    *GPPUDCLK0 = 0; // flush GPIO setup
-
-    *AUX_MU_CNTL = CNTL_TX_ENABLE | CNTL_RX_ENABLE;
+    gpio_setpull(GPIO_14|GPIO_15, GPIO_PULL_NONE);
 
     intenable(IRQ_AUX);
 }
