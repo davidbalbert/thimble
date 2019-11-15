@@ -1,9 +1,10 @@
 typedef struct TrapFrame TrapFrame;
-typedef enum GpioAlt GpioAlt;
-typedef enum GpioMode GpioMode;
 
 // bcmint.c
 u32 readirq(void);
+
+// sd.c
+void sdinit(void);
 
 // syscall.c
 void syscall(TrapFrame *tf);
