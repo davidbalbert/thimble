@@ -8,19 +8,21 @@
 #include "bcm2837.h"
 #include "gpio.h"
 
+#define AUX_BASE (PBASE+0x215000)
+
 /* Auxilary mini UART registers */
-#define AUX_ENABLE      ((volatile u32 *)(PBASE+0x00215004))
-#define AUX_MU_IO       ((volatile u32 *)(PBASE+0x00215040))
-#define AUX_MU_IER      ((volatile u32 *)(PBASE+0x00215044))
-#define AUX_MU_IIR      ((volatile u32 *)(PBASE+0x00215048))
-#define AUX_MU_LCR      ((volatile u32 *)(PBASE+0x0021504C))
-#define AUX_MU_MCR      ((volatile u32 *)(PBASE+0x00215050))
-#define AUX_MU_LSR      ((volatile u32 *)(PBASE+0x00215054))
-#define AUX_MU_MSR      ((volatile u32 *)(PBASE+0x00215058))
-#define AUX_MU_SCRATCH  ((volatile u32 *)(PBASE+0x0021505C))
-#define AUX_MU_CNTL     ((volatile u32 *)(PBASE+0x00215060))
-#define AUX_MU_STAT     ((volatile u32 *)(PBASE+0x00215064))
-#define AUX_MU_BAUD     ((volatile u32 *)(PBASE+0x00215068))
+#define AUX_ENABLE      ((volatile u32 *)(AUX_BASE+0x04))
+#define AUX_MU_IO       ((volatile u32 *)(AUX_BASE+0x40))
+#define AUX_MU_IER      ((volatile u32 *)(AUX_BASE+0x44))
+#define AUX_MU_IIR      ((volatile u32 *)(AUX_BASE+0x48))
+#define AUX_MU_LCR      ((volatile u32 *)(AUX_BASE+0x4C))
+#define AUX_MU_MCR      ((volatile u32 *)(AUX_BASE+0x50))
+#define AUX_MU_LSR      ((volatile u32 *)(AUX_BASE+0x54))
+#define AUX_MU_MSR      ((volatile u32 *)(AUX_BASE+0x58))
+#define AUX_MU_SCRATCH  ((volatile u32 *)(AUX_BASE+0x5C))
+#define AUX_MU_CNTL     ((volatile u32 *)(AUX_BASE+0x60))
+#define AUX_MU_STAT     ((volatile u32 *)(AUX_BASE+0x64))
+#define AUX_MU_BAUD     ((volatile u32 *)(AUX_BASE+0x68))
 
 #define AUX_ENABLE_UART 1
 #define LCR_8_BIT 3
