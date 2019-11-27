@@ -33,7 +33,16 @@ OBJS += \
 	x86_64/alltraps.o\
 
 LIBCOBJS += \
-	   x86_64/libcasm.o\
+	x86_64/libcasm.o\
+
+CLEAN += \
+	kernel.img\
+	x86_64/*.o\
+	x86_64/*.d\
+	x86_64/boot\
+	x86_64/stage2\
+	x86_64/ivec.S\
+	x86_64/stage2size.*\
 
 
 .PHONY: default

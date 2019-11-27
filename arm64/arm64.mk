@@ -26,20 +26,29 @@ OBJS += \
 	arm64/sd.o\
 
 LIBCOBJS += \
-	   arm64/libcasm.o\
+	arm64/libcasm.o\
+
+CLEAN += \
+	kernel8.img\
+	sd.img\
+	arm64/*.o\
+	arm64/*.d\
 
 .PHONY: default
-default: kernel
+default: kernel8.img
 
-sd.img:
+kernel8.img: kernel
+	cp kernel kernel8.img
+
+sd.img: kernel8.img
 	./mkfs.sh sd.img
 
 .PHONY: qemu
-qemu: kernel
-	$(QEMU) -M raspi3 -serial null -serial mon:stdio -kernel kernel -nographic
+qemu: kernel8.img sd.img
+	$(QEMU) -M raspi3 -serial null -serial mon:stdio -kernel kernel8.img -drive file=sd.img,if=sd,format=raw -nographic
 
 .PHONY: gdb
-gdb: kernel
-	$(QEMU) -M raspi3 -serial null -serial mon:stdio -kernel kernel -nographic -gdb tcp::1234 -S
+gdb: kernel8.img
+	$(QEMU) -M raspi3 -serial null -serial mon:stdio -kernel kernel8.img -drive file=sd.img,if=sd,format=raw -nographic -gdb tcp::1234 -S
 
 -include arm64/*.d

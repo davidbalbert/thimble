@@ -44,5 +44,6 @@ sdinit(void)
     gpio_setfunc(GPIO_47, GPIO_IN);
     gpio_setdetect(GPIO_47, GPIO_EVENT_HIGH);
 
-    cprintf("sd host controller version: %d\n", (*EMMC_SLOTISR_VER >> 16) & 0xFF);
+    //cprintf("sd host controller version: %d\n", (*EMMC_SLOTISR_VER >> 16) & 0xFF);
+
 }
