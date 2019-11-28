@@ -26,6 +26,62 @@
 #define EMMC_CONTROL2       ((volatile unsigned int*)(EMMC_BASE+0x3C))
 #define EMMC_SLOTISR_VER    ((volatile unsigned int*)(EMMC_BASE+0xFC))
 
+#define CMD_GO_IDLE_STATE      (0 << 24) // CMD0
+#define CMD_ALL_SEND_CID       (2 << 24) // CMD2
+#define CMD_SEND_RELATIVE_ADDR (3 << 24) // ...
+#define CMD_SELECT_CARD        (7 << 24)
+#define CMD_SEND_IF_COND       (8 << 24)
+#define CMD_SEND_CSD           (9 << 24)
+#define CMD_APP                (55 << 24)
+
+#define ACMD_SD_SEND_OP_COND   (41 << 24)
+
+#define RSP_NONE    (0b00 << 16)
+#define RSP_136     (0b01 << 16)
+#define RSP_48      (0b10 << 16)
+#define RSP_48_BUSY (0b11 << 16)
+
+// CMD8
+#define CHECK_PATTERN 0b10101010
+#define VHS_27_36     (0b0001 << 8) // 2.7V - 3.6V
+
+// ACMD41
+#define OCR_ALL_VOLTAGES (0b111111111 << 15)
+#define OCR_HCS  (1 << 30) // Host Capacity Support (1 == SDHC and SDXC supported)
+#define OCR_CSS  (1 << 30) // Card Capacity Status (0 == SDSC, 1 == SDHC or SDXC, which are block addressed)
+#define OCR_BUSY (1 << 31) // Zero when busy, one when ready
+
+#define CTL1_CLK_INTLEN           (1 << 0)
+#define CTL1_CLK_STABLE           (1 << 1)
+#define CTL1_CLK_EN               (1 << 2)
+#define CTL1_CLK_GENSEL           (1 << 5)
+#define CTL1_DATA_TOUNIT_DISABLED (0b1111 << 16)
+#define CTL1_SRST_HC              (1 << 24)
+
+#define INT_ERR (1 << 15)
+#define INT_ALL 0x17FF137
+
+struct SdCard {
+    int sdhc; // high capacity or extended capacity;
+    u32 rca;
+};
+typedef struct SdCard SdCard;
+
+SdCard card;
+
+// Send command. Non-zero on error.
+static int
+sendcmd(int cmd, int flags, int arg)
+{
+    *EMMC_INTERRUPT = INT_ALL;
+    *EMMC_ARG1 = arg;
+    *EMMC_CMDTM = cmd | flags;
+
+    while (*EMMC_INTERRUPT == 0);
+
+    return *EMMC_INTERRUPT & INT_ERR;
+}
+
 // gpio47 - SD card detect
 // gpio48 - SD card clock
 // gpio49 - SD card command
@@ -44,6 +100,68 @@ sdinit(void)
     gpio_setfunc(GPIO_47, GPIO_IN);
     gpio_setdetect(GPIO_47, GPIO_EVENT_HIGH);
 
-    //cprintf("sd host controller version: %d\n", (*EMMC_SLOTISR_VER >> 16) & 0xFF);
+    // reset host controller
+    *EMMC_CONTROL0 = 0;
+    *EMMC_CONTROL1 = CTL1_SRST_HC;
+    *EMMC_CONTROL2 = 0;
+    while (*EMMC_CONTROL1 & CTL1_SRST_HC);
 
+    // configure clock and wait for it to become ready
+    *EMMC_CONTROL1 = CTL1_CLK_INTLEN | CTL1_CLK_GENSEL | (1<<15) | CTL1_DATA_TOUNIT_DISABLED;
+    while ((*EMMC_CONTROL1 & CTL1_CLK_STABLE) == 0);
+
+    // enable clock
+    *EMMC_CONTROL1 |= CTL1_CLK_EN;
+
+    // enable interrupts
+    *EMMC_INT_MASK = INT_ALL;
+
+    // CMD0
+    if (sendcmd(CMD_GO_IDLE_STATE, RSP_NONE, 0)) {
+        panic("sdinit - cmd0");
+    }
+
+    // CMD8
+    // TODO: support cards that don't respond to CMD8
+    if (sendcmd(CMD_SEND_IF_COND, RSP_48_BUSY, VHS_27_36 | CHECK_PATTERN)) {
+        panic("sdinit - cmd8");
+    }
+
+    // CMD8 echos back its arguments on success
+    if (*EMMC_RESP0 != (VHS_27_36 | CHECK_PATTERN)) {
+        panic("sdinit - cmd8 response");
+    }
+
+    int ready = 0;
+    while (!ready) {
+        // Maybe set card to host transfer mode? It's present in pios, but I
+        // don't think its necessary.
+        sendcmd(CMD_APP, RSP_48, 0);
+
+        sendcmd(ACMD_SD_SEND_OP_COND, RSP_48, OCR_HCS | OCR_ALL_VOLTAGES);
+
+        // OCR_BUSY is LOW when when busy, not high.
+        ready = *EMMC_RESP0 & OCR_BUSY;
+    }
+
+    card.sdhc = (*EMMC_RESP0 & OCR_CSS) == OCR_CSS;
+
+    // CMD2
+    if (sendcmd(CMD_ALL_SEND_CID, RSP_136, 0)) {
+        panic("sdinit - cmd2");
+    }
+
+    // CMD3
+    if (sendcmd(CMD_SEND_RELATIVE_ADDR, RSP_48, 0)) {
+        panic("sdinit - cmd3");
+    }
+
+    card.rca = *EMMC_RESP0 & 0xffff0000;
+
+    // CMD7
+    if (sendcmd(CMD_SELECT_CARD, RSP_48, card.rca)) {
+        panic("sdinit - cmd7");
+    }
+
+    cprintf("sd0 initialized sdhc=%d, rca=0x%x\n", card.sdhc, card.rca);
 }

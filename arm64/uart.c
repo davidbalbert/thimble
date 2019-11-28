@@ -31,7 +31,7 @@
 #define IIR_TX_FIFO_CLEAR (1 << 1)
 #define IIR_RX_READY      (2 << 1)
 
-#define CNTL_RX_ENABLE 1
+#define CNTL_RX_ENABLE (1 << 0)
 #define CNTL_TX_ENABLE (1 << 1)
 
 #define LSR_CAN_TX (1 << 5)

@@ -40,7 +40,7 @@ default: kernel8.img
 kernel8.img: kernel
 	cp kernel kernel8.img
 
-sd.img: kernel8.img
+sd.img: kernel8.img mkfs.sh
 	./mkfs.sh sd.img
 
 .PHONY: qemu
