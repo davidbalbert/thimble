@@ -1,5 +1,6 @@
 #include "u.h"
 
+#include "arm64.h"
 #include "defs.h"
 #include "mem.h"
 
@@ -8,38 +9,47 @@
 
 #define EMMC_BASE (PBASE+0x300000)
 
-#define EMMC_ARG2           ((volatile unsigned int*)(EMMC_BASE+0x00))
-#define EMMC_BLKSIZECNT     ((volatile unsigned int*)(EMMC_BASE+0x04))
-#define EMMC_ARG1           ((volatile unsigned int*)(EMMC_BASE+0x08))
-#define EMMC_CMDTM          ((volatile unsigned int*)(EMMC_BASE+0x0C))
-#define EMMC_RESP0          ((volatile unsigned int*)(EMMC_BASE+0x10))
-#define EMMC_RESP1          ((volatile unsigned int*)(EMMC_BASE+0x14))
-#define EMMC_RESP2          ((volatile unsigned int*)(EMMC_BASE+0x18))
-#define EMMC_RESP3          ((volatile unsigned int*)(EMMC_BASE+0x1C))
-#define EMMC_DATA           ((volatile unsigned int*)(EMMC_BASE+0x20))
-#define EMMC_STATUS         ((volatile unsigned int*)(EMMC_BASE+0x24))
-#define EMMC_CONTROL0       ((volatile unsigned int*)(EMMC_BASE+0x28))
-#define EMMC_CONTROL1       ((volatile unsigned int*)(EMMC_BASE+0x2C))
-#define EMMC_INTERRUPT      ((volatile unsigned int*)(EMMC_BASE+0x30))
-#define EMMC_INT_MASK       ((volatile unsigned int*)(EMMC_BASE+0x34))
-#define EMMC_INT_EN         ((volatile unsigned int*)(EMMC_BASE+0x38))
-#define EMMC_CONTROL2       ((volatile unsigned int*)(EMMC_BASE+0x3C))
-#define EMMC_SLOTISR_VER    ((volatile unsigned int*)(EMMC_BASE+0xFC))
+#define EMMC_ARG2           ((volatile u32*)(EMMC_BASE+0x00))
+#define EMMC_BLKSIZECNT     ((volatile u32*)(EMMC_BASE+0x04))
+#define EMMC_ARG1           ((volatile u32*)(EMMC_BASE+0x08))
+#define EMMC_CMDTM          ((volatile u32*)(EMMC_BASE+0x0C))
+#define EMMC_RESP0          ((volatile u32*)(EMMC_BASE+0x10))
+#define EMMC_RESP1          ((volatile u32*)(EMMC_BASE+0x14))
+#define EMMC_RESP2          ((volatile u32*)(EMMC_BASE+0x18))
+#define EMMC_RESP3          ((volatile u32*)(EMMC_BASE+0x1C))
+#define EMMC_DATA           ((volatile u32*)(EMMC_BASE+0x20))
+#define EMMC_STATUS         ((volatile u32*)(EMMC_BASE+0x24))
+#define EMMC_CONTROL0       ((volatile u32*)(EMMC_BASE+0x28))
+#define EMMC_CONTROL1       ((volatile u32*)(EMMC_BASE+0x2C))
+#define EMMC_INTERRUPT      ((volatile u32*)(EMMC_BASE+0x30))
+#define EMMC_INT_MASK       ((volatile u32*)(EMMC_BASE+0x34))
+#define EMMC_INT_EN         ((volatile u32*)(EMMC_BASE+0x38))
+#define EMMC_CONTROL2       ((volatile u32*)(EMMC_BASE+0x3C))
+#define EMMC_CAPABILITIES1  ((volatile u32*)(EMMC_BASE+0x40))
+#define EMMC_CAPABILITIES2  ((volatile u32*)(EMMC_BASE+0x44))
+#define EMMC_SLOTISR_VER    ((volatile u32*)(EMMC_BASE+0xFC))
 
-#define CMD_GO_IDLE_STATE      (0 << 24) // CMD0
-#define CMD_ALL_SEND_CID       (2 << 24) // CMD2
-#define CMD_SEND_RELATIVE_ADDR (3 << 24) // ...
-#define CMD_SELECT_CARD        (7 << 24)
-#define CMD_SEND_IF_COND       (8 << 24)
-#define CMD_SEND_CSD           (9 << 24)
-#define CMD_APP                (55 << 24)
+#define CMD_GO_IDLE_STATE       (0 << 24) // CMD0
+#define CMD_ALL_SEND_CID        (2 << 24) // CMD2
+#define CMD_SEND_RELATIVE_ADDR  (3 << 24) // ...
+#define CMD_SELECT_CARD         (7 << 24)
+#define CMD_SEND_IF_COND        (8 << 24)
+#define CMD_SEND_CSD            (9 << 24)
+#define CMD_READ_MULTIPLE_BLOCK (18 << 24)
+#define CMD_APP                 (55 << 24)
 
 #define ACMD_SD_SEND_OP_COND   (41 << 24)
 
-#define RSP_NONE    (0b00 << 16)
-#define RSP_136     (0b01 << 16)
-#define RSP_48      (0b10 << 16)
-#define RSP_48_BUSY (0b11 << 16)
+// CMDTM
+#define TM_BLKCNT_EN    (1 << 1)
+#define TM_AUTO_CMD12   (0b01 << 2)
+#define TM_CARD_TO_HOST (1 << 4)
+#define TM_MULTI_BLOCK  (1 << 5)
+#define RSP_NONE        (0b00 << 16)
+#define RSP_136         (0b01 << 16)
+#define RSP_48          (0b10 << 16)
+#define RSP_48_BUSY     (0b11 << 16)
+#define CMD_ISDATA      (1 << 21)
 
 // CMD8
 #define CHECK_PATTERN 0b10101010
@@ -80,6 +90,23 @@ sendcmd(int cmd, int flags, int arg)
     while (*EMMC_INTERRUPT == 0);
 
     return *EMMC_INTERRUPT & INT_ERR;
+}
+
+void
+sdread(byte *addr, u64 lba, u16 count)
+{
+    if (!card.sdhc) {
+        lba *= 512; // SDSC cards are byte addressed
+    }
+
+    dmb();
+
+    *EMMC_BLKSIZECNT = (count<<16) | 512; // 512 byte blocks;
+
+    sendcmd(CMD_READ_MULTIPLE_BLOCK,
+            TM_BLKCNT_EN | TM_AUTO_CMD12 | TM_CARD_TO_HOST |
+            TM_MULTI_BLOCK | RSP_48 | CMD_ISDATA,
+            lba);
 }
 
 // gpio47 - SD card detect
@@ -162,6 +189,8 @@ sdinit(void)
     if (sendcmd(CMD_SELECT_CARD, RSP_48, card.rca)) {
         panic("sdinit - cmd7");
     }
+
+    cprintf("emmc0 capabilities1=0x%x, capabilities2=0x%x\n", *EMMC_CAPABILITIES1, *EMMC_CAPABILITIES2);
 
     cprintf("sd0 initialized sdhc=%d, rca=0x%x\n", card.sdhc, card.rca);
 }
