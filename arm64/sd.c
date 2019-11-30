@@ -49,6 +49,8 @@
 #define RSP_136         (0b01 << 16)
 #define RSP_48          (0b10 << 16)
 #define RSP_48_BUSY     (0b11 << 16)
+#define CMD_CRCCHK_EN   (1 << 19)
+#define CMD_IXCHK_EN    (1 << 20)
 #define CMD_ISDATA      (1 << 21)
 
 // CMD8
@@ -85,7 +87,7 @@ sendcmd(int cmd, int flags, int arg)
 {
     *EMMC_INTERRUPT = INT_ALL;
     *EMMC_ARG1 = arg;
-    *EMMC_CMDTM = cmd | flags;
+    *EMMC_CMDTM = cmd | flags | CMD_CRCCHK_EN | CMD_IXCHK_EN;
 
     while (*EMMC_INTERRUPT == 0);
 
@@ -194,5 +196,5 @@ sdinit(void)
 
     cprintf("emmc0 capabilities1=0x%x, capabilities2=0x%x\n", *EMMC_CAPABILITIES1, *EMMC_CAPABILITIES2);
 
-    cprintf("sd0 initialized sdhc=%d, rca=0x%x\n", card.sdhc, card.rca);
+    cprintf("sd0 initialized sdhc=%d, rca=0x%x\n", card.sdhc, card.rca >> 16);
 }
