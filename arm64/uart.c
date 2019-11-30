@@ -1,5 +1,6 @@
 #include "u.h"
 
+#include "arm64.h"
 #include "defs.h"
 #include "console.h"
 #include "irq.h"
@@ -64,6 +65,8 @@
  */
 void
 uart_putc(byte c) {
+    dmb();
+
     for (;;) {
         if (*AUX_MU_LSR & LSR_CAN_TX) {
             break;
@@ -79,6 +82,8 @@ uart_putc(byte c) {
 char
 uart_getc(void) {
     byte c;
+
+    dmb();
 
     for (;;) {
         if (*AUX_MU_LSR & LSR_CAN_RX) {
@@ -117,6 +122,8 @@ uart_clear(void)
 void
 handleuart(void)
 {
+    dmb();
+
     while (*AUX_MU_IIR & IIR_RX_READY) {
         uart_putc(uart_getc());
     }
@@ -129,6 +136,8 @@ void
 uart_init(void)
 {
     u32 r;
+
+    dmb();
 
     /* initialize UART */
     *AUX_ENABLE |= AUX_ENABLE_UART;
