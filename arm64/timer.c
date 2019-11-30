@@ -33,6 +33,8 @@ timerinit(void)
     u64 freq = cntfrq(); // system counter frequency in Hz
     interval = freq / 100; // 100 times second;
 
+    dmb();
+
     // scale the timer by 1: 2^31 = 0x80000000, therefore timer_freq = input_freq
     *TIMER_PRESCALE = 0x80000000;
 

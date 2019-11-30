@@ -36,6 +36,8 @@
 u32
 readirq(void)
 {
+    dmb();
+
     u32 pending = *LOCAL_IRQ_PENDING;
 
     // In intenable, we go from IRQ number to the relevant bit in the pending
@@ -96,6 +98,8 @@ readirq(void)
         if (irq != IRQ_AUX) {
             return irq;
         } else {
+            dmb();
+
             pending = *AUX_IRQ;
             hwirq = ctz(pending);
 
@@ -116,6 +120,8 @@ readirq(void)
 static void
 enablelocal(u32 hwirq)
 {
+    dmb();
+
     if (hwirq >= 0 && hwirq <= 3) {
         // TODO: multicore
         *TIMER_IRQ_CTL0 = (1 << hwirq);
