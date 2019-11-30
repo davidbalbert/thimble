@@ -53,6 +53,9 @@
 #define CMD_IXCHK_EN    (1 << 20)
 #define CMD_ISDATA      (1 << 21)
 
+// STATUS
+#define STATUS_READ_EN   (1 << 11)
+
 // CMD8
 #define CHECK_PATTERN 0b10101010
 #define VHS_27_36     (0b0001 << 8) // 2.7V - 3.6V
@@ -97,6 +100,8 @@ sendcmd(int cmd, int flags, int arg)
 void
 sdread(byte *addr, u64 lba, u16 count)
 {
+    u32 *addri = (u32 *)addr;
+
     if (!card.sdhc) {
         lba *= 512; // SDSC cards are byte addressed
     }
@@ -109,6 +114,13 @@ sdread(byte *addr, u64 lba, u16 count)
             TM_BLKCNT_EN | TM_AUTO_CMD12 | TM_CARD_TO_HOST |
             TM_MULTI_BLOCK | RSP_48 | CMD_ISDATA,
             lba);
+
+    for (usize n = count * 512; n > 0; n -= 4) {
+        while ((*EMMC_STATUS & STATUS_READ_EN) == 0);
+
+        *addri = *EMMC_DATA;
+        addri++;
+    }
 }
 
 // gpio47 - SD card detect

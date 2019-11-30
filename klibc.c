@@ -53,6 +53,12 @@ isdigit(int c)
     return c >= '0' && c <= '9';
 }
 
+int
+isprint(int c)
+{
+    return c >= ' ' && c <= '~';
+}
+
 // NOTE:
 //  - base is ignored
 //  - only supports positive numbers
