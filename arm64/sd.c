@@ -127,6 +127,8 @@ sdinit(void)
     gpio_setfunc(GPIO_47, GPIO_IN);
     gpio_setdetect(GPIO_47, GPIO_EVENT_HIGH);
 
+    dmb();
+
     // reset host controller
     *EMMC_CONTROL0 = 0;
     *EMMC_CONTROL1 = CTL1_SRST_HC;

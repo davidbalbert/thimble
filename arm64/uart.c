@@ -118,13 +118,13 @@ void
 uart_init(void)
 {
     dmb();
-    
+
     /* initialize UART */
     *AUX_ENABLE |= AUX_ENABLE_UART;
-    //*AUX_MU_IER = 0;
+    *AUX_MU_IER = 0;
     *AUX_MU_CNTL = 0;
     *AUX_MU_LCR = LCR_8_BIT;
-    //*AUX_MU_MCR = 0;
+    *AUX_MU_MCR = 0;
     *AUX_MU_IER = IER_RX_INT;
     *AUX_MU_IIR |= IIR_RX_FIFO_CLEAR | IIR_TX_FIFO_CLEAR;
     *AUX_MU_BAUD = 270; // 115200 baud
