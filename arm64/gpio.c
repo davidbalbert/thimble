@@ -44,6 +44,8 @@ gpio_setfunc0(u64 pin, GpioAlt alt)
     if (alt < 0 || alt > 7)
         panic("gpio_setfunc0 - invalid alt");
 
+    dmb();
+
     int offset = pin / 10;
     int shift = (pin%10)*3;
 
@@ -72,6 +74,8 @@ gpio_setpull(u64 pins, GpioPull pull)
 {
     int i;
     u32 low, high;
+
+    dmb();
 
     if (pull < 0 || pull > 2)
         panic("gpio_setpull - invalid pull");
@@ -105,6 +109,8 @@ gpio_setpull(u64 pins, GpioPull pull)
 void gpio_setdetect(u64 pins, GpioEvent event)
 {
     u32 low, high;
+
+    dmb();
 
     low = pins & 0xFFFFFFFF;
     high = pins >> 32;
