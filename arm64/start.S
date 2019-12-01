@@ -137,7 +137,7 @@ pg_table_entry bpgmap2, 0
 .quad 0
 .endr
 
-// Map 16 MB of memory, as well as enough device space to use uart1
+// Map 18 MB of memory, as well as enough device space to use uart1
 .align 12
 bpgmap2:
 pg_table_block 0x00000000, PTE_AF | PTE_ISH | PTE_CACHEABLE

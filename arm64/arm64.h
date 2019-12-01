@@ -63,6 +63,26 @@ readdaif(void)
     return res;
 }
 
+static inline uintptr
+ttbr0(void)
+{
+    uintptr res;
+
+    asm volatile("mrs %0, ttbr0_el1" : "=r" (res));
+
+    return res;
+}
+
+static inline uintptr
+ttbr1(void)
+{
+    uintptr res;
+
+    asm volatile("mrs %0, ttbr1_el1" : "=r" (res));
+
+    return res;
+}
+
 static inline void
 lttbr0(uintptr pgmap)
 {

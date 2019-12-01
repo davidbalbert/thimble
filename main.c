@@ -18,7 +18,7 @@ main(void)
     // kernel so we need to map less memory initially
     //
     // Allocate all pages mapped by boot page tables.
-    initmem1(end, p2v(16*MB));
+    initmem1(end, p2v(18*MB));
     kvmalloc();
     trapinit();
     intinit();
