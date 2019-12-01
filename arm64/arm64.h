@@ -98,19 +98,19 @@ w_ttbr1(uintptr pgmap)
 static inline void
 dsb(void)
 {
-    asm volatile("dsb ish");
+    asm volatile("dsb ish" : : : "memory");
 }
 
 static inline void
 dmb(void)
 {
-    asm volatile("dmb ish");
+    asm volatile("dmb ish" : : : "memory");
 }
 
 static inline void
 isb(void)
 {
-    asm volatile("isb");
+    asm volatile("isb" : : : "memory");
 }
 
 static inline void
