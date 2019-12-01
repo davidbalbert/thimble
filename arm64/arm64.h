@@ -20,7 +20,7 @@ el(void)
 }
 
 static inline void
-st_vbar_el1(void *p)
+w_vbar_el1(void *p)
 {
     asm volatile("msr vbar_el1, %[p]" : : [p] "r" (p));
 }
@@ -64,7 +64,7 @@ readdaif(void)
 }
 
 static inline uintptr
-ttbr0(void)
+r_ttbr0(void)
 {
     uintptr res;
 
@@ -74,7 +74,7 @@ ttbr0(void)
 }
 
 static inline uintptr
-ttbr1(void)
+r_ttbr1(void)
 {
     uintptr res;
 
@@ -84,13 +84,13 @@ ttbr1(void)
 }
 
 static inline void
-lttbr0(uintptr pgmap)
+w_ttbr0(uintptr pgmap)
 {
     asm volatile("msr ttbr0_el1, %[pgmap]" : : [pgmap] "r" (pgmap));
 }
 
 static inline void
-lttbr1(uintptr pgmap)
+w_ttbr1(uintptr pgmap)
 {
     asm volatile("msr ttbr1_el1, %[pgmap]" : : [pgmap] "r" (pgmap));
 }
@@ -138,7 +138,7 @@ ctz(u64 n)
 
 // read the frequency of the system counter
 static inline u64
-cntfrq(void)
+r_cntfrq(void)
 {
     u64 res;
     asm volatile("mrs %0, cntfrq_el0" : "=r" (res));
@@ -148,7 +148,7 @@ cntfrq(void)
 
 // current system count value
 static inline u64
-cntct(void)
+r_cntpct(void)
 {
     u64 res;
     asm volatile("mrs %0, cntpct_el0" : "=r" (res));
@@ -158,7 +158,7 @@ cntct(void)
 
 // value of CNTP_CTL_EL0, the physical timer control register.
 static inline u64
-cntpctl(void)
+r_cntpctl(void)
 {
     u64 res;
     asm volatile("mrs %0, cntp_ctl_el0" : "=r" (res));
@@ -168,13 +168,13 @@ cntpctl(void)
 
 // set CNTP_CT_EL0, the physical timer control register
 static inline void
-st_cntpctl(u64 val)
+w_cntpctl(u64 val)
 {
     asm volatile("msr cntp_ctl_el0, %0" :: "r" (val));
 }
 
 static inline void
-st_cntptval(u64 val)
+w_cntptval(u64 val)
 {
     asm volatile("msr cntp_tval_el0, %0" :: "r" (val));
 }

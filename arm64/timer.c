@@ -21,7 +21,7 @@ static u64 interval;
 void
 handletimer(void)
 {
-    st_cntptval(interval);
+    w_cntptval(interval);
 
     if (proc && proc->state == RUNNING)
         yield();
@@ -30,7 +30,7 @@ handletimer(void)
 void
 timerinit(void)
 {
-    u64 freq = cntfrq(); // system counter frequency in Hz
+    u64 freq = r_cntfrq(); // system counter frequency in Hz
     interval = freq / 100; // 100 times second;
 
     dmb();
@@ -38,8 +38,8 @@ timerinit(void)
     // scale the timer by 1: 2^31 = 0x80000000, therefore timer_freq = input_freq
     *TIMER_PRESCALE = 0x80000000;
 
-    st_cntptval(interval);
-    st_cntpctl(CNTP_CTL_EL0_ENABLE);
+    w_cntptval(interval);
+    w_cntpctl(CNTP_CTL_EL0_ENABLE);
 
     // TODO: configure CNTKCTL_EL1 to disable timer access in EL0
 

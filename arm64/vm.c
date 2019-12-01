@@ -139,8 +139,8 @@ setupkvm()
 void
 switchkvm(void)
 {
-    lttbr1(v2p(kpgmap));
-    lttbr0(v2p(emptymap));
+    w_ttbr1(v2p(kpgmap));
+    w_ttbr0(v2p(emptymap));
 
     dsb(); // Make sure page-table updates are done
 
@@ -155,8 +155,8 @@ switchuvm(Proc *p)
 {
     push_off();
 
-    lttbr1(v2p(kpgmap));
-    lttbr0(v2p(p->pgmap));
+    w_ttbr1(v2p(kpgmap));
+    w_ttbr0(v2p(p->pgmap));
 
     dsb();
     tlbi();

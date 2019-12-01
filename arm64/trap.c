@@ -96,5 +96,5 @@ trap(TrapFrame *tf)
 void
 trapinit(void)
 {
-    st_vbar_el1(vectors);
+    w_vbar_el1(vectors);
 }
