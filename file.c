@@ -310,5 +310,5 @@ copyfds(Proc *oldp, Proc *newp)
 void
 fileinit(void)
 {
-    initlock(&ftable.lock);
+    initlock(&ftable.lock, "ftable");
 }

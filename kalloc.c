@@ -110,7 +110,7 @@ kalloc(void)
 void
 initmem1(void *start, void *end)
 {
-    initlock(&kmem.lock);
+    initlock(&kmem.lock, "kmem");
     kmem.freelist = nil;
 
     // interrupts aren't set up yet, so we can't call lock/unlock

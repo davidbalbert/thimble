@@ -258,7 +258,7 @@ sys_rfork(void)
 void
 schedinit(void)
 {
-    initlock(&ptable.lock);
+    initlock(&ptable.lock, "ptable");
 
     cpu = &cpus[0];
     cpu->id = 0;

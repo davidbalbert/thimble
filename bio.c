@@ -18,10 +18,10 @@ binit(void)
 {
     Buf *b;
 
-    initlock(&bcache.lock);
+    initlock(&bcache.lock, "bcache");
 
     for (b = bcache.bufs; b < bcache.bufs+NBUF; b++) {
-        initlock(&b->lock);
+        initlock(&b->lock, "buf");
     }
 }
 

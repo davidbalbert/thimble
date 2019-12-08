@@ -64,7 +64,7 @@ usize strlen(char *s);
 long strtol(char *s, char **endptr, int base);
 
 // lock.c
-void initlock(SpinLock *l);
+void initlock(SpinLock *l, char *name);
 void lock(SpinLock *l);
 void unlock(SpinLock *l);
 void push_off(void);

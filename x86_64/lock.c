@@ -8,9 +8,10 @@
 #include "x86.h"
 
 void
-initlock(SpinLock *l)
+initlock(SpinLock *l, char *name)
 {
     l->locked = 0;
+    l->name = name;
 }
 
 void
