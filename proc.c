@@ -23,6 +23,12 @@ static Cpu cpus[MAXCPU];
 Cpu  *cpu;  // current cpu
 Proc *proc; // current proc
 
+Cpu *
+mycpu(void)
+{
+    return cpu;
+}
+
 static void
 sched(void)
 {

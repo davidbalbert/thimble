@@ -11,12 +11,17 @@ initlock(SpinLock *l, char *name)
 {
     l->locked = 0;
     l->name = name;
+    l->cpu = nil;
 }
 
 void
 lock(SpinLock *l)
 {
     push_off();
+
+    if (holding(l)) {
+        panic("lock");
+    }
 
     while (1) {
         while (ldaxr(&l->locked)) {
@@ -29,13 +34,33 @@ lock(SpinLock *l)
 
         wfe();
     }
+
+    l->cpu = mycpu();
 }
 
 void
 unlock(SpinLock *l)
 {
+    if (!holding(l)) {
+        panic("unlock");
+    }
+
+    l->cpu = nil;
+
     stlr(&l->locked, 0);
     pop_off();
+}
+
+int
+holding(SpinLock *l)
+{
+    int r;
+
+    push_off();
+    r = l->locked && l->cpu == mycpu();
+    pop_off();
+
+    return r;
 }
 
 void

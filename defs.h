@@ -1,4 +1,5 @@
 typedef struct Buf Buf;
+typedef struct Cpu Cpu;
 typedef struct SpinLock SpinLock;
 typedef struct Registers Registers;
 typedef struct Proc Proc;
@@ -69,12 +70,14 @@ void lock(SpinLock *l);
 void unlock(SpinLock *l);
 void push_off(void);
 void pop_off(void);
+int holding(SpinLock *l);
 
 // pic.c/bcmint.c
 void intinit(void);
 void intenable(u32 irq);
 
 // proc.c
+Cpu *mycpu(void);
 void panic(char *fmt, ...) __attribute__((noreturn));
 void vpanic(char *fmt, va_list ap) __attribute__((noreturn));
 void schedinit(void);
@@ -107,7 +110,7 @@ void trapinit(void);
 // vm.c
 usize allocuvm(Pte *pgmap, usize oldsz, usize newsz);
 void clearpteu(Pte *pgmap, void *addr);
-Pte* copyuvm(Pte *oldmap, usize sz);
+Pte *copyuvm(Pte *oldmap, usize sz);
 void freeuvm(Pte *pgmap);
 void kvmalloc(void);
 void loaduvm(Pte *pgmap, char *addr, byte *data, usize sz);
