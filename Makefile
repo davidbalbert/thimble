@@ -7,6 +7,7 @@ OBJS := \
 	kalloc.o\
 	file.o\
 	proc.o\
+	bio.o\
 
 LIBCOBJS := \
 	klibc.o\

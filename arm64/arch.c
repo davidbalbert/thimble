@@ -1,6 +1,8 @@
 #include "u.h"
 
 #include "archdefs.h"
+#include "lock.h"
+#include "bio.h"
 #include "defs.h"
 #include "uart.h"
 
@@ -23,8 +25,11 @@ archinit(void)
       panic("archinit");
     }
 
-    sdread(data, 63, 2);
-    xxd(data, 1024, 63*512);
+    Buf *b = bread(1, 31);
+
+    xxd(b->data, BSIZE, 63*512);
+
+    brelse(b);
 }
 
 usize

@@ -1,11 +1,12 @@
 typedef struct TrapFrame TrapFrame;
+typedef struct Buf Buf;
 
 // bcmint.c
 u32 readirq(void);
 
 // sd.c
 void sdinit(void);
-void sdread(byte *addr, u64 lba, u16 count);
+void sdrw(Buf *b, int write);
 
 // syscall.c
 void syscall(TrapFrame *tf);

@@ -23,6 +23,7 @@ main(void)
     trapinit();
     intinit();
     timerinit();
+    binit();
     fileinit();
 
     initmem2(p2v(PHYSTOP));

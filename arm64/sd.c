@@ -1,6 +1,8 @@
 #include "u.h"
 
 #include "arm64.h"
+#include "lock.h"
+#include "bio.h"
 #include "defs.h"
 #include "mem.h"
 
@@ -97,7 +99,7 @@ sendcmd(int cmd, int flags, int arg)
     return *EMMC_INTERRUPT & INT_ERR;
 }
 
-void
+static void
 sdread(byte *addr, u64 lba, u16 count)
 {
     u32 *addri = (u32 *)addr;
@@ -121,6 +123,23 @@ sdread(byte *addr, u64 lba, u16 count)
         *addri = *EMMC_DATA;
         addri++;
     }
+}
+
+void
+sdrw(Buf *b, int write)
+{
+    if (write) {
+        panic("sdrw - write is not supported");
+    }
+
+    if (BSIZE % 512 != 0) {
+        panic("sdrw - BSIZE must be a multiple of 512");
+    }
+
+    u64 lba = b->blockno * (BSIZE/512);
+
+    cprintf("sdread(0x%p, %l, %d)\n", b->data, lba, BSIZE/512);
+    sdread(b->data, lba, BSIZE/512);
 }
 
 // gpio47 - SD card detect

@@ -1,7 +1,14 @@
+typedef struct Buf Buf;
 typedef struct SpinLock SpinLock;
 typedef struct Registers Registers;
 typedef struct Proc Proc;
 typedef struct File File;
+
+// buf.o
+void binit(void);
+Buf *bread(uint dev, u64 blockno);
+void brelse(Buf *b);
+void bwrite(Buf *b);
 
 // console.c
 
