@@ -25,6 +25,7 @@ OBJS += \
 	arm64/gpio.o\
 	arm64/sd.o\
 	arm64/dma.o\
+	arm64/busaddr.o\
 
 LIBCOBJS += \
 	arm64/libcasm.o\

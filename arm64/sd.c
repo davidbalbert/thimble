@@ -1,6 +1,8 @@
 #include "u.h"
 
 #include "arm64.h"
+#include "archdefs.h"
+#include "dma.h"
 #include "lock.h"
 #include "sleeplock.h"
 #include "bio.h"
@@ -103,8 +105,6 @@ sendcmd(int cmd, int flags, int arg)
 static void
 sdread(byte *addr, u64 lba, u16 count)
 {
-    u32 *addri = (u32 *)addr;
-
     if (!card.sdhc) {
         lba *= 512; // SDSC cards are byte addressed
     }
@@ -118,12 +118,7 @@ sdread(byte *addr, u64 lba, u16 count)
             TM_MULTI_BLOCK | RSP_48 | CMD_ISDATA,
             lba);
 
-    for (usize n = count * 512; n > 0; n -= 4) {
-        while ((*EMMC_STATUS & STATUS_READ_EN) == 0);
-
-        *addri = *EMMC_DATA;
-        addri++;
-    }
+    dmastart(DMA_CHAN_EMMC, DMA_DEV_EMMC, DMA_D2M, (void *)EMMC_DATA, addr, count*512);
 }
 
 void
@@ -139,7 +134,6 @@ sdrw(Buf *b, int write)
 
     u64 lba = b->blockno * (BSIZE/512);
 
-    cprintf("sdread(0x%p, %l, %d)\n", b->data, lba, BSIZE/512);
     sdread(b->data, lba, BSIZE/512);
 }
 

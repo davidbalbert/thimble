@@ -19,7 +19,7 @@ void xxd(byte *data, usize len, usize start);
 void
 archinit(void)
 {
-    dma_init();
+    dmainit();
     sdinit();
 
     byte *data = kalloc();

@@ -5,9 +5,14 @@ typedef struct TrapFrame TrapFrame;
 // bcmint.c
 u32 readirq(void);
 
+// busaddr.c
+u32 busaddr_mem(uintptr pa);
+u32 busaddr_p(uintptr pa);
+
 // dma.c
-void dma_init(void);
-void dma_start(int chan, DmaControlBlock *cb);
+void dmainit(void);
+void dmastart(int chan, int dev, int dir, void *src, void *dst, usize len);
+//void handle_dma(void);
 
 // sd.c
 void sdinit(void);
