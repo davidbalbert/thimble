@@ -226,7 +226,7 @@ sdinit(void)
         panic("sdinit - cmd7");
     }
 
-    cprintf("emmc0 capabilities1=0x%x, capabilities2=0x%x\n", *EMMC_CAPABILITIES1, *EMMC_CAPABILITIES2);
+    cprintf("sdhc0 capabilities1=0x%x, capabilities2=0x%x\n", *EMMC_CAPABILITIES1, *EMMC_CAPABILITIES2);
 
     cprintf("sd0 initialized sdhc=%d, rca=0x%x\n", card.sdhc, card.rca >> 16);
 }
