@@ -1,8 +1,13 @@
-typedef struct TrapFrame TrapFrame;
 typedef struct Buf Buf;
+typedef struct DmaControlBlock DmaControlBlock;
+typedef struct TrapFrame TrapFrame;
 
 // bcmint.c
 u32 readirq(void);
+
+// dma.c
+void dma_init(void);
+void dma_start(int chan, DmaControlBlock *cb);
 
 // sd.c
 void sdinit(void);

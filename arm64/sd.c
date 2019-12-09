@@ -154,6 +154,8 @@ sdrw(Buf *b, int write)
 void
 sdinit(void)
 {
+    dmb();
+
     u64 all = GPIO_47|GPIO_48|GPIO_49|GPIO_50|GPIO_51|GPIO_52|GPIO_53;
 
     gpio_setpull(all, GPIO_PULL_DOWN);

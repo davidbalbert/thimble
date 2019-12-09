@@ -24,6 +24,7 @@ OBJS += \
 	arm64/swtch.o\
 	arm64/gpio.o\
 	arm64/sd.o\
+	arm64/dma.o\
 
 LIBCOBJS += \
 	arm64/libcasm.o\
