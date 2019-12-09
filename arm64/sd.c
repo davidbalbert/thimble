@@ -2,6 +2,7 @@
 
 #include "arm64.h"
 #include "lock.h"
+#include "sleeplock.h"
 #include "bio.h"
 #include "defs.h"
 #include "mem.h"

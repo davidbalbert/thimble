@@ -2,6 +2,7 @@
 
 #include "archdefs.h"
 #include "lock.h"
+#include "sleeplock.h"
 #include "bio.h"
 #include "defs.h"
 #include "uart.h"

@@ -3,6 +3,7 @@
 #include "archdefs.h"
 #include "defs.h"
 #include "lock.h"
+#include "sleeplock.h"
 
 #include "bio.h"
 
@@ -21,7 +22,7 @@ binit(void)
     initlock(&bcache.lock, "bcache");
 
     for (b = bcache.bufs; b < bcache.bufs+NBUF; b++) {
-        initlock(&b->lock, "buf");
+        initsleeplock(&b->lock, "buf");
     }
 }
 
@@ -37,7 +38,7 @@ bget(uint dev, u64 blockno)
         if (b->dev == dev && b->blockno == blockno) {
             b->refcnt++;
             unlock(&bcache.lock);
-            lock(&b->lock);
+            locksleep(&b->lock);
             return b;
         }
     }
@@ -50,7 +51,7 @@ bget(uint dev, u64 blockno)
             b->refcnt = 1;
             b->valid = 0;
             unlock(&bcache.lock);
-            lock(&b->lock);
+            locksleep(&b->lock);
             return b;
         }
     }
@@ -77,7 +78,7 @@ bread(uint dev, u64 blockno)
 void
 brelse(Buf *b)
 {
-    unlock(&b->lock);
+    unlocksleep(&b->lock);
 
     lock(&bcache.lock);
     b->refcnt--;

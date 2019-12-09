@@ -29,6 +29,7 @@ mycpu(void)
     return cpu;
 }
 
+// should be called holding ptable.lock
 static void
 sched(void)
 {
@@ -185,6 +186,43 @@ mkproc(byte *data)
 
     lock(&ptable.lock);
     p->state = READY;
+    unlock(&ptable.lock);
+}
+
+void
+sleep(void *chan, SpinLock *l)
+{
+    if (l != &ptable.lock) {
+        lock(&ptable.lock);
+        unlock(l);
+    }
+
+    proc->chan = chan;
+    proc->state = WAITING;
+
+    sched();
+
+    proc->chan = nil;
+
+    if (l != &ptable.lock) {
+        unlock(&ptable.lock);
+        lock(l);
+    }
+}
+
+void
+wakeup(void *chan)
+{
+    Proc *p;
+
+    lock(&ptable.lock);
+
+    for (p = ptable.procs; p < ptable.procs+NPROCS; p++) {
+        if (p->state == WAITING && p->chan == chan) {
+            p->state = READY;
+        }
+    }
+
     unlock(&ptable.lock);
 }
 

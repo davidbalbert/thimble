@@ -2,7 +2,7 @@
 
 typedef struct Buf Buf;
 struct Buf {
-    SpinLock lock;
+    SleepLock lock;
     int valid;
     int disk;
     uint dev;

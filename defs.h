@@ -1,5 +1,6 @@
 typedef struct Buf Buf;
 typedef struct Cpu Cpu;
+typedef struct SleepLock SleepLock;
 typedef struct SpinLock SpinLock;
 typedef struct Registers Registers;
 typedef struct Proc Proc;
@@ -87,8 +88,16 @@ void procbegin(void);
 void initkstack(Proc *p);
 void initstack(Proc *p, u64 entry);
 void archrfork(Proc *old, Proc *new);
+void sleep(void *chan, SpinLock *l);
+void wakeup(void *chan);
 
 void yield(void);
+
+// sleeplock.c
+void initsleeplock(SleepLock *l, char *name);
+void locksleep(SleepLock *l);
+void unlocksleep(SleepLock *l);
+int holdingsleep(SleepLock *l);
 
 // switch.S
 void swtch(Registers **from, Registers *to);

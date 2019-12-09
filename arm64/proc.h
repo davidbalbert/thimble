@@ -47,6 +47,7 @@ struct Proc {
     char errstr[ERRMAX];
     File *files[NFD];
     int nextfd;
+    void *chan; // pointer to sleep on
 };
 typedef struct Proc Proc;
 
