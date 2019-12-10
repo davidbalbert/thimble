@@ -10,7 +10,6 @@ u32 busaddr_mem(uintptr pa);
 u32 busaddr_p(uintptr pa);
 
 // dma.c
-void dmainit(void);
 void dmastart(int chan, int dev, int dir, void *src, void *dst, usize len);
 //void handle_dma(void);
 

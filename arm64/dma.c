@@ -34,50 +34,46 @@ struct ControlBlock {
 };
 typedef struct ControlBlock ControlBlock;
 
-void
-dmainit(void)
-{
-    int i;
+struct Ctrl {
+    ControlBlock *cb;
+};
+typedef struct Ctrl Ctrl;
 
-    dmb();
-
-    for (i = 0; i < 15; i++) {
-        *R(CS, i) = CS_RESET;
-    }
-
-    // done is a bitmask with 15 bits, one per chanel
-    int done = 0;
-    while (done != 0x7FFF) {
-        for (i = 0; i < 15; i++) {
-            if (done & (1 << i)) {
-                continue;
-            }
-
-            if ((*R(CS, i) & CS_RESET) == 0) {
-                done |= (1 << i);
-            }
-        }
-    }
-}
+// Only use the full channels (0-6), not the "lite" ones.
+#define NCHAN 7
+Ctrl ctrls[NCHAN];
 
 void
 dmastart(int chan, int dev, int dir, void *src, void *dst, usize len)
 {
     dmb();
 
-    if (chan < 0 || chan > 14) {
-        panic("dma_start - chan must be between 0 and 14");
+    if (chan < 0 || chan > NCHAN) {
+        panic("dmastart - chan must be between 0 and %d", NCHAN-1);
     }
 
-    ControlBlock cb __attribute__ ((__aligned__(32)));
+    Ctrl *ctrl = &ctrls[chan];
 
-    memzero(&cb, sizeof(ControlBlock));
+    if (ctrl->cb == nil) {
+        // TODO: 32 byte alligned malloc
+        ctrl->cb = kalloc();
+        if (ctrl->cb == nil) {
+            panic("dmastart - alloc cb");
+        }
+        memzero(ctrl->cb, sizeof(ControlBlock));
+
+        *DMA_ENABLE |= (1 << chan);
+
+        *R(CS, chan) = CS_RESET;
+        while (*R(CS, chan) & CS_RESET)
+            ;
+    }
 
     switch(dir) {
         case DMA_D2M:
-            cb.ti = DMA_TI_DEST_INC | DMA_TI_SRC_DREQ;
-            cb.src_addr = busaddr_p(v2p(src));
-            cb.dst_addr = busaddr_mem(v2p(dst));
+            ctrl->cb->ti = DMA_TI_DEST_INC | DMA_TI_SRC_DREQ;
+            ctrl->cb->src_addr = busaddr_p(v2p(src));
+            ctrl->cb->dst_addr = busaddr_mem(v2p(dst));
             break;
         case DMA_M2D:
             panic("dmastart - M2D unsupported");
@@ -87,13 +83,13 @@ dmastart(int chan, int dev, int dir, void *src, void *dst, usize len)
             break;
     }
 
-    cb.ti |=  DMA_TI_PERMAP(dev) | DMA_TI_INTEN;
-    cb.len = len;
-    cb.next = 0;
+    ctrl->cb->ti |=  DMA_TI_PERMAP(dev) | DMA_TI_INTEN;
+    ctrl->cb->len = len;
+    ctrl->cb->next = 0;
 
     dsb();
 
-    *R(CONBLK_AD, chan) = busaddr_mem(v2p(&cb));
+    *R(CONBLK_AD, chan) = busaddr_mem(v2p(ctrl->cb));
     *R(CS, chan) = CS_ACTIVE;
 
     while ((*R(CS, chan) & (CS_END | CS_ERROR)) == 0)
