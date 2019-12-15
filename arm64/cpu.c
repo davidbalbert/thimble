@@ -1,6 +1,7 @@
 #include "u.h"
 
 #include "arm64.h"
+#include "defs.h"
 #include "mem.h"
 
 byte bootkstack[KSTACKSIZE] __attribute__ ((aligned (PGSIZE)));

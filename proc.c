@@ -49,14 +49,16 @@ yield(void)
     unlock(&ptable.lock);
 }
 
+#include "arm64.h"
+
 void
 scheduler(void)
 {
     Proc *p;
 
-    intr_on();
-
     for (;;) {
+        intr_on();
+
         lock(&ptable.lock);
         for (p = ptable.procs; p < &ptable.procs[NPROCS]; p++) {
             if (p->state != READY)

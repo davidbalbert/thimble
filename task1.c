@@ -39,6 +39,41 @@ ltoa(long n, char *buf)
     buf[j] = '\0';
 }
 
+static usize
+dumpline(int fd, byte **data, usize len)
+{
+    char buf[2];
+    byte *p = *data;
+
+    buf[0] = '\0';
+    buf[1] = '\0';
+
+    for (usize i = 0; i < 16 && len; i++, len--) {
+        if (isprint(p[i])) {
+            buf[0] = p[i];
+            write(fd, buf, 1);
+        } else {
+            write(fd, ".", 1);
+        }
+    }
+
+    write(fd, "\n", 1);
+
+    *data += 16;
+    return len;
+}
+
+void
+xxd(int fd, byte *data, usize len, usize start)
+{
+    usize i = start;
+
+    while (len > 0) {
+        len = dumpline(fd, &data, len);
+        i += 16;
+    }
+}
+
 int
 main(void)
 {
@@ -49,6 +84,18 @@ main(void)
     int pid;
 
     fd = open("/dev/cons", OWRITE);
+
+    byte buf2[512];
+    int res = bread(1, 63, buf2, 512);
+
+    if (res == -1) {
+        char *msg = "bread failed\n";
+        write(fd, msg, strlen(msg));
+        for (;;)
+            ;
+    }
+
+    xxd(fd, buf2, 512, 0x8000);
 
     pid = fork();
     if (pid == 0) {

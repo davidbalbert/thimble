@@ -82,6 +82,8 @@
 #define INT_ALL 0x17FF137
 
 struct SdCard {
+    SpinLock lock;
+    int inuse;
     int sdhc; // high capacity or extended capacity;
     u32 rca;
 };
@@ -119,6 +121,8 @@ sdread(byte *addr, u64 lba, u16 count)
             lba);
 
     dmastart(DMA_CHAN_EMMC, DMA_DEV_EMMC, DMA_D2M, (void *)EMMC_DATA, addr, count*512);
+
+    dmawait(DMA_CHAN_EMMC, &card.lock);
 }
 
 void
@@ -134,7 +138,19 @@ sdrw(Buf *b, int write)
 
     u64 lba = b->blockno * (BSIZE/512);
 
+    lock(&card.lock);
+
+    while (card.inuse == 1) {
+        sleep(&card, &card.lock);
+    }
+
+    card.inuse = 1;
     sdread(b->data, lba, BSIZE/512);
+    card.inuse = 0;
+
+    wakeup(&card);
+
+    unlock(&card.lock);
 }
 
 // gpio47 - SD card detect
@@ -148,6 +164,9 @@ sdrw(Buf *b, int write)
 void
 sdinit(void)
 {
+    initlock(&card.lock, "sdcard");
+    card.inuse = 0;
+
     dmb();
 
     u64 all = GPIO_47|GPIO_48|GPIO_49|GPIO_50|GPIO_51|GPIO_52|GPIO_53;

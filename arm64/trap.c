@@ -3,6 +3,7 @@
 #include "archdefs.h"
 #include "arm64.h"
 #include "defs.h"
+#include "dma.h"
 #include "irq.h"
 
 #define ESR_SYSCALL 0b010101
@@ -79,10 +80,13 @@ trap(TrapFrame *tf)
 
     switch (trapno) {
         case IRQ_TIMER:
-            handletimer();
+            timerintr();
             break;
         case IRQ_UART:
-            handleuart();
+            uartintr();
+            break;
+        case IRQ_DMA(0) ... IRQ_DMA(DMA_NCHAN-1):
+            dmaintr(trapno - IRQ_DMA0);
             break;
         default:
             cprintf("trap: %u\n", trapno);

@@ -1,4 +1,4 @@
-#define BSIZE 1024
+#define BSIZE 512
 
 typedef struct Buf Buf;
 struct Buf {

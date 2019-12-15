@@ -104,7 +104,7 @@ uart_clear(void)
 }
 
 void
-handleuart(void)
+uartintr(void)
 {
     dmb();
 

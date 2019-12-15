@@ -12,6 +12,7 @@ int close(int fd);
 // TODO: long -> usize
 long read(int fd, void *buf, usize nbytes);
 long write(int fd, void *buf, usize nbytes);
+long bread(uint dev, u64 blockno, void *buf, usize nbytes);
 
 int printint(int i);
 

@@ -4,6 +4,7 @@
 #include "arm64.h"
 #include "defs.h"
 #include "dma.h"
+#include "irq.h"
 #include "mem.h"
 
 #include "bcm2837.h"
@@ -39,17 +40,15 @@ struct Ctrl {
 };
 typedef struct Ctrl Ctrl;
 
-// Only use the full channels (0-6), not the "lite" ones.
-#define NCHAN 7
-Ctrl ctrls[NCHAN];
+Ctrl ctrls[DMA_NCHAN];
 
 void
 dmastart(int chan, int dev, int dir, void *src, void *dst, usize len)
 {
     dmb();
 
-    if (chan < 0 || chan > NCHAN) {
-        panic("dmastart - chan must be between 0 and %d", NCHAN-1);
+    if (chan < 0 || chan >= DMA_NCHAN) {
+        panic("dmastart - chan must be between 0 and %d", DMA_NCHAN-1);
     }
 
     Ctrl *ctrl = &ctrls[chan];
@@ -67,6 +66,8 @@ dmastart(int chan, int dev, int dir, void *src, void *dst, usize len)
         *R(CS, chan) = CS_RESET;
         while (*R(CS, chan) & CS_RESET)
             ;
+
+        intenable(IRQ_DMA(chan));
     }
 
     switch(dir) {
@@ -90,14 +91,49 @@ dmastart(int chan, int dev, int dir, void *src, void *dst, usize len)
     dsb();
 
     *R(CONBLK_AD, chan) = busaddr_mem(v2p(ctrl->cb));
-    *R(CS, chan) = CS_ACTIVE;
 
-    while ((*R(CS, chan) & (CS_END | CS_ERROR)) == 0)
-        ;
+    *DMA_INT_STATUS = 0;
+    *R(CS, chan) = CS_INT;
+
+    dmb();
+
+    *R(CS, chan) = CS_ACTIVE;
+}
+
+void
+dmawait(int chan, SpinLock *l)
+{
+    if (!holding(l)) {
+        panic("dmawait - not holding lock");
+    }
+
+    dmb();
+
+    if (chan < 0 || chan >= DMA_NCHAN) {
+        panic("dmastart - chan must be between 0 and %d", DMA_NCHAN-1);
+    }
+
+    Ctrl *ctrl = &ctrls[chan];
+
+    sleep(ctrl, l);
 
     if (*R(CS, chan) & CS_ERROR) {
-        panic("dma_start - dma error");
+        panic("dmastart - dma error");
     }
 
     *R(CS, chan) = CS_END | CS_INT;
+}
+
+void
+dmaintr(int chan)
+{
+    if (chan < 0 || chan >= DMA_NCHAN) {
+        panic("dmaintr - chan must be between 0 and %d", DMA_NCHAN-1);
+    }
+
+    Ctrl *ctrl = &ctrls[chan];
+
+    *R(CS, chan) = CS_INT;
+
+    wakeup(ctrl);
 }

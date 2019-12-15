@@ -111,7 +111,7 @@ long argstr(int n, char **pp);
 
 // timer.c
 void timerinit(void);
-void handletimer(void);
+void timerintr(void);
 
 // trap.c
 void trapinit(void);
@@ -134,3 +134,6 @@ int uvmperm(void);
 Pte *walkpgmap(Pte *pgmap, void *va, int alloc);
 int mappages(Pte *pgmap, void *va, usize size, uintptr pa, int perm);
 Pte *allocpgmap(void);
+
+// xxd.c
+void xxd(byte *data, usize len, usize start);

@@ -136,6 +136,8 @@ intenable(u32 irq)
     int domain = irq & IRQ_DOMAIN;
     int hwirq = irq & IRQ_NUM;
 
+    dmb();
+
     switch (domain) {
         case IRQ_DOMAIN_LOCAL:
             enablelocal(hwirq);

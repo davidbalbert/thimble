@@ -21,7 +21,7 @@
 #define TIMER_FREQDIV (2 << 1)     // repeating timer
 
 void
-handletimer(void)
+timerintr(void)
 {
     if (proc && proc->state == RUNNING)
         yield();

@@ -9,6 +9,7 @@ OBJS := \
 	proc.o\
 	bio.o\
 	sleeplock.o\
+	xxd.o\
 
 LIBCOBJS := \
 	klibc.o\

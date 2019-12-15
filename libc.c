@@ -39,3 +39,9 @@ rfork(int flags)
 {
     return syscall(SYS_RFORK, flags);
 }
+
+long
+bread(uint dev, u64 blockno, void *buf, usize nbytes)
+{
+    return syscall(SYS_BREAD, dev, blockno, buf, nbytes);
+}

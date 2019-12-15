@@ -100,7 +100,7 @@ trap(TrapFrame *tf)
 {
     switch(tf->trapno) {
         case T_IRQ0 + IRQ_TIMER:
-            handletimer();
+            timerintr();
             break;
         case T_IRQ0 + IRQ_KBD:
             handlekbd();

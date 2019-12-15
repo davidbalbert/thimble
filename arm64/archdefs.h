@@ -1,6 +1,7 @@
 typedef struct Buf Buf;
 typedef struct DmaControlBlock DmaControlBlock;
 typedef struct TrapFrame TrapFrame;
+typedef struct SpinLock SpinLock;
 
 // bcmint.c
 u32 readirq(void);
@@ -11,7 +12,8 @@ u32 busaddr_p(uintptr pa);
 
 // dma.c
 void dmastart(int chan, int dev, int dir, void *src, void *dst, usize len);
-//void handle_dma(void);
+void dmawait(int chan, SpinLock *lock);
+void dmaintr(int chan);
 
 // sd.c
 void sdinit(void);
@@ -21,7 +23,7 @@ void sdrw(Buf *b, int write);
 void syscall(TrapFrame *tf);
 
 // uart.c
-void handleuart(void);
+void uartintr(void);
 
 // vmdbg.c
 void kprintmap(Pte *pgdir);

@@ -19,7 +19,7 @@
 static u64 interval;
 
 void
-handletimer(void)
+timerintr(void)
 {
     w_cntptval(interval);
 
