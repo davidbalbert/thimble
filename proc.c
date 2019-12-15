@@ -35,6 +35,15 @@ sched(void)
 {
     int intena;
 
+    if (!holding(&ptable.lock))
+        panic("sched - ptable.lock");
+    if (cpu->noff != 1)
+        panic("sched - noff != 1, noff=%d", cpu->noff);
+    if (proc->state == RUNNING)
+        panic("sched - running");
+    if (intr_ison())
+        panic("sched interruptable");
+
     intena = cpu->intena;
     swtch(&proc->regs, cpu->scheduler);
     cpu->intena = intena;

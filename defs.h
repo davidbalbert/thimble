@@ -30,6 +30,7 @@ void cwrite(char *buf, usize nbytes);
 // $(ARCH)/cpu.c
 void intr_on(void);
 void intr_off(void);
+int intr_ison(void);
 
 // $(ARCH)/arch.c
 

@@ -1,6 +1,7 @@
 #include "u.h"
 
 #include "arm64.h"
+#include "asm.h"
 #include "defs.h"
 #include "mem.h"
 
@@ -22,4 +23,10 @@ void
 intr_on(void)
 {
     asm volatile("msr DAIFClr, #2");
+}
+
+int
+intr_ison(void)
+{
+    return (readdaif() & DAIF_I) == 0;
 }
