@@ -2,6 +2,7 @@
 
 #include "defs.h"
 #include "elf.h"
+#include "file.h"
 #include "lib.h"
 #include "lock.h"
 #include "mem.h"
@@ -89,7 +90,14 @@ scheduler(void)
 void
 procbegin(void)
 {
+    static int first = 1;
+
     unlock(&ptable.lock);
+
+    if (first) {
+        fsinit(ROOTDEV);
+        first = 0;
+    }
 
     // returns to the process entry point. See mkproc's first arg.
 }

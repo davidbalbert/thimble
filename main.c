@@ -24,6 +24,7 @@ main(void)
     intinit();
     timerinit();
     binit();
+    iinit();
     fileinit();
 
     initmem2(p2v(PHYSTOP));

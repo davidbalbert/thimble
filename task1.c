@@ -97,6 +97,8 @@ main(void)
 
     xxd(fd, buf2, 512, 0x8000);
 
+    printfile("/");
+
     pid = fork();
     if (pid == 0) {
         label = "child: ";

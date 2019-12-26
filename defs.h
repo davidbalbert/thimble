@@ -41,6 +41,10 @@ void archinit(void);
 
 void halt(void);
 
+// fat.c
+void iinit(void);
+void fsinit(int dev);
+
 // file.c
 void fileinit(void);
 void copyfds(Proc *oldp, Proc *newp);

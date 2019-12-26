@@ -45,3 +45,9 @@ bread(uint dev, u64 blockno, void *buf, usize nbytes)
 {
     return syscall(SYS_BREAD, dev, blockno, buf, nbytes);
 }
+
+long
+printfile(char *path)
+{
+    return syscall(SYS_PRINTFILE, path);
+}

@@ -10,6 +10,7 @@ OBJS := \
 	bio.o\
 	sleeplock.o\
 	xxd.o\
+	fat.o\
 
 LIBCOBJS := \
 	klibc.o\

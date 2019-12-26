@@ -1,3 +1,6 @@
+#define ROOTDEV 1
+#define ROOTINO 1
+
 typedef struct File File;
 struct File {
     long (*read)(File *f, char *buf, usize nbytes);
