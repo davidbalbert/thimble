@@ -1,5 +1,7 @@
 #define ROOTDEV 1
-#define ROOTINO 1
+
+#define T_DIR  1
+#define T_FILE 2
 
 typedef struct File File;
 struct File {

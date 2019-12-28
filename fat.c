@@ -61,7 +61,33 @@ struct Bpb32 {
 };
 typedef struct Bpb32 Bpb32;
 
+#define ATTR_READ_ONLY 0x01
+#define ATTR_HIDDEN    0x02
+#define ATTR_SYSTEM    0x04
+#define ATTR_VOLUME_ID 0x08
+#define ATTR_DIRECTORY 0x10
+#define ATTR_ARCHIVE   0x20
+
+#define ATTR_LONG_NAME (ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID)
+
+struct FatDirent {
+    byte name[11];
+    byte attr;
+    byte res0;
+    byte ctimetenth;
+    byte ctime[2];
+    byte cdate[2];
+    byte adate[2];
+    byte clusterhi[2];
+    byte mtime[2];
+    byte mdate[2];
+    byte clusterlo[2];
+    byte size[4];
+};
+typedef struct FatDirent FatDirent;
+
 struct Superblock {
+    int dev;
     int isfat32;
     u16 sectsize;
     byte clustsize;
@@ -75,6 +101,12 @@ struct Superblock {
 };
 typedef struct Superblock Superblock;
 Superblock sb;
+
+static u64
+min(u64 x, u64 y)
+{
+    return x < y ? x : y;
+}
 
 static u16
 read16(byte data[2])
@@ -93,13 +125,7 @@ read32(byte data[4])
 static u32
 nsect(Superblock *sb)
 {
-    return sb->volsize - (sb->nresv + (sb->nfats*sb->fatsize) + sb->nrootent);
-}
-
-static u32
-ncluster(Superblock *sb)
-{
-    return nsect(sb) / sb->clustsize;
+    return sb->volsize - (sb->nresv + (sb->nfats*sb->fatsize) + sb->nrootent*sizeof(FatDirent));
 }
 
 static void
@@ -118,6 +144,7 @@ readsb(int dev, Superblock *sb)
 
     Bpb32 *bpb32 = (Bpb32 *)bpb;
 
+    sb->dev = dev;
     sb->sectsize = read16(bpb32->sectsize);
     sb->clustsize = bpb32->clustsize;
     sb->nresv = read16(bpb32->nresv);
@@ -133,7 +160,7 @@ readsb(int dev, Superblock *sb)
     sb->infosect = read16(bpb32->infosect);
 
     cprintf("fatsize=%d, isfat32=%d, sectsize=%d, clustsize=%d\n", fatsize, sb->isfat32, sb->sectsize, sb->clustsize);
-    cprintf("nsect=%d, ncluster=%d\n", nsect(sb), ncluster(sb));
+    cprintf("nsect=%d, rootstart=%d\n", nsect(sb), sb->rootstart);
 
     brelse(b);
 }
@@ -144,6 +171,19 @@ fsinit(int dev)
     readsb(dev, &sb);
 }
 
+// Inodes in FAT are in-memory FAT direntries. This is because FAT doesn't have
+// an on-disk inode and instead stores file metadata on the direntry.
+//
+// Inum is the byte offset of the direntry on disk (this doesn't hold for the
+// root directory, see below).
+//
+// In FAT32 cluster numbers 0 and 1 are reserved in the FAT, which means cluster
+// numbering starts at 2. We use cluster 0 to mean the root directory. Because
+// the root directory doesn't have a direntry for itself, we use a fake
+// 0x200000 offset to represent the root direntry.
+
+#define ROOTCLUSTER 0
+#define ROOTOFFSET  0x200000 // maximum valid directory size
 
 struct Inode {
     uint dev;
@@ -153,6 +193,11 @@ struct Inode {
     int valid;
 
     u32 size;
+    u32 type;
+    u32 firstcluster;
+
+    u32 dircluster;
+    u32 diroffset;
 };
 typedef struct Inode Inode;
 
@@ -175,9 +220,16 @@ iinit(void)
 }
 
 Inode *
-iget(uint dev, u64 inum)
+iget(uint dev, u32 cluster, u32 offset)
 {
     Inode *ip, *empty;
+    u64 inum;
+
+    if (cluster == ROOTCLUSTER && sb.isfat32) {
+        cluster = sb.rootstart;
+    }
+
+    inum = (cluster * sb.clustsize * sb.sectsize) + offset;
 
     lock(&icache.lock);
 
@@ -186,6 +238,11 @@ iget(uint dev, u64 inum)
         if (ip->ref > 0 && ip->dev == dev && ip->inum == inum) {
             ip->ref++;
             unlock(&icache.lock);
+
+            if (ip->dircluster != cluster || ip->diroffset != offset) {
+                panic("iget - bad cluster or offset");
+            }
+
             return ip;
         }
 
@@ -203,6 +260,8 @@ iget(uint dev, u64 inum)
     ip->inum = inum;
     ip->ref = 1;
     ip->valid = 0;
+    ip->dircluster = cluster;
+    ip->diroffset = offset;
     unlock(&icache.lock);
 
     return ip;
@@ -220,12 +279,71 @@ iput(Inode *ip)
     unlock(&icache.lock);
 }
 
+static int
+isrootdirent(Inode *ip)
+{
+    return ((sb.isfat32 && ip->dircluster == sb.rootstart) || ip->dircluster == ROOTCLUSTER) && ip->diroffset == ROOTOFFSET;
+}
+
+static u64
+cluster2block(u32 cluster, u32 offset)
+{
+    if (cluster == ROOTCLUSTER) {
+        panic("cluster2block - fat16 is not supported");
+    }
+
+    if (offset >= sb.clustsize*sb.sectsize) {
+        panic("cluster2block - offset to big");
+    }
+
+    u64 sector = sb.nresv + (sb.nfats*sb.fatsize) + sb.nrootent*sizeof(FatDirent) + (cluster-2)*sb.clustsize + offset/sb.sectsize;
+
+    return OFFSET + (sector*sb.sectsize)/BSIZE;
+}
+
+static void
+readcluster(u32 cluster, u32 offset, void *dst, usize n)
+{
+    usize tot, m;
+    byte *dstb = (byte *)dst;
+    u64 block;
+    Buf *b;
+
+    if (offset + n >= sb.clustsize*sb.sectsize) {
+        panic("readcluster - out of range");
+    }
+
+    for (tot = 0; tot < n; tot += m, offset += m, dstb += m) {
+        block = cluster2block(cluster, offset);
+        b = bread(sb.dev, block);
+        m = min(n - tot, BSIZE - offset%BSIZE);
+        memmove(dstb, b->data+(offset%BSIZE), m);
+        brelse(b);
+    }
+}
+
 void
 ilock(Inode *ip)
 {
+    FatDirent dirent;
+
     locksleep(&ip->lock);
 
-    ip->size = 512;
+    if (ip->valid) {
+        return;
+    }
+
+    if (isrootdirent(ip)) {
+        ip->size = 0;
+        ip->firstcluster = ip->dircluster;
+        ip->type = T_DIR;
+    } else {
+        readcluster(ip->dircluster, ip->diroffset, &dirent, sizeof(dirent));
+        ip->size = read32(dirent.size);
+        ip->firstcluster = (read16(dirent.clusterhi) << 16) | read16(dirent.clusterlo);
+        ip->type = (dirent.attr & ATTR_DIRECTORY) ? T_DIR : T_FILE;
+    }
+
     ip->valid = 1;
 }
 
@@ -246,12 +364,87 @@ iunlockput(Inode *ip)
     iput(ip);
 }
 
+static int
+readifile(Inode *ip, void *dst, usize off, usize n)
+{
+    if (off > ip->size || off + n < off) {
+        return -1;
+    }
+    if (off + n > ip->size) {
+        n = ip->size - off;
+    }
+
+    return n;
+}
+
+static u32
+nextcluster(u32 cluster)
+{
+    u64 offset, blockno;
+    u32 next;
+    Buf *b;
+
+    if (!sb.isfat32) {
+        panic("nextcluster doesn't support fat16 yet");
+    }
+
+    // First two cluster numbers are reserved.
+    if (cluster == 0 || cluster == 1) {
+        return 0;
+    }
+
+    cluster -= 2; // clusters start at index 2
+
+    offset = cluster * 4;
+    blockno = (sb.nresv*sb.sectsize + offset)/BSIZE;
+
+    b = bread(sb.dev, blockno);
+    next = read32(b->data + (offset%BSIZE));
+    brelse(b);
+
+    return next;
+}
+
+static int
+readidir(Inode *ip, void *dst, usize offset, usize n)
+{
+    usize bpc = sb.clustsize*sb.sectsize; // bytes per cluster
+    usize tot, m;
+    u32 skip = offset/bpc;
+    u32 cluster = ip->firstcluster;
+    byte *dstb = (byte *)dst;
+
+    while (skip) {
+        cluster = nextcluster(cluster);
+        if (cluster == 0) {
+            return -1;
+        }
+        skip--;
+    }
+
+    for (tot = 0; tot < n; tot += m, offset += m, dstb += m) {
+        if (cluster == 0) {
+            return -1;
+        }
+
+        m = min(n - tot, bpc - offset%bpc);
+        readcluster(cluster, offset%bpc, dstb, m);
+        cluster = nextcluster(cluster);
+    }
+
+    return n;
+}
+
 int
 readi(Inode *ip, void *dst, usize off, usize n)
 {
-    memzero(dst, n);
-
-    return n;
+    if (ip->type == T_FILE) {
+        return readifile(ip, dst, off, n);
+    } else if (ip->type == T_DIR){
+        return readidir(ip, dst, off, n);
+    } else {
+        panic("readi - bad type");
+    }
 }
 
 Inode *
@@ -260,7 +453,9 @@ namei(char *path)
     Inode *ip;
 
     if (*path == '/') {
-        ip = iget(ROOTDEV, ROOTINO);
+        ip = iget(ROOTDEV, ROOTCLUSTER, ROOTOFFSET);
+    } else {
+        panic("namei - not implemented");
     }
 
     return ip;
@@ -273,12 +468,21 @@ printfile(char *path)
 
     ilock(ip);
 
-    byte data[ip->size];
-    readi(ip, data, 0, ip->size);
+    FatDirent dirent;
+    usize offset = 0;
+    usize n = 0;
+
+    while ((n = readi(ip, &dirent, offset, sizeof(FatDirent)))) {
+        if (dirent.name[0] == 0) {
+            break;
+        }
+
+        xxd((byte *)&dirent, sizeof(FatDirent), offset);
+
+        offset += n;
+    }
 
     iunlockput(ip);
-
-    xxd(data, ip->size, 0);
 }
 
 long
