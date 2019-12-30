@@ -220,6 +220,15 @@ iinit(void)
     }
 }
 
+static char
+fat_downcase(char c) {
+    if (c >= 'A' && c <= 'Z') {
+        return c + 32;
+    } else {
+        return c;
+    }
+}
+
 static void
 fat_copy_shortname(Dir *d, FatDirent *fdir)
 {
@@ -232,7 +241,7 @@ fat_copy_shortname(Dir *d, FatDirent *fdir)
         } else if (fdir->name[i] == 0x20) {
             break;
         } else {
-            *s = fdir->name[i];
+            *s = fat_downcase(fdir->name[i]);
         }
 
         s++;
@@ -249,7 +258,7 @@ fat_copy_shortname(Dir *d, FatDirent *fdir)
             break;
         }
 
-        *s = fdir->ext[i];
+        *s = fat_downcase(fdir->ext[i]);
         s++;
     }
 
