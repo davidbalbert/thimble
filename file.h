@@ -14,3 +14,11 @@ struct File {
     usize pos;
     int omode;
 };
+
+#define DIRSIZ 256
+
+struct Dir {
+    u64 inum;
+    char name[DIRSIZ];
+};
+typedef struct Dir Dir;
