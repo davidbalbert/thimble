@@ -17,8 +17,8 @@ struct File {
 
 #define DIRSIZ 256
 
-struct Dir {
+struct Dirent {
     u64 inum;
     char name[DIRSIZ];
 };
-typedef struct Dir Dir;
+typedef struct Dirent Dirent;

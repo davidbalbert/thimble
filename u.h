@@ -10,6 +10,8 @@ typedef unsigned long  u64;
 typedef unsigned long uintptr;
 typedef unsigned long usize;
 
+typedef long ssize;
+
 typedef unsigned int uint;
 
 typedef unsigned long Pte;

@@ -87,6 +87,20 @@ struct FatDirent {
 };
 typedef struct FatDirent FatDirent;
 
+struct LongDirent {
+    byte seq;
+    byte name0[10];
+    byte attr;
+    byte type;
+    byte checksum;
+    byte name1[12];
+    byte clusterlo[2]; // always 0x0000
+    byte name2[4];
+};
+typedef struct LongDirent LongDirent;
+
+#define FIRST_LFN 0x40
+
 struct Superblock {
     int dev;
     int isfat32;
@@ -99,6 +113,7 @@ struct Superblock {
     u32 fatsize;
     u32 rootstart;
     u16 infosect;
+    u32 clustbytes;
 };
 typedef struct Superblock Superblock;
 Superblock sb;
@@ -159,6 +174,8 @@ readsb(int dev, Superblock *sb)
 
     sb->rootstart = read32(bpb32->rootstart);
     sb->infosect = read16(bpb32->infosect);
+
+    sb->clustbytes = sb->sectsize * sb->clustsize;
 
     cprintf("fatsize=%d, isfat32=%d, sectsize=%d, clustsize=%d\n", fatsize, sb->isfat32, sb->sectsize, sb->clustsize);
     cprintf("nsect=%d, rootstart=%d\n", nsect(sb), sb->rootstart);
@@ -230,35 +247,35 @@ fat_downcase(char c) {
 }
 
 static void
-fat_copy_shortname(Dir *d, FatDirent *fdir)
+fat_copy_shortname(Dirent *d, FatDirent *fd)
 {
     int i;
     char *s = d->name;
 
     for (i = 0; i < 8; i++) {
-        if (i == 0 && fdir->name[i] == 0x05) {
+        if (i == 0 && fd->name[i] == 0x05) {
             *s = 0xE5;
-        } else if (fdir->name[i] == 0x20) {
+        } else if (fd->name[i] == 0x20) {
             break;
         } else {
-            *s = fat_downcase(fdir->name[i]);
+            *s = fat_downcase(fd->name[i]);
         }
 
         s++;
     }
 
-    if (fdir->ext[0] != 0x20) {
+    if (fd->ext[0] != 0x20) {
         *s = '.';
         s++;
     }
 
 
     for (i = 0; i < 3; i++) {
-        if (fdir->ext[i] == 0x20) {
+        if (fd->ext[i] == 0x20) {
             break;
         }
 
-        *s = fat_downcase(fdir->ext[i]);
+        *s = fat_downcase(fd->ext[i]);
         s++;
     }
 
@@ -418,19 +435,6 @@ iunlockput(Inode *ip)
     iput(ip);
 }
 
-static int
-readifile(Inode *ip, void *dst, usize off, usize n)
-{
-    if (off > ip->size || off + n < off) {
-        return -1;
-    }
-    if (off + n > ip->size) {
-        n = ip->size - off;
-    }
-
-    return n;
-}
-
 static u32
 nextcluster(u32 cluster)
 {
@@ -459,61 +463,16 @@ nextcluster(u32 cluster)
     return next;
 }
 
-// Skips N dirents that represent files or directories. Will additionally skip
-// any empty dirents that aren't at the end of the directory, volume ID dirents,
-// and long file name dirents.
+// reads n bytes into dst starting from cluster, offset by offset.
 //
-// Returns the number of bytes skipped on success. If the directory ends before
-// we skip N dirents, returns -1.
-static int
-fat_skipdir(Inode *ip, usize nskip)
+// TODO: deal with n > SSIZE_MAX
+static ssize
+fatread(Inode *ip, void *dst, usize offset, usize n, u32 *clusterp)
 {
-    if (ip->type != T_DIR) {
-        panic("fat_skipdir - must be called on a directory");
-    }
-
-    FatDirent fdir;
-
+    byte *dstb = (byte *)dst;
+    usize tot, m;
     u32 cluster = ip->firstcluster;
-    usize bpc = sb.clustsize*sb.sectsize; // bytes per cluster
-    usize n = nskip * sizeof(FatDirent);
-    usize tot;
-
-    for (tot = 0; tot < n; tot += sizeof(FatDirent)) {
-        if (cluster == 0) {
-            return -1;
-        }
-
-        readcluster(cluster, tot % bpc, &fdir, sizeof(FatDirent));
-
-        if (fdir.name[0] == 0) {
-            // finished the directory without skipping enough entries
-            return -1;
-        } else if (fdir.name[0] == 0xE5) {
-            // an empty slot, skip it;
-            n += sizeof(FatDirent);
-        } else if ((fdir.attr & ATTR_LONG_NAME) == ATTR_LONG_NAME) {
-            n += sizeof(FatDirent);
-        } else if ((fdir.attr & ATTR_VOLUME_ID) == ATTR_VOLUME_ID) {
-            n += sizeof(FatDirent);
-        }
-
-        if (tot % bpc > (tot+sizeof(FatDirent)) % bpc) {
-            cluster = nextcluster(cluster);
-        }
-    }
-
-    return tot;
-}
-
-static int
-fat_readdir(Inode *ip, Dir *d, usize offset)
-{
-    usize bpc = sb.clustsize*sb.sectsize;
-    u32 skip = offset/bpc;
-    u32 cluster = ip->firstcluster;
-    FatDirent fdir;
-    usize tot = 0;
+    usize skip = offset/sb.clustbytes;
 
     while (skip) {
         cluster = nextcluster(cluster);
@@ -523,43 +482,125 @@ fat_readdir(Inode *ip, Dir *d, usize offset)
         skip--;
     }
 
-    for (;;) {
+    for (tot = 0; tot < n; tot += m, offset += m, dstb += m) {
+        // must be at loop start to handle the case where we skip no clusters
         if (cluster == 0) {
             return -1;
         }
 
-        readcluster(cluster, offset % bpc, &fdir, sizeof(FatDirent));
-
-        tot += sizeof(FatDirent);
-        offset += sizeof(FatDirent);
-
-        if (fdir.name[0] == 0) {
-            return -1;
+        if (clusterp) {
+            *clusterp = cluster;
         }
 
-        if (fdir.name[0] != 0xE5 && (fdir.attr & ATTR_LONG_NAME) != ATTR_LONG_NAME && (fdir.attr & ATTR_VOLUME_ID) != ATTR_VOLUME_ID) {
-            break;
-        }
+        m = min(n - tot, sb.clustbytes - offset%sb.clustbytes);
+        readcluster(cluster, offset % sb.clustbytes, &dstb, m);
+
+        cluster = nextcluster(cluster);
     }
-
-    d->inum = fat_geninum(cluster, offset);
-    fat_copy_shortname(d, &fdir);
 
     return tot;
 }
 
+
 static int
+readifile(Inode *ip, void *dst, usize off, usize n)
+{
+    if (off > ip->size || off + n < off) {
+        return -1;
+    }
+
+    if (off + n > ip->size) {
+        n = ip->size - off;
+    }
+
+    return fatread(ip, dst, off, n, nil);
+}
+
+// Skips N FatDirents that represent files or directories. Will additionally skip
+// any empty dirents that aren't at the end of the directory, volume ID dirents,
+// and long file name dirents.
+//
+// Returns the number of bytes skipped on success. If the directory ends before
+// we skip N dirents, returns -1.
+static ssize
+fat_skipdir(Inode *ip, usize nskip)
+{
+    if (ip->type != T_DIR) {
+        panic("fat_skipdir - must be called on a directory");
+    }
+
+    FatDirent fd;
+    usize tot, m;
+    usize n = nskip * sizeof(FatDirent);
+
+    for (tot = 0; tot < n; tot += m) {
+        m = fatread(ip, &fd, tot, sizeof(FatDirent), nil);
+
+        if (m == -1) {
+            // m will be -1 if offset or offset+n is past the last cluster in
+            // the list.
+            return -1;
+        } else if (fd.name[0] == 0) {
+            // finished the directory without skipping enough entries
+            return -1;
+        } else if (fd.name[0] == 0xE5) {
+            // an empty slot, skip it;
+            n += sizeof(FatDirent);
+        } else if ((fd.attr & ATTR_LONG_NAME) == ATTR_LONG_NAME) {
+            n += sizeof(FatDirent);
+        } else if ((fd.attr & ATTR_VOLUME_ID) == ATTR_VOLUME_ID) {
+            n += sizeof(FatDirent);
+        }
+    }
+
+    return tot;
+}
+
+// Reads a Dirent from a FAT directory, consuming any number of FatDirents
+// (volume ids, empty entries, and long file name entries). Returns -1 if we
+// reach the end of a directory before reading a Dirent. Otherwise, returns the
+// number of bytes consumed from the FAT directory.
+static ssize
+fat_readdir(Inode *ip, Dirent *d, usize offset)
+{
+    FatDirent fd;
+    usize tot, n;
+    u32 cluster;
+
+    tot = 0;
+    for (;;) {
+        n = fatread(ip, &fd, offset, sizeof(FatDirent), &cluster);
+
+        tot += n;
+        offset += n;
+
+        if (fd.name[0] == 0) {
+            return -1;
+        }
+
+        if (fd.name[0] != 0xE5 && (fd.attr & ATTR_LONG_NAME) != ATTR_LONG_NAME && (fd.attr & ATTR_VOLUME_ID) != ATTR_VOLUME_ID) {
+            break;
+        }
+    }
+
+    fat_copy_shortname(d, &fd);
+    d->inum = fat_geninum(cluster, offset);
+
+    return tot;
+}
+
+static ssize
 readdir(Inode *ip, void *dst, usize offset, usize n)
 {
     usize ndir, skip, m, tot;
     byte *dstb = (byte *)dst;
 
-    if (offset % sizeof(Dir) || n % sizeof(Dir)) {
+    if (offset % sizeof(Dirent) || n % sizeof(Dirent)) {
         return -1;
     }
 
-    skip = offset/sizeof(Dir);
-    ndir = n/sizeof(Dir);
+    skip = offset/sizeof(Dirent);
+    ndir = n/sizeof(Dirent);
 
     m = fat_skipdir(ip, skip);
 
@@ -567,15 +608,15 @@ readdir(Inode *ip, void *dst, usize offset, usize n)
         return -1;
     }
 
-    for (tot = 0; tot < ndir; tot++, dstb += sizeof(Dir)) {
-        m = fat_readdir(ip, (Dir *)dstb, m);
+    for (tot = 0; tot < ndir; tot++, dstb += sizeof(Dirent)) {
+        m = fat_readdir(ip, (Dirent *)dstb, m);
 
         if (m == -1) {
             break;
         }
     }
 
-    return tot * sizeof(Dir);
+    return tot * sizeof(Dirent);
 }
 
 /*
@@ -643,7 +684,7 @@ printfile(char *path)
 
     ilock(ip);
 
-    Dir dirent;
+    Dirent dirent;
     usize offset = 0;
     usize n = 0;
 
