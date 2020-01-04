@@ -493,7 +493,7 @@ fatread(Inode *ip, void *dst, usize offset, usize n, u32 *clusterp)
         }
 
         m = min(n - tot, sb.clustbytes - offset%sb.clustbytes);
-        readcluster(cluster, offset % sb.clustbytes, &dstb, m);
+        readcluster(cluster, offset % sb.clustbytes, dstb, m);
 
         cluster = nextcluster(cluster);
     }
