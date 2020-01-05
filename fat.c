@@ -69,6 +69,7 @@ typedef struct Bpb32 Bpb32;
 #define ATTR_ARCHIVE   0x20
 
 #define ATTR_LONG_NAME (ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID)
+#define ATTR_LONG_NAME_MASK (ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID | ATTR_DIRECTORY | ATTR_ARCHIVE)
 
 struct FatDirent {
     byte name[8];
@@ -99,7 +100,8 @@ struct LongDirent {
 };
 typedef struct LongDirent LongDirent;
 
-#define FIRST_LFN 0x40
+#define LAST_LONGENT 0x40
+#define LONGENT_CHARS 13
 
 struct Superblock {
     int dev;
@@ -136,7 +138,7 @@ read32(byte data[4])
     return (data[0]<<0) | (data[1]<<8) | (data[2] << 16) | (data[3] << 24);
 }
 
-#define OFFSET 63
+#define BOFFSET 63
 
 static u32
 nsect(Superblock *sb)
@@ -147,7 +149,7 @@ nsect(Superblock *sb)
 static void
 readsb(int dev, Superblock *sb)
 {
-    Buf *b = bread(dev, OFFSET);
+    Buf *b = bread(dev, BOFFSET);
     Bpb *bpb = (Bpb *)b->data;
 
     u16 fatsize = read16(bpb->fatsize);
@@ -237,57 +239,16 @@ iinit(void)
     }
 }
 
-static char
-fat_downcase(char c) {
-    if (c >= 'A' && c <= 'Z') {
-        return c + 32;
-    } else {
-        return c;
-    }
-}
-
-static void
-fat_copy_shortname(Dirent *d, FatDirent *fd)
-{
-    int i;
-    char *s = d->name;
-
-    for (i = 0; i < 8; i++) {
-        if (i == 0 && fd->name[i] == 0x05) {
-            *s = 0xE5;
-        } else if (fd->name[i] == 0x20) {
-            break;
-        } else {
-            *s = fat_downcase(fd->name[i]);
-        }
-
-        s++;
-    }
-
-    if (fd->ext[0] != 0x20) {
-        *s = '.';
-        s++;
-    }
-
-
-    for (i = 0; i < 3; i++) {
-        if (fd->ext[i] == 0x20) {
-            break;
-        }
-
-        *s = fat_downcase(fd->ext[i]);
-        s++;
-    }
-
-    *s = '\0';
-}
-
 // Cluster is the cluster that contains the dirent.
 // Offset is the offset of the dirent in that cluster.
 static u64
 fat_geninum(u32 cluster, u32 offset)
 {
-    return (cluster * sb.clustsize * sb.sectsize) + offset;
+    if (offset >= sb.clustbytes) {
+        panic("fat_geninum - offset is too big");
+    }
+
+    return (cluster * sb.clustbytes) + offset;
 }
 
 Inode *
@@ -300,7 +261,7 @@ iget(uint dev, u32 cluster, u32 offset)
         cluster = sb.rootstart;
     }
 
-    inum = fat_geninum(cluster, offset);
+    inum = fat_geninum(cluster, offset%sb.clustbytes);
 
     lock(&icache.lock);
 
@@ -369,7 +330,7 @@ cluster2block(u32 cluster, u32 offset)
 
     u64 sector = sb.nresv + (sb.nfats*sb.fatsize) + sb.nrootent*sizeof(FatDirent) + (cluster-2)*sb.clustsize + offset/sb.sectsize;
 
-    return OFFSET + (sector*sb.sectsize)/BSIZE;
+    return BOFFSET + (sector*sb.sectsize)/BSIZE;
 }
 
 static void
@@ -516,6 +477,12 @@ readifile(Inode *ip, void *dst, usize off, usize n)
     return fatread(ip, dst, off, n, nil);
 }
 
+static int
+islong(FatDirent *fd)
+{
+    return fd->attr == ATTR_LONG_NAME;
+}
+
 // Skips N FatDirents that represent files or directories. Will additionally skip
 // any empty dirents that aren't at the end of the directory, volume ID dirents,
 // and long file name dirents.
@@ -546,7 +513,7 @@ fat_skipdir(Inode *ip, usize nskip)
         } else if (fd.name[0] == 0xE5) {
             // an empty slot, skip it;
             n += sizeof(FatDirent);
-        } else if ((fd.attr & ATTR_LONG_NAME) == ATTR_LONG_NAME) {
+        } else if (islong(&fd)) {
             n += sizeof(FatDirent);
         } else if ((fd.attr & ATTR_VOLUME_ID) == ATTR_VOLUME_ID) {
             n += sizeof(FatDirent);
@@ -556,8 +523,134 @@ fat_skipdir(Inode *ip, usize nskip)
     return tot;
 }
 
+static char
+fat_downcase(char c) {
+    if (c >= 'A' && c <= 'Z') {
+        return c + 32;
+    } else {
+        return c;
+    }
+}
+
+static void
+copy_shortname(Dirent *d, FatDirent *fd)
+{
+    int i;
+    char *s = d->name;
+
+    for (i = 0; i < 8; i++) {
+        if (i == 0 && fd->name[i] == 0x05) {
+            *s = 0xE5;
+        } else if (fd->name[i] == 0x20) {
+            break;
+        } else {
+            *s = fat_downcase(fd->name[i]);
+        }
+
+        s++;
+    }
+
+    if (fd->ext[0] != 0x20) {
+        *s = '.';
+        s++;
+    }
+
+
+    for (i = 0; i < 3; i++) {
+        if (fd->ext[i] == 0x20) {
+            break;
+        }
+
+        *s = fat_downcase(fd->ext[i]);
+        s++;
+    }
+
+    *s = '\0';
+}
+
+// returns the number of bytes
+static int
+copy_codepoints(Dirent *d, int charoff, byte *codepoints, int count)
+{
+    int i;
+    u16 codepoint;
+
+    int n = min(count, DIRSIZ-charoff);
+
+    for (i = 0; i < n; i++) {
+        codepoint = read16(codepoints + i*2);
+
+        if (codepoint == 0) {
+            d->name[charoff+i] = '\0';
+            return i*2;
+        } else if (codepoint > 0xFF) {
+            d->name[charoff+i] = '?';
+        } else {
+            d->name[charoff+i] = (char)codepoint;
+        }
+    }
+
+    return n*2;
+}
+
+// Reads the LFN starting at fd into d->name
+//
+// - fd is the first LongDirent in the series
+// - offset is the offset of the **next** LongDirent
+//
+// Returns the number of additional bytes read.
+//
+// After execution:
+//
+// - fd is the associated FatDirent.
+// - cluster is the cluster that contains the final fd.
+static ssize
+read_longname(Inode *ip, Dirent *d, FatDirent *fd, usize offset, u32 *clusterp)
+{
+    LongDirent *ld = (LongDirent *)fd;
+
+    if (!(ld->seq & LAST_LONGENT)) {
+        panic("read_longname - fd is not the last longent");
+    }
+
+    int nlents = ld->seq & ~LAST_LONGENT;
+    usize n;
+
+    LongDirent lds[nlents+1]; // the last element of lds is a regular FatDirent
+    lds[0] = *ld;
+
+    n = fatread(ip, lds+1, offset, nlents*sizeof(LongDirent), clusterp);
+
+    if (n == -1) {
+        return -1;
+    }
+
+    int m, charoff = 0;
+    for (ld = &lds[nlents-1]; ld >= lds; ld--) {
+        m = copy_codepoints(d, charoff, ld->name0, 5);
+        n += m;
+        charoff += m/2;
+        if (m < 10) { break; }
+
+        m = copy_codepoints(d, charoff, ld->name1, 6);
+        n += m;
+        charoff += m/2;
+        if (m < 12) { break; }
+
+        m = copy_codepoints(d, charoff, ld->name2, 2);
+        n += m;
+        charoff += m/2;
+        if (m < 4) { break; }
+    }
+
+    *fd = *((FatDirent *)&lds[nlents]);
+
+    return n;
+}
+
+
 // Reads a Dirent from a FAT directory, consuming any number of FatDirents
-// (volume ids, empty entries, and long file name entries). Returns -1 if we
+// (volume id, empty entries, and long file name entries). Returns -1 if we
 // reach the end of a directory before reading a Dirent. Otherwise, returns the
 // number of bytes consumed from the FAT directory.
 static ssize
@@ -578,13 +671,25 @@ fat_readdir(Inode *ip, Dirent *d, usize offset)
             return -1;
         }
 
-        if (fd.name[0] != 0xE5 && (fd.attr & ATTR_LONG_NAME) != ATTR_LONG_NAME && (fd.attr & ATTR_VOLUME_ID) != ATTR_VOLUME_ID) {
+        if (fd.name[0] != 0xE5 && (!(fd.attr & ATTR_VOLUME_ID) || islong(&fd))) {
             break;
         }
     }
 
-    fat_copy_shortname(d, &fd);
-    d->inum = fat_geninum(cluster, offset);
+    if (islong(&fd)) {
+        n = read_longname(ip, d, &fd, offset, &cluster);
+
+        if (n == -1) {
+            return -1;
+        }
+
+        tot += n;
+        offset += n;
+    } else {
+        copy_shortname(d, &fd);
+    }
+
+    d->inum = fat_geninum(cluster, offset%sb.clustbytes);
 
     return tot;
 }
@@ -618,38 +723,6 @@ readdir(Inode *ip, void *dst, usize offset, usize n)
 
     return tot * sizeof(Dirent);
 }
-
-/*
-static int
-readidir(Inode *ip, void *dst, usize offset, usize n)
-{
-    usize bpc = sb.clustsize*sb.sectsize; // bytes per cluster
-    usize tot, m;
-    u32 skip = offset/bpc;
-    u32 cluster = ip->firstcluster;
-    byte *dstb = (byte *)dst;
-
-    while (skip) {
-        cluster = nextcluster(cluster);
-        if (cluster == 0) {
-            return -1;
-        }
-        skip--;
-    }
-
-    for (tot = 0; tot < n; tot += m, offset += m, dstb += m) {
-        if (cluster == 0) {
-            return -1;
-        }
-
-        m = min(n - tot, bpc - offset%bpc);
-        readcluster(cluster, offset%bpc, dstb, m);
-        cluster = nextcluster(cluster);
-    }
-
-    return n;
-}
-*/
 
 int
 readi(Inode *ip, void *dst, usize off, usize n)

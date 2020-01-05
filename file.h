@@ -15,6 +15,8 @@ struct File {
     int omode;
 };
 
+// Filenames are a maximum of DIRSIZ long. If the length == DIRSIZ, name is not
+// null terminated. If length < DIRSIZ, name is null terminated.
 #define DIRSIZ 256
 
 struct Dirent {
