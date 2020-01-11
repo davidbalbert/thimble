@@ -21,6 +21,6 @@ struct File {
 
 struct Dirent {
     u64 inum;
-    char name[DIRSIZ];
+    char name[DIRSIZ]; // a UTF-8 string
 };
 typedef struct Dirent Dirent;

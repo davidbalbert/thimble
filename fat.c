@@ -568,29 +568,32 @@ copy_shortname(Dirent *d, FatDirent *fd)
     *s = '\0';
 }
 
-// returns the number of bytes
+// Returns the number of bytes written. Sets nrune to the number of runes read.
 static int
-copy_codepoints(Dirent *d, int charoff, byte *codepoints, int count)
+copy_codepoints(Dirent *d, int charoff, byte *codepoints, int count, int *nrune)
 {
-    int i;
-    u16 codepoint;
+    int i, n, tot = 0;
+    Rune r;
 
-    int n = min(count, DIRSIZ-charoff);
+    for (i = 0; i < count; i++) {
+        r = read16(codepoints + i*2);
 
-    for (i = 0; i < n; i++) {
-        codepoint = read16(codepoints + i*2);
+        if (charoff + runelen(r) > DIRSIZ) {
+            if (charoff == DIRSIZ-1) {
+                d->name[charoff++] = '\0';
+            }
 
-        if (codepoint == 0) {
-            d->name[charoff+i] = '\0';
-            return i*2;
-        } else if (codepoint > 0xFF) {
-            d->name[charoff+i] = '?';
+            break;
         } else {
-            d->name[charoff+i] = (char)codepoint;
+            n = runetochar(d->name + charoff, &r);
         }
+
+        charoff += n;
+        tot += n;
     }
 
-    return n*2;
+    *nrune = i;
+    return tot;
 }
 
 // Reads the LFN starting at fd into d->name
@@ -625,22 +628,16 @@ read_longname(Inode *ip, Dirent *d, FatDirent *fd, usize offset, u32 *clusterp)
         return -1;
     }
 
-    int m, charoff = 0;
+    int nrune = 0, charoff = 0;
     for (ld = &lds[nlents-1]; ld >= lds; ld--) {
-        m = copy_codepoints(d, charoff, ld->name0, 5);
-        n += m;
-        charoff += m/2;
-        if (m < 10) { break; }
+        charoff += copy_codepoints(d, charoff, ld->name0, 5, &nrune);
+        if (nrune < 5) { break; }
 
-        m = copy_codepoints(d, charoff, ld->name1, 6);
-        n += m;
-        charoff += m/2;
-        if (m < 12) { break; }
+        charoff += copy_codepoints(d, charoff, ld->name1, 6, &nrune);
+        if (nrune < 6) { break; }
 
-        m = copy_codepoints(d, charoff, ld->name2, 2);
-        n += m;
-        charoff += m/2;
-        if (m < 4) { break; }
+        charoff += copy_codepoints(d, charoff, ld->name2, 2, &nrune);
+        if (nrune < 2) { break; }
     }
 
     *fd = *((FatDirent *)&lds[nlents]);

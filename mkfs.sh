@@ -19,6 +19,6 @@ disk=$(echo $output | awk '{ print $1 }');
 volume=$(echo $output | awk '{ print $5 }');
 
 cp kernel8.img $volume/kernel8.img
-cp hello.txt $volume/hello.txt
+cp héllo.txt $volume/héllo.txt
 
 hdiutil detach $disk > /dev/null

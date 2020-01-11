@@ -70,6 +70,9 @@ int strcmp(char *s1, char *s2);
 usize strlen(char *s);
 long strtol(char *s, char **endptr, int base);
 
+int runetochar(char *s, Rune *r);
+int runelen(Rune r);
+
 // lock.c
 void initlock(SpinLock *l, char *name);
 void lock(SpinLock *l);
