@@ -580,16 +580,17 @@ copy_codepoints(Dirent *d, int charoff, byte *codepoints, int count, int *nrune)
 
         if (charoff + runelen(r) > DIRSIZ) {
             if (charoff == DIRSIZ-1) {
-                d->name[charoff++] = '\0';
+                d->name[charoff] = '\0';
+                tot += 1;
             }
 
             break;
         } else {
             n = runetochar(d->name + charoff, &r);
-        }
 
-        charoff += n;
-        tot += n;
+            charoff += n;
+            tot += n;
+        }
     }
 
     *nrune = i;
