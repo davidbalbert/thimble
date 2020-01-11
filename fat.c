@@ -585,12 +585,12 @@ copy_codepoints(Dirent *d, int charoff, byte *codepoints, int count, int *nrune)
             }
 
             break;
-        } else {
-            n = runetochar(d->name + charoff, &r);
-
-            charoff += n;
-            tot += n;
         }
+        
+        n = runetochar(d->name + charoff, &r);
+
+        charoff += n;
+        tot += n;
     }
 
     *nrune = i;
