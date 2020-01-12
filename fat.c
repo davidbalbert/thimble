@@ -324,7 +324,7 @@ cluster2block(u32 cluster, u32 offset)
         panic("cluster2block - fat16 is not supported");
     }
 
-    if (offset >= sb.clustsize*sb.sectsize) {
+    if (offset >= sb.clustbytes) {
         panic("cluster2block - offset to big");
     }
 
@@ -341,7 +341,7 @@ readcluster(u32 cluster, u32 offset, void *dst, usize n)
     u64 block;
     Buf *b;
 
-    if (offset + n >= sb.clustsize*sb.sectsize) {
+    if (offset + n >= sb.clustbytes) {
         panic("readcluster - out of range");
     }
 
