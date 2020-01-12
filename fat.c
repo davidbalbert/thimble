@@ -5,6 +5,7 @@
 #include "bio.h"
 #include "file.h"
 #include "defs.h"
+#include "mem.h"
 
 struct Bpb {
     byte jmpboot[3];
@@ -692,6 +693,10 @@ fat_readdir(Inode *ip, Dirent *d, usize offset)
     }
 
     d->inum = fat_geninum(cluster, offset%sb.clustbytes);
+    d->dircluster = cluster;
+
+    // offset was incremented past the FatDirent, so move it backwards
+    d->diroffset = (offset-sizeof(FatDirent))%sb.clustbytes;
 
     return tot;
 }
@@ -776,10 +781,43 @@ skipelem(char *path, char *name)
     return path;
 }
 
+static int
+namecmp(char *a, char *b)
+{
+    return strncmp(a, b, DIRSIZ);
+}
+
+Inode *
+dirlookup(Inode *dp, char *name)
+{
+    Dirent d;
+    usize off = 0;
+
+    if (dp->type != T_DIR) {
+        panic("dirlookup - dp is not a directory");
+    }
+
+    for (;;) {
+        if (readi(dp, &d, off, sizeof(Dirent)) != sizeof(Dirent)) {
+            return nil;
+        }
+
+        if (namecmp(name, d.name) == 0) {
+            return iget(dp->dev, d.dircluster, d.diroffset);
+        }
+
+        off += sizeof(Dirent);
+    }
+
+    return nil;
+}
+
+// Retruns an unlocked inode representing the file at path, or nil if the file
+// can't be found.
 Inode *
 namei(char *path)
 {
-    Inode *ip;
+    Inode *ip, *next;
     char name[DIRSIZ];
 
     if (*path == '/') {
@@ -788,8 +826,21 @@ namei(char *path)
         panic("namei - cwd not implemented");
     }
 
-    while ((path = skipelem(path, name))) {
-        cprintf("%s\n", name);
+    while ((path = skipelem(path, name)) != nil) {
+        ilock(ip);
+
+        if (ip->type != T_DIR) {
+            iunlockput(ip);
+            return nil;
+        }
+
+        if ((next = dirlookup(ip, name)) == nil) {
+            iunlockput(ip);
+            return nil;
+        }
+
+        iunlockput(ip);
+        ip = next;
     }
 
     return ip;
@@ -799,22 +850,30 @@ static void
 printfile(char *path)
 {
     Inode *ip = namei(path);
+    usize n;
+
+    if (ip == nil) {
+        panic("printfile - no file named %s", path);
+    }
 
     ilock(ip);
 
-    Dirent dirent;
-    usize offset = 0;
-    usize n = 0;
-
-    while ((n = readi(ip, &dirent, offset, sizeof(dirent)))) {
-        if (n == -1) {
-            break;
-        }
-
-        cprintf("%s\n", dirent.name);
-
-        offset += n;
+    if (ip->size > PGSIZE) {
+        panic("printfile - ip->size too big");
     }
+
+    byte *data = kalloc();
+    if (data == nil) {
+        panic("printfile - can't allocate page");
+    }
+
+    if ((n = readi(ip, data, 0, ip->size)) != ip->size) {
+        panic("coudln't read data");
+    }
+
+    cprintf("%s", data);
+
+    kfree(data);
 
     iunlockput(ip);
 }

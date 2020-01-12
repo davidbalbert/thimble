@@ -22,5 +22,8 @@ struct File {
 struct Dirent {
     u64 inum;
     char name[DIRSIZ]; // a UTF-8 string
+
+    u32 dircluster;
+    u32 diroffset;
 };
 typedef struct Dirent Dirent;

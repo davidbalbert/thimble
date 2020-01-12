@@ -67,6 +67,7 @@ void *memzero(void *p, usize n);
 int isdigit(int c);
 int isprint(int c);
 int strcmp(char *s1, char *s2);
+int strncmp(char *s1, char *s2, usize n);
 usize strlen(char *s);
 long strtol(char *s, char **endptr, int base);
 

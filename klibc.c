@@ -104,6 +104,34 @@ strcmp(char *s1, char *s2)
     }
 }
 
+int
+strncmp(char *s1, char *s2, usize n)
+{
+    char *p1, *p2;
+    int i;
+
+    p1 = s1;
+    p2 = s2;
+
+    for (i = 0; i < n; i++) {
+        if (*p1 == '\0' && *p2 == '\0')
+            return 0;
+        else if (*p1 == '\0')
+            return -1;
+        else if (*p2 == '\0')
+            return 1;
+        else if (*p1 < *p2)
+            return -1;
+        else if (*p1 > *p2)
+            return 1;
+
+        p1++;
+        p2++;
+    }
+
+    return 0;
+}
+
 usize
 strlen(char *s)
 {

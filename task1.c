@@ -97,7 +97,7 @@ main(void)
 
     xxd(fd, buf2, 512, 0x8000);
 
-    printfile("/foo/bar/baz.txt");
+    printfile("/héllo.txt");
 
     pid = fork();
     if (pid == 0) {
