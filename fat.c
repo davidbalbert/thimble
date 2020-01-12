@@ -216,8 +216,8 @@ struct Inode {
     u32 type;
     u32 firstcluster;
 
-    u32 dircluster;
-    u32 diroffset;
+    u32 dircluster; // cluster of the directory containing the dirent for this inode
+    u32 diroffset;  // offset *within* dircluster
 };
 typedef struct Inode Inode;
 
@@ -251,6 +251,9 @@ fat_geninum(u32 cluster, u32 offset)
     return (cluster * sb.clustbytes) + offset;
 }
 
+// Returns an inode from the inode cache respresenting the direntry at
+// cluster+offset with ref incremented. Cluster is a cluster within a directory. Offset is the offset
+// within cluster.
 Inode *
 iget(uint dev, u32 cluster, u32 offset)
 {
@@ -354,10 +357,11 @@ readcluster(u32 cluster, u32 offset, void *dst, usize n)
     }
 }
 
+// Locks ip, loading inode metadata if necessary.
 void
 ilock(Inode *ip)
 {
-    FatDirent dirent;
+    FatDirent fd;
 
     locksleep(&ip->lock);
 
@@ -370,10 +374,10 @@ ilock(Inode *ip)
         ip->firstcluster = ip->dircluster;
         ip->type = T_DIR;
     } else {
-        readcluster(ip->dircluster, ip->diroffset, &dirent, sizeof(dirent));
-        ip->size = read32(dirent.size);
-        ip->firstcluster = (read16(dirent.clusterhi) << 16) | read16(dirent.clusterlo);
-        ip->type = (dirent.attr & ATTR_DIRECTORY) ? T_DIR : T_FILE;
+        readcluster(ip->dircluster, ip->diroffset, &fd, sizeof(FatDirent));
+        ip->size = read32(fd.size);
+        ip->firstcluster = (read16(fd.clusterhi) << 16) | read16(fd.clusterlo);
+        ip->type = (fd.attr & ATTR_DIRECTORY) ? T_DIR : T_FILE;
     }
 
     ip->valid = 1;
@@ -734,15 +738,58 @@ readi(Inode *ip, void *dst, usize off, usize n)
     }
 }
 
+//   skipelem("a/bb/c", name) = "bb/c", setting name = "a"
+//   skipelem("///a//bb", name) = "bb", setting name = "a"
+//   skipelem("a", name) = "", setting name = "a"
+//   skipelem("", name) = skipelem("////", name) = 0
+//
+static char*
+skipelem(char *path, char *name)
+{
+    char *s;
+    int len;
+
+    while (*path == '/') {
+        path++;
+    }
+    if (*path == '\0') {
+        return nil;
+    }
+
+    s = path;
+    while (*path != '/' && *path != '\0') {
+        path++;
+    }
+    len = path - s;
+
+    if (len >= DIRSIZ) {
+        memmove(name, s, DIRSIZ);
+    } else {
+        memmove(name, s, len);
+        name[len] = '\0';
+    }
+
+    while (*path == '/') {
+        path++;
+    }
+
+    return path;
+}
+
 Inode *
 namei(char *path)
 {
     Inode *ip;
+    char name[DIRSIZ];
 
     if (*path == '/') {
         ip = iget(ROOTDEV, ROOTCLUSTER, ROOTOFFSET);
     } else {
-        panic("namei - not implemented");
+        panic("namei - cwd not implemented");
+    }
+
+    while ((path = skipelem(path, name))) {
+        cprintf("%s\n", name);
     }
 
     return ip;
