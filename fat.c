@@ -328,7 +328,7 @@ cluster2block(u32 cluster, u32 offset)
         panic("cluster2block - offset to big");
     }
 
-    u64 sector = sb.nresv + (sb.nfats*sb.fatsize) + sb.nrootent*sizeof(FatDirent) + (cluster-2)*sb.clustsize + offset/sb.sectsize;
+    u64 sector = sb.nresv + (sb.nfats*sb.fatsize) + sb.nrootent*sizeof(FatDirent)/sb.sectsize + (cluster-2)*sb.clustsize + offset/sb.sectsize;
 
     return BOFFSET + (sector*sb.sectsize)/BSIZE;
 }
