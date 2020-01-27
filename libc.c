@@ -51,3 +51,9 @@ printfile(char *path)
 {
     return syscall(SYS_PRINTFILE, path);
 }
+
+int
+exec(char *path)
+{
+    return syscall(SYS_EXEC, path);
+}

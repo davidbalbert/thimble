@@ -102,6 +102,7 @@ main(void)
     pid = fork();
     if (pid == 0) {
         label = "child: ";
+        exec("/task2");
     } else if (pid > 0) {
         label = "parent: ";
     } else {

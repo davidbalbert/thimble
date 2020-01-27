@@ -5,3 +5,4 @@
 #define SYS_RFORK   5
 #define SYS_BREAD   6
 #define SYS_PRINTFILE 7
+#define SYS_EXEC    8

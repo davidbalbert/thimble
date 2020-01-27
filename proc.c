@@ -318,6 +318,26 @@ sys_rfork(void)
     return rfork(flags);
 }
 
+long
+exec(char *path)
+{
+    cprintf("exec(\"%s\")\n", path);
+
+    return 0;
+}
+
+long
+sys_exec(void)
+{
+    char *path;
+
+    if (argstr(0, &path) < 0) {
+        return -1;
+    }
+
+    return exec(path);
+}
+
 void
 schedinit(void)
 {

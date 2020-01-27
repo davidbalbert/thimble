@@ -5,6 +5,7 @@ long sys_write(void);
 long sys_rfork(void);
 long sys_bread(void);
 long sys_printfile(void);
+long sys_exec(void);
 
 static long (*syscalls[])(void) = {
     [SYS_OPEN] sys_open,
@@ -14,4 +15,5 @@ static long (*syscalls[])(void) = {
     [SYS_RFORK] sys_rfork,
     [SYS_BREAD] sys_bread,
     [SYS_PRINTFILE] sys_printfile,
+    [SYS_EXEC] sys_exec,
 };

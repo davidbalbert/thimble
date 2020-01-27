@@ -37,6 +37,9 @@ main.c: task1.h
 task1: task1.o $(LIBCOBJS)
 	$(LD) $(LDFLAGS) -e main -Ttext=0 -o task1 $^
 
+task2: task2.o $(LIBCOBJS)
+	$(LD) $(LDFLAGS) -e main -Ttext=0 -o task2 $^
+
 task1.h: task1
 	xxd -i task1 > task1.h
 
