@@ -7,11 +7,11 @@ fi
 
 set -e
 
-GMP=https://ftp.gnu.org/gnu/gmp/gmp-6.1.2.tar.bz2
+GMP=https://ftp.gnu.org/gnu/gmp/gmp-6.2.0.tar.bz2
 MPFR=https://ftp.gnu.org/gnu/mpfr/mpfr-4.0.2.tar.bz2
 MPC=https://ftp.gnu.org/gnu/mpc/mpc-1.1.0.tar.gz
-BINUTILS=https://ftp.gnu.org/gnu/binutils/binutils-2.32.tar.bz2
-GCC=https://ftp.gnu.org/gnu/gcc/gcc-9.2.0/gcc-9.2.0.tar.gz
+BINUTILS=https://ftp.gnu.org/gnu/binutils/binutils-2.34.tar.bz2
+GCC=https://ftp.gnu.org/gnu/gcc/gcc-9.3.0/gcc-9.3.0.tar.gz
 
 function envfile() {
   pushd $(dirname $0) >/dev/null

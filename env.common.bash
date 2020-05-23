@@ -33,7 +33,7 @@ eval export $(libpath)=$PREFIX/lib:\$$(libpath)
 
 if [[ ! -v MAKEFLAGS ]]; then
   makeflags_set=1
-  export MAKEFLAGS=-j4
+  export MAKEFLAGS=-j8
 fi
 
 PS1="(thimble $ARCH) $PS1"
