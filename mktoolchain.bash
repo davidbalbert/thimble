@@ -35,18 +35,18 @@ function dir() {
   basename "$1" | sed 's/\.tar\..*$//'
 }
 
-GCC=0
-CLANG=0
+BUILD_GCC=0
+BUILD_CLANG=0
 
 SKIP_CLEANUP=0
 
 for arg in "$@"; do
   case $arg in
     --gcc)
-      GCC=1
+      BUILD_GCC=1
       ;;
     --clang)
-      CLANG=1
+      BUILD_CLANG=1
       ;;
     --skip-cleanup)
       SKIP_CLEANUP=1
@@ -58,11 +58,11 @@ for arg in "$@"; do
   esac
 done
 
-if [ "$GCC" -eq 0 ] && [ "$CLANG" -eq 0 ]; then
-  CLANG=1
+if [ "$BUILD_GCC" -eq 0 ] && [ "$BUILD_CLANG" -eq 0 ]; then
+  GCC=1
 fi
 
-if [ "$GCC" -eq 1 ] && [ "$(uname)" = "Darwin" ]; then
+if [ "$BUILD_GCC" -eq 1 ] && [ "$(uname)" = "Darwin" ]; then
   echo "Error: GCC 13 doesn't build with Xcode 15. This should be fixed in GCC 14."
   echo "See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=111632 for more info."
   exit 1
@@ -100,7 +100,7 @@ if [ ! -x "$PREFIX/bin/aarch64-elf-ld" ]; then
   cd ..
 fi
 
-if [ "$CLANG" -eq 1 ]; then
+if [ "$BUILD_CLANG" -eq 1 ]; then
   if ! type cmake >/dev/null 2>&1 || [ "$(cmake -P "$PREFIX/../llvm_cmake_version.cmake")" != 1 ]; then
     get "$CMAKE"
     cd "$(dir $CMAKE)"
@@ -121,7 +121,7 @@ if [ "$CLANG" -eq 1 ]; then
   fi
 fi
 
-if [ "$GCC" -eq 1 ]; then
+if [ "$BUILD_GCC" -eq 1 ]; then
   if [ ! -f "$PREFIX/lib/libgmp.a" ]; then
     get "$GMP"
     cd "$(dir $GMP)"
