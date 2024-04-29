@@ -1,4 +1,4 @@
-ifneq ($(shell command -v x86_64-elf-gcc 2>/dev/null),)
+ifneq ($(shell command -v x86_64-elf-ld 2>/dev/null),)
 	GNU_TOOLCHAIN := x86_64-elf
 else
 	GNU_TOOLCHAIN := x86_64-linux-gnu
