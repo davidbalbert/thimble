@@ -31,4 +31,5 @@ For the xv6 license, see `ACKNOWLEDGEMENTS`
 
 # License
 
-Thimble is copyright 2015-2019 David Albert and is available under the terms of the GNU GPLv3 or later. See COPYING for more info.
+Thimble is copyright David Albert and released under the terms of the MIT License. See LICENSE.txt for details.
+
