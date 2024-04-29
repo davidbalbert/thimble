@@ -27,7 +27,7 @@ function get() {
     curl --progress-bar --location --output "$name" "$1"
   fi
 
-  echo Extracting...
+  echo Extracting $name...
   tar xf "$name"
 }
 
