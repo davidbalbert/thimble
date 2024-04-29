@@ -1,8 +1,17 @@
-TOOLCHAIN := aarch64-elf
-
-CFLAGS := -O0 -MD -ffreestanding -Wall -Werror -g -I. -Iarm64
-ASFLAGS := -MD -g
+LD := aarch64-elf-ld
 LDFLAGS := -m aarch64elf -static -nostdlib -N
+
+ifeq ($(TOOLCHAIN),Clang)
+	CC := clang
+	CFLAGS := -target aarch64-elf -O0 -MD -ffreestanding -Wall -Werror -g -I. -Iarm64
+	ASFLAGS := -target aarch64-elf -MD -g
+else ifeq ($(TOOLCHAIN),GCC)
+	CC := aarch64-elf-gcc
+	CFLAGS := -O0 -MD -ffreestanding -Wall -Werror -g -I. -Iarm64
+	ASFLAGS := -MD -g
+else
+    $(error Unsupported TOOLCHAIN: $(TOOLCHAIN))
+endif
 
 QEMU := qemu-system-aarch64
 
@@ -31,10 +40,10 @@ LIBCOBJS += \
 
 .PHONY: qemu
 qemu: kernel
-	$(QEMU) -M raspi3 -serial null -serial mon:stdio -kernel kernel -nographic
+	$(QEMU) -M raspi3b -serial null -serial mon:stdio -kernel kernel -nographic
 
 .PHONY: gdb
 gdb: kernel
-	$(QEMU) -M raspi3 -serial null -serial mon:stdio -kernel kernel -nographic -gdb tcp::1234 -S
+	$(QEMU) -M raspi3b -serial null -serial mon:stdio -kernel kernel -nographic -gdb tcp::1234 -S
 
 -include arm64/*.d

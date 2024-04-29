@@ -67,14 +67,14 @@ static u32 togglemap[256] = {
 */
 
 static u32 modmap[256] = {
-    [0x1D] LCTRL,
-    [0x2A] LSHIFT,
-    [0x36] RSHIFT,
-    [0x38] LALT,
+    [0x1D] = LCTRL,
+    [0x2A] = LSHIFT,
+    [0x36] = RSHIFT,
+    [0x38] = LALT,
 };
 
 static u32 e0modmap[256] = {
-    [0x1D] RCTRL,
+    [0x1D] = RCTRL,
 };
 
 

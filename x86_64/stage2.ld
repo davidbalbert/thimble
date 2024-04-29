@@ -7,21 +7,24 @@ SECTIONS
 	.text :
 	{
 		*(.text);
+		*(.ltext);
 	}
 
 	.rodata :
 	{
-		*(.rodata);
+		*(.rodata*);
 	}
 
 	.bss :
 	{
 		*(.bss);
+		*(.lbss);
 	}
 
 	.data :
 	{
 		*(.data);
+		*(.ldata);
 	}
 
 	/DISCARD/ :

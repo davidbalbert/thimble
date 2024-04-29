@@ -40,7 +40,7 @@ static char *classes[] = {
     "Satellite Communication Controller",
     "Encryption/Decryption Controller",
     "Data Acquisition and Signal Processing Controller",
-    [0xFF] "Device does not fit defined class"
+    [0xFF] = "Device does not fit defined class"
 };
 
 char *

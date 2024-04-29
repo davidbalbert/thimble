@@ -31,9 +31,15 @@ export PATH=$PREFIX/bin:$PATH
 export MANPATH=$PREFIX/share/man:$MANPATH
 eval export $(libpath)=$PREFIX/lib:\$$(libpath)
 
+if [ $(uname) == "Darwin" ]; then
+  NCORES=$(sysctl -n hw.ncpu)
+else
+  NCORES=$(grep -c '^processor' /proc/cpuinfo)
+fi
+
 if [[ ! -v MAKEFLAGS ]]; then
   makeflags_set=1
-  export MAKEFLAGS=-j8
+  export MAKEFLAGS="-j$NCORES"
 fi
 
 PS1="(thimble $ARCH) $PS1"

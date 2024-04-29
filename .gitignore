@@ -1,4 +1,5 @@
 toolchain
+
 *.o
 *.d
 *.img
@@ -13,3 +14,5 @@ task1
 task1.h
 task2
 task2.h
+
+.vscode

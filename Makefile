@@ -12,11 +12,10 @@ LIBCOBJS := \
 	   klibc.o\
 	   libc.o\
 
-include $(ARCH)/$(ARCH).mk
+ARCH ?= x86_64
+TOOLCHAIN ?= GCC
 
-CC := $(TOOLCHAIN)-gcc
-LD := $(TOOLCHAIN)-ld
-OBJCOPY := $(TOOLCHAIN)-objcopy
+include $(ARCH)/$(ARCH).mk
 
 kernel: $(OBJS) $(ARCH)/kernel.ld
 	$(LD) $(LDFLAGS) -T $(ARCH)/kernel.ld -o kernel $(OBJS)
