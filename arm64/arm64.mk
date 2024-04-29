@@ -13,7 +13,7 @@ ifeq ($(TOOLCHAIN),Clang)
 	ASFLAGS := -target aarch64-elf -MD -g
 else ifeq ($(TOOLCHAIN),GCC)
 	CC := $(GNU_TOOLCHAIN)-gcc
-	CFLAGS := -O0 -MD -ffreestanding -Wall -Werror -g -I. -Iarm64
+	CFLAGS := -O0 -MD -ffreestanding -fno-pie -Wall -Werror -g -I. -Iarm64
 	ASFLAGS := -MD -g
 else
     $(error Unsupported TOOLCHAIN: $(TOOLCHAIN))
