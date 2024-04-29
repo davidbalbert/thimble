@@ -101,7 +101,7 @@ if [ ! -x "$PREFIX/bin/aarch64-elf-ld" ]; then
 fi
 
 if [ "$CLANG" -eq 1 ]; then
-  if ! type cmake >/dev/null 2>&1 || [ "$(cmake -P "$(dirname "$0")/llvm_cmake_version.cmake")" -ne 1 ]; then
+  if ! type cmake >/dev/null 2>&1 || [ "$(cmake -P "$(dirname "$0")/llvm_cmake_version.cmake")" != 1 ]; then
     get "$CMAKE"
     cd "$(dir $CMAKE)"
     ./bootstrap --prefix="$PREFIX" --parallel="$NCORES"
