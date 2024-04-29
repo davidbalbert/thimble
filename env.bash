@@ -42,7 +42,7 @@ if [[ ! -v MAKEFLAGS ]]; then
   export MAKEFLAGS="-j$NCORES"
 fi
 
-PS1="(thimble $ARCH) $PS1"
+PS1="(thimble) $PS1"
 
 function deactivate() {
   unset PREFIX
