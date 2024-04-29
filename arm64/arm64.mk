@@ -1,7 +1,7 @@
-ifneq ($(shell command -v x86_64-elf-gcc 2>/dev/null),)
-	GNU_TOOLCHAIN := x86_64-elf
+ifneq ($(shell command -v aarch64-elf-gcc 2>/dev/null),)
+	GNU_TOOLCHAIN := aarch64-elf
 else
-	GNU_TOOLCHAIN := x86_64-linux-gnu
+	GNU_TOOLCHAIN := aarch64-linux-gnu
 endif
 
 LD := $(GNU_TOOLCHAIN)-ld
