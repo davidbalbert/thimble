@@ -114,7 +114,7 @@ if [ "$CLANG" -eq 1 ]; then
     get "$LLVM"
     mkdir -p "$(dir $LLVM)/build"
     cd "$(dir $LLVM)/build"
-    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" -DLLVM_ENABLE_PROJECTS="clang;lldb" -DCMAKE_BUILD_TYPE=Release -DLLDB_INCLUDE_TESTS=OFF -G "Unix Makefiles" ../llvm
+    cmake -DCMAKE_INSTALL_PREFIX="$PREFIX" -DLLVM_ENABLE_PROJECTS="clang" -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" ../llvm
     make
     make install
     cd ../..
