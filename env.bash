@@ -55,13 +55,14 @@ function deactivate() {
     unset MAKEFLAGS
   fi
 
+  unset NCORES
+
   unset prev_path
   unset prev_libpath
   unset prev_manpath
   unset prev_ps1
   unset makeflags_set
   unset deactivate
-  unset ARCH
 }
 
 if [ $(uname) == "Darwin" ]; then
