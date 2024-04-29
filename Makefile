@@ -1,3 +1,6 @@
+ARCH ?= x86_64
+TOOLCHAIN ?= GCC
+
 OBJS := \
 		main.o\
 		syscall.o\
@@ -11,9 +14,6 @@ OBJS := \
 LIBCOBJS := \
 	   klibc.o\
 	   libc.o\
-
-ARCH ?= x86_64
-TOOLCHAIN ?= GCC
 
 include $(ARCH)/$(ARCH).mk
 

@@ -1,4 +1,10 @@
-LD := x86_64-elf-ld
+ifneq ($(shell command -v x86_64-elf-gcc 2>/dev/null),)
+	GNU_TOOLCHAIN := x86_64-elf
+else
+	GNU_TOOLCHAIN := x86_64-linux-gnu
+endif
+
+LD := $(GNU_TOOLCHAIN)-ld
 LDFLAGS := -static -nostdlib --omagic
 
 ifeq ($(TOOLCHAIN),Clang)
@@ -6,7 +12,7 @@ ifeq ($(TOOLCHAIN),Clang)
 	CFLAGS := -target x86_64-elf -O0 -MD -ffreestanding -Wall -Werror -mno-red-zone -mcmodel=large -g -I. -Ix86_64
 	ASFLAGS := -target x86_64-elf -MD -g -I. -Ix86_64
 else ifeq ($(TOOLCHAIN),GCC)
-	CC := x86_64-elf-gcc
+	CC := $(GNU_TOOLCHAIN)-gcc
 	CFLAGS := -m64 -O0 -MD -ffreestanding -Wall -Werror -mno-red-zone -mcmodel=large -g -I. -Ix86_64
 	ASFLAGS := -m64 -MD -g -I. -Ix86_64 -Wa,-divide
 else
