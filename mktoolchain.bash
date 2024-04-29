@@ -104,7 +104,7 @@ if [ "$CLANG" -eq 1 ]; then
   if ! type cmake >/dev/null 2>&1 || [ "$(cmake -P "../llvm_cmake_version.cmake")" != 1 ]; then
     get "$CMAKE"
     cd "$(dir $CMAKE)"
-    ./bootstrap --prefix="$PREFIX" --parallel="$NCORES" -DCMAKE_USE_OPENSSL=OFF
+    ./bootstrap --prefix="$PREFIX" --parallel="$NCORES"
     make
     make install
     cd ..
