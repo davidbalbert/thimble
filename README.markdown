@@ -15,6 +15,7 @@ On boot, initializes hardware, scheduler, virtual memory, and then spawns the fi
 - rfork†
 
 *Only /dev/cons is supported for now.
+
 †The interface is like Plan 9's rfork, but for now it behaves like UNIX's fork(2).
 
 ## Features
