@@ -7,6 +7,7 @@ SECTIONS
 	.text :
 	{
 		*(.text);
+		*(.ltext);
 	}
 
 	/DISCARD/ :

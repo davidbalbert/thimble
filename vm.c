@@ -34,7 +34,7 @@ copyuvm(Pte *oldmap, usize sz)
         pte = walkpgmap(oldmap, (void *)a, 0);
         if (pte == nil)
             panic("copyuvm - nil pte");
-        if (!*pte & PTE_P)
+        if (!(*pte & PTE_P))
             panic("copyuvm - page not present");
 
         oldmem = p2v(pte_addr(*pte));

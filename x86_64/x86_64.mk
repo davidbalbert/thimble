@@ -1,8 +1,23 @@
-TOOLCHAIN := x86_64-elf
+ifneq ($(shell command -v x86_64-elf-ld 2>/dev/null),)
+	GNU_TOOLCHAIN := x86_64-elf
+else
+	GNU_TOOLCHAIN := x86_64-linux-gnu
+endif
 
-CFLAGS := -m64 -O0 -MD -ffreestanding -Wall -Werror -mno-red-zone -mcmodel=large -g -I. -Ix86_64
-ASFLAGS := -m64 -MD -g -I. -Ix86_64 -Wa,-divide
-LDFLAGS := -static -nostdlib -N
+LD := $(GNU_TOOLCHAIN)-ld
+LDFLAGS := -static -nostdlib --omagic
+
+ifeq ($(TOOLCHAIN),Clang)
+	CC := clang
+	CFLAGS := -target x86_64-elf -O0 -MD -ffreestanding -Wall -Werror -mno-red-zone -mcmodel=large -g -I. -Ix86_64
+	ASFLAGS := -target x86_64-elf -MD -g -I. -Ix86_64
+else ifeq ($(TOOLCHAIN),GCC)
+	CC := $(GNU_TOOLCHAIN)-gcc
+	CFLAGS := -m64 -O0 -MD -ffreestanding -fno-pie -Wall -Werror -mno-red-zone -mcmodel=large -g -I. -Ix86_64
+	ASFLAGS := -m64 -MD -g -I. -Ix86_64 -Wa,-divide
+else
+    $(error Unsupported TOOLCHAIN: $(TOOLCHAIN))
+endif
 
 QEMU := qemu-system-x86_64
 
@@ -50,7 +65,7 @@ kernel.img: x86_64/boot x86_64/stage2 x86_64/stage2size.txt kernel
 x86_64/boot.o: x86_64/stage2size.h
 
 x86_64/boot: x86_64/boot.o x86_64/boot.ld
-	$(LD) $(LDFLAGS) -N -T x86_64/boot.ld -o x86_64/boot x86_64/boot.o
+	$(LD) $(LDFLAGS) --script=x86_64/boot.ld --output=x86_64/boot x86_64/boot.o
 
 x86_64/stage2size.txt: x86_64/stage2
 	wc -c x86_64/stage2 | awk '{ print int(($$1 + 511) / 512) }' > x86_64/stage2size.txt
@@ -70,7 +85,7 @@ STAGE2OBJS := \
 	     klibc.o\
 
 x86_64/stage2: $(STAGE2OBJS) x86_64/stage2.ld
-	$(LD) $(LDFLAGS) -N -T x86_64/stage2.ld -o x86_64/stage2 $(STAGE2OBJS)
+	$(LD) $(LDFLAGS) --script=x86_64/stage2.ld --output=x86_64/stage2 $(STAGE2OBJS)
 
 
 .PHONY: qemu

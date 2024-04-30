@@ -8,8 +8,8 @@ void ideread(byte *addr, u32 lba, byte count);
 // console.c
 typedef struct Console Console;
 
-Console *uart_console;
-Console *vga_console;
+extern Console *uart_console;
+extern Console *vga_console;
 
 void cinit(Console *c);
 void cprintf(char *fmt, ...);

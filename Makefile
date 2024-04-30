@@ -1,3 +1,6 @@
+ARCH ?= x86_64
+TOOLCHAIN ?= GCC
+
 OBJS := \
 		main.o\
 		syscall.o\
@@ -13,10 +16,6 @@ LIBCOBJS := \
 	   libc.o\
 
 include $(ARCH)/$(ARCH).mk
-
-CC := $(TOOLCHAIN)-gcc
-LD := $(TOOLCHAIN)-ld
-OBJCOPY := $(TOOLCHAIN)-objcopy
 
 kernel: $(OBJS) $(ARCH)/kernel.ld
 	$(LD) $(LDFLAGS) -T $(ARCH)/kernel.ld -o kernel $(OBJS)

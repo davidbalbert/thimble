@@ -7,8 +7,8 @@ typedef struct File File;
 
 typedef struct Console Console;
 
-Console *uart_console;
-Console *vga_console;
+extern Console *uart_console;
+extern Console *vga_console;
 
 void cinit(Console *c);
 void cprintf(char *fmt, ...);

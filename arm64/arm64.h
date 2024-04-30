@@ -14,7 +14,7 @@ static inline int
 el(void)
 {
     int res;
-    asm volatile("mrs %[res], CurrentEL" : [res] "=r" (res));
+    asm volatile("mrs %x[res], CurrentEL" : [res] "=r" (res));
 
     return (res >> 2) & 0x3;
 }
@@ -31,7 +31,7 @@ ldaxr(u32 *p)
 {
     u32 res;
 
-    asm volatile("ldaxr %[res], [%[p]]" : [res] "=r" (res) : [p] "r" (p));
+    asm volatile("ldaxr %w[res], [%[p]]" : [res] "=r" (res) : [p] "r" (p));
 
     return res;
 }
@@ -42,7 +42,7 @@ stxr(u32 *p, u32 v)
 {
     u32 status;
 
-    asm volatile("stxr %w[status], %[v], [%[p]]" : [status] "=&r" (status) : [v] "r" (v), [p] "r" (p) : "memory");
+    asm volatile("stxr %w[status], %w[v], [%[p]]" : [status] "=&r" (status) : [v] "r" (v), [p] "r" (p) : "memory");
 
     return status;
 }
@@ -51,7 +51,7 @@ stxr(u32 *p, u32 v)
 static inline void
 stlr(u32 *p, u32 v)
 {
-    asm volatile("stlr %[v], [%[p]]" : : [v] "r" (v), [p] "r" (p) : "memory");
+    asm volatile("stlr %w[v], [%[p]]" : : [v] "r" (v), [p] "r" (p) : "memory");
 }
 
 static inline u64

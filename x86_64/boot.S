@@ -6,9 +6,9 @@
 #define STAGE2 0x7E00
 
 .code16
-.globl start
+.globl _start
 
-start:
+_start:
     ljmp    $0x0000, $start1 # Get CS in a known state (0x0000)
 
 start1:
@@ -25,7 +25,7 @@ start1:
                             # (rather than decrement) index registers.
 
 
-    mov     $start, %sp     # Set up the bootloader's stack directly below the
+    mov     $_start, %sp     # Set up the bootloader's stack directly below the
     mov     %sp, %bp        # bootloader in memory. We're storing our paging structures
                             # at 0x1000, 0x2000, 0x3000, and 0x4000, so the stack can
                             # grow from 0x7C00 to 0x5000 without overwriting anything

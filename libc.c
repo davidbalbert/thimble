@@ -2,7 +2,7 @@
 #include "libc.h"
 #include "syscall.h"
 
-long syscall();
+long syscall(long num, ...);
 
 int
 open(char *file, int omode)

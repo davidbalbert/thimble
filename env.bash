@@ -31,12 +31,18 @@ export PATH=$PREFIX/bin:$PATH
 export MANPATH=$PREFIX/share/man:$MANPATH
 eval export $(libpath)=$PREFIX/lib:\$$(libpath)
 
-if [[ ! -v MAKEFLAGS ]]; then
-  makeflags_set=1
-  export MAKEFLAGS=-j8
+if [ $(uname) == "Darwin" ]; then
+  NCORES=$(sysctl -n hw.ncpu)
+else
+  NCORES=$(grep -c '^processor' /proc/cpuinfo)
 fi
 
-PS1="(thimble $ARCH) $PS1"
+if [[ ! -v MAKEFLAGS ]]; then
+  makeflags_set=1
+  export MAKEFLAGS="-j$NCORES"
+fi
+
+PS1="(thimble) $PS1"
 
 function deactivate() {
   unset PREFIX
@@ -49,13 +55,14 @@ function deactivate() {
     unset MAKEFLAGS
   fi
 
+  unset NCORES
+
   unset prev_path
   unset prev_libpath
   unset prev_manpath
   unset prev_ps1
   unset makeflags_set
   unset deactivate
-  unset ARCH
 }
 
 if [ $(uname) == "Darwin" ]; then
