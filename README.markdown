@@ -6,6 +6,17 @@ Supports PC with legacy BIOS (x86_64) and Raspberry Pi 3B (aarch64). Doesn't boo
 
 On boot, initializes hardware, scheduler, virtual memory, and then spawns the first user space process ([task1.c](/task1.c)) which forks, and then parent and child start counting up to infinity.
 
+### Supported system calls
+
+- open*
+- close
+- read
+- write
+- rfork†
+
+*Only /dev/cons is supported for now.
+†The interface is like Plan 9's rfork, but for now it behaves like UNIX's fork(2).
+
 ## Features
 
 - Multiplatform.
